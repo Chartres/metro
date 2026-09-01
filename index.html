@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Prague Metro — Growth Through Time</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Interactive map of the Prague Metro's growth from opening day 1974 to today — every extension, rename and closure.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script type="module" src="/src/analytics.ts"></script>
+<style>
+  :root{
+    --a-color:#2e8b3d;
+    --b-color:#f0b400;
+    --c-color:#da251c;
+    --d-color:#0f5cab;
+    --bg:#0f1216;
+    --panel:#171b21;
+    --panel2:#1d222a;
+    --ink:#e9ecf1;
+    --ink-dim:#9aa4b2;
+    --border:#2a3038;
+    --accent:#ffd166;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  #app{display:flex;flex-direction:column;height:100vh;min-height:640px;}
+
+  header{padding:14px 20px 10px;border-bottom:1px solid var(--border);background:var(--panel);flex:0 0 auto;}
+  header h1{margin:0 0 2px;font-size:19px;font-weight:700;letter-spacing:.2px;}
+  header p{margin:0;color:var(--ink-dim);font-size:12.5px;}
+
+  #controls{display:flex;align-items:center;gap:14px;padding:10px 20px;background:var(--panel);
+    border-bottom:1px solid var(--border);flex:0 0 auto;flex-wrap:wrap;}
+  #playBtn{background:var(--accent);color:#20180a;border:none;border-radius:20px;width:38px;height:38px;
+    font-size:15px;cursor:pointer;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    transition:transform .12s;}
+  #playBtn:hover{transform:scale(1.07);}
+  #dateLabel{font-variant-numeric:tabular-nums;font-weight:700;font-size:16px;min-width:132px;}
+  #sliderWrap{position:relative;flex:1 1 320px;min-width:220px;}
+  #slider{width:100%;accent-color:var(--accent);cursor:pointer;height:22px;}
+  #ticks{position:relative;height:14px;margin-top:-2px;pointer-events:none;}
+  .tick{position:absolute;top:0;width:2px;height:8px;background:var(--ink-dim);opacity:.55;transform:translateX(-1px);}
+  .tick.major{height:11px;background:var(--accent);opacity:.9;}
+  #speedRow{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-dim);}
+  select{background:var(--panel2);color:var(--ink);border:1px solid var(--border);border-radius:6px;
+    padding:4px 6px;font-size:12px;}
+  #stats{display:flex;gap:16px;font-size:12.5px;color:var(--ink-dim);flex:0 0 auto;}
+  #stats b{color:var(--ink);font-variant-numeric:tabular-nums;}
+
+  #main{flex:1 1 auto;display:flex;min-height:0;}
+  #mapCol{flex:1 1 auto;position:relative;min-width:0;background:
+    radial-gradient(circle at 30% 20%, #161b22 0%, var(--bg) 65%);}
+  svg{width:100%;height:100%;display:block;}
+
+  #legend{position:absolute;left:16px;bottom:16px;background:rgba(23,27,33,.88);border:1px solid var(--border);
+    border-radius:10px;padding:10px 14px;font-size:12px;backdrop-filter:blur(4px);}
+  #legend .row{display:flex;align-items:center;gap:8px;margin:3px 0;}
+  #legend .sw{width:20px;height:4px;border-radius:2px;}
+  #legend .sw.dashed{background:none;border-top:3px dashed var(--d-color);height:0;}
+  #legend .sw.dashed.planned{border-top-style:dotted;opacity:.6;}
+
+  #eventBanner{position:absolute;top:14px;left:50%;transform:translateX(-50%);
+    background:rgba(255,209,102,.14);border:1px solid var(--accent);color:var(--accent);
+    padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;
+    transition:opacity .35s, transform .35s;pointer-events:none;max-width:80%;text-align:center;}
+  #eventBanner.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  #tooltip{position:absolute;pointer-events:none;background:#0c0e12;border:1px solid var(--border);
+    border-radius:8px;padding:8px 11px;font-size:12.5px;line-height:1.5;box-shadow:0 6px 18px rgba(0,0,0,.4);
+    opacity:0;transition:opacity .1s;max-width:230px;z-index:10;}
+  #tooltip b{display:block;font-size:13.5px;margin-bottom:2px;}
+  #tooltip .muted{color:var(--ink-dim);}
+  #tooltip .former{color:#ff9f9f;font-style:italic;}
+
+  .station{cursor:pointer;}
+  .station circle{transition:r .25s, fill .25s, stroke .25s, opacity .3s;}
+  .station text{font-size:9.5px;fill:var(--ink-dim);pointer-events:none;transition:opacity .3s, fill .3s;}
+  .station.interchange circle.core{fill:#0f1216;}
+  .segment{fill:none;stroke-linecap:round;transition:opacity .35s, stroke-width .3s;}
+  .segment.ghost{opacity:.14;stroke:#5a6270;stroke-width:3;stroke-dasharray:1 7;}
+  .segment.future{stroke:var(--d-color);stroke-width:4;stroke-dasharray:6 6;opacity:0;transition:opacity .5s;}
+  .segment.future.on{opacity:.85;}
+  .segment.future.planned{stroke-width:3;stroke-dasharray:2 7;}
+  .segment.future.planned.on{opacity:.55;}
+
+  @keyframes pulseRing{
+    0%{ stroke-opacity:.9; stroke-width:2; r:9; }
+    70%{ stroke-opacity:0; stroke-width:14; r:22; }
+    100%{ stroke-opacity:0; stroke-width:14; r:24; }
+  }
+  .flashring{fill:none;stroke:var(--accent);animation:pulseRing 1.4s ease-out 2;}
+
+  #side{width:300px;flex:0 0 auto;background:var(--panel);border-left:1px solid var(--border);
+    display:flex;flex-direction:column;min-height:0;}
+  #sideTabs{display:flex;border-bottom:1px solid var(--border);flex:0 0 auto;}
+  #sideTabs button{flex:1;background:none;border:none;color:var(--ink-dim);padding:10px 4px;font-size:12.5px;
+    cursor:pointer;border-bottom:2px solid transparent;}
+  #sideTabs button.active{color:var(--ink);border-bottom-color:var(--accent);font-weight:600;}
+  #sidePanels{flex:1 1 auto;overflow-y:auto;min-height:0;}
+  #eventsList{padding:8px;}
+  .ev{padding:9px 10px;margin-bottom:6px;border-radius:8px;border:1px solid var(--border);
+    background:var(--panel2);cursor:pointer;transition:background .15s, border-color .15s;}
+  .ev:hover{background:#232a34;}
+  .ev.active{border-color:var(--accent);background:#2a2515;}
+  .ev.future{opacity:.75;}
+  .ev .evdate{font-size:10.5px;color:var(--ink-dim);font-variant-numeric:tabular-nums;}
+  .ev .evtitle{font-size:12.8px;font-weight:600;margin:2px 0 3px;}
+  .ev .evdesc{font-size:11.5px;color:var(--ink-dim);line-height:1.4;}
+  .tag{display:inline-block;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:9px;margin-right:5px;
+    vertical-align:1px;}
+  .tag.A{background:var(--a-color);color:#fff;}
+  .tag.B{background:var(--b-color);color:#241900;}
+  .tag.C{background:var(--c-color);color:#fff;}
+  .tag.D{background:var(--d-color);color:#fff;}
+  .tag.rename{background:#7a5cff;color:#fff;}
+  .tag.flood{background:#2b7fd9;color:#fff;}
+
+  #detailPanel{padding:14px;font-size:12.8px;line-height:1.6;color:var(--ink-dim);}
+  #detailPanel h3{color:var(--ink);margin:0 0 4px;font-size:14px;}
+  #detailPanel .empty{color:var(--ink-dim);font-size:12.5px;}
+  #detailPanel .kv{margin-top:8px;}
+  #detailPanel .kv div{margin-bottom:3px;}
+  #detailPanel .kv b{color:var(--ink);}
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:#333a44;border-radius:4px;}
+
+  /* Phone: stack instead of squeezing the map beside a 230px sidebar. The map
+     takes the full width at its exact content aspect (1180:880 viewBox), so the
+     roughly-square area under the controls is used edge to edge with zero
+     letterbox; timeline/detail flow below on the page scroll. Station labels
+     are sub-4px at this scale — hide them, grow the dots, let tap → detail and
+     the tooltip carry the names. */
+  @media (max-width:820px){
+    #app{height:auto;min-height:100dvh;}
+    #main{flex-direction:column;min-height:0;}
+    #mapCol{flex:none;width:100%;}
+    #mapCol svg{width:100%;height:auto;aspect-ratio:1180/880;display:block;}
+    #side{width:100%;flex:none;border-left:0;border-top:1px solid var(--border);}
+    #sidePanels{max-height:none;}
+    header{padding:10px 14px 8px;}
+    header p{display:none;}
+    #controls{padding:8px 12px;gap:10px;}
+    #stats{width:100%;justify-content:space-between;}
+    #dateLabel{min-width:108px;font-size:15px;}
+    .station text{display:none;}
+    .station circle.dot{r:9px;}
+    .station circle.ring{r:12px;}
+    .station circle.core{r:8px;}
+    /* off the map: a compact strip below it — the overlay covered a third of
+       the small map (line A's west branch) */
+    #legend{position:static;display:flex;flex-wrap:wrap;gap:2px 14px;
+      border:0;border-radius:0;background:var(--panel);
+      font-size:10.5px;padding:6px 12px;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>🚇 Prague Metro — Growth Through Time</h1>
+    <p>The network's full extent from opening day (9 May 1974) to today, with every extension, rename and closure along the way.</p>
+  </header>
+
+  <div id="controls">
+    <button id="playBtn" title="Play / pause">▶</button>
+    <div id="dateLabel">—</div>
+    <div id="sliderWrap">
+      <input type="range" id="slider" min="0" max="1000" value="1000" step="1">
+      <div id="ticks"></div>
+    </div>
+    <div id="speedRow">
+      Speed
+      <select id="speed">
+        <option value="60">1×</option>
+        <option value="25">3×</option>
+        <option value="10" selected>6×</option>
+        <option value="4">12×</option>
+      </select>
+    </div>
+    <div id="stats">
+      <div>Stations open: <b id="statStations">0</b>/58</div>
+      <div>Lines running: <b id="statLines">0</b></div>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="mapCol">
+      <svg id="svg" viewBox="-40 60 1180 880" preserveAspectRatio="xMidYMid meet">
+        <g id="ghostLayer"></g>
+        <g id="futureLayer"></g>
+        <g id="liveLayer"></g>
+        <g id="flashLayer"></g>
+        <g id="stationLayer"></g>
+      </svg>
+      <div id="legend">
+        <div class="row"><div class="sw" style="background:var(--a-color)"></div>Line A</div>
+        <div class="row"><div class="sw" style="background:var(--b-color)"></div>Line B</div>
+        <div class="row"><div class="sw" style="background:var(--c-color)"></div>Line C</div>
+        <div class="row"><div class="sw dashed"></div>Line D — under construction</div>
+        <div class="row"><div class="sw dashed planned"></div>Line D — planned extension</div>
+        <div class="row"><div class="sw" style="background:#5a6270;opacity:.4"></div>Not yet built</div>
+      </div>
+      <div id="eventBanner"></div>
+      <div id="tooltip"></div>
+    </div>
+    <div id="side">
+      <div id="sideTabs">
+        <button class="active" data-tab="events">Timeline</button>
+        <button data-tab="detail">Station</button>
+      </div>
+      <div id="sidePanels">
+        <div id="eventsList"></div>
+        <div id="detailPanel" style="display:none"><div class="empty">Click a station on the map to see its history.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   DATA — Prague Metro history (sourced from Wikipedia / DPP records)
+   --------------------------------------------------------------- */
+const S = {}; // stations by id
+function st(id,name,former,lines,x,y){ S[id]={id,name,former,lines,x,y}; }
+
+// Line A (west -> east)
+st('nemocnice_motol','Nemocnice Motol',null,['A'],170,300);
+st('petriny','Petřiny',null,['A'],220,310);
+st('nadrazi_veleslavin','Nádraží Veleslavín',null,['A'],270,325);
+st('borislavka','Bořislavka',null,['A'],320,345);
+st('dejvicka','Dejvická','Leninova',['A'],370,370);
+st('hradcanska','Hradčanská',null,['A'],420,400);
+st('malostranska','Malostranská',null,['A'],470,440);
+st('staromestska','Staroměstská',null,['A'],520,480);
+st('mustek','Můstek',null,['A','B'],570,500);
+st('muzeum','Muzeum',null,['A','C'],620,480);
+st('namesti_miru','Náměstí Míru',null,['A'],680,460);
+st('jz_podebrad','Jiřího z Poděbrad',null,['A'],740,445);
+st('flora','Flora',null,['A'],800,435);
+st('zelivskeho','Želivského',null,['A'],860,430);
+st('strasnicka','Strašnická',null,['A'],920,430);
+st('skalka','Skalka',null,['A'],980,435);
+st('depo_hostivar','Depo Hostivař',null,['A'],1040,445);
+
+// Line B (southwest -> northeast)
+st('zlicin','Zličín',null,['B'],-10,678);
+st('stodulky','Stodůlky',null,['B'],40,680);
+st('luka','Luka',null,['B'],90,680);
+st('luziny','Lužiny',null,['B'],140,678);
+st('hurka','Hůrka',null,['B'],190,675);
+st('nove_butovice','Nové Butovice','Dukelská',['B'],240,670);
+st('radlicka','Radlická',null,['B'],290,660);
+st('jinonice','Jinonice','Švermova',['B'],340,645);
+st('andel','Anděl','Moskevská',['B'],390,625);
+st('smichovske_nadrazi','Smíchovské nádraží',null,['B'],440,600);
+st('karlovo_namesti','Karlovo náměstí',null,['B'],490,565);
+st('narodni_trida','Národní třída',null,['B'],530,530);
+st('namesti_republiky','Náměstí Republiky',null,['B'],590,440);
+st('krizikova','Křižíkova',null,['B'],650,340);
+st('invalidovna','Invalidovna',null,['B'],690,310);
+st('palmovka','Palmovka',null,['B'],730,280);
+st('ceskomoravska','Českomoravská',null,['B'],770,250);
+st('vysocanska','Vysočanská',null,['B'],810,220);
+st('kolbenova','Kolbenova',null,['B'],850,195);
+st('hloubetin','Hloubětín',null,['B'],890,170);
+st('rajska_zahrada','Rajská zahrada',null,['B'],930,145);
+st('cerny_most','Černý Most',null,['B'],970,120);
+
+// Line C (north -> south)
+st('letnany','Letňany',null,['C'],500,100);
+st('prosek','Prosek',null,['C'],520,140);
+st('strizkov','Střížkov',null,['C'],540,180);
+st('ladvi','Ládví',null,['C'],560,220);
+st('kobylisy','Kobylisy',null,['C'],580,260);
+st('nadrazi_holesovice','Nádraží Holešovice','Fučíkova',['C'],600,300);
+st('vltavska','Vltavská',null,['C'],605,340);
+st('florenc','Florenc','Sokolovská',['B','C'],610,380);
+st('hlavni_nadrazi','Hlavní nádraží',null,['C'],615,430);
+st('ip_pavlova','I.P.Pavlova',null,['C'],635,520);
+st('vysehrad','Vyšehrad','Gottwaldova',['C'],650,560);
+st('prazskeho_povstani','Pražského povstání',null,['C'],665,600);
+st('pankrac','Pankrác','Mládežnická',['C'],680,640);
+st('budejovicka','Budějovická',null,['C'],695,680);
+st('kacerov','Kačerov',null,['C'],710,720);
+st('roztyly','Roztyly','Primátora Vacka',['C'],725,760);
+st('chodov','Chodov','Budovatelů',['C'],740,800);
+st('opatov','Opatov','Družby',['C'],755,840);
+st('haje','Háje','Kosmonautů',['C'],770,880);
+
+// Planned Line D (not open — under construction from 2022)
+st('olbrachtova','Olbrachtova',null,['D'],660,700);
+st('nove_dvory','Nové Dvory',null,['D'],645,740);
+st('nemocnice_krc','Nemocnice Krč',null,['D'],630,780);
+st('libus','Libuš',null,['D'],615,820);
+st('pisnice','Depo Písnice',null,['D'],600,860);
+
+// Ordered station sequences per line (defines the drawn path)
+const LINE_ORDER = {
+  A:['nemocnice_motol','petriny','nadrazi_veleslavin','borislavka','dejvicka','hradcanska','malostranska',
+     'staromestska','mustek','muzeum','namesti_miru','jz_podebrad','flora','zelivskeho','strasnicka','skalka','depo_hostivar'],
+  B:['zlicin','stodulky','luka','luziny','hurka','nove_butovice','radlicka','jinonice','andel','smichovske_nadrazi',
+     'karlovo_namesti','narodni_trida','mustek','namesti_republiky','florenc','krizikova','invalidovna','palmovka',
+     'ceskomoravska','vysocanska','kolbenova','hloubetin','rajska_zahrada','cerny_most'],
+  C:['letnany','prosek','strizkov','ladvi','kobylisy','nadrazi_holesovice','vltavska','florenc','hlavni_nadrazi',
+     'muzeum','ip_pavlova','vysehrad','prazskeho_povstani','pankrac','budejovicka','kacerov','roztyly','chodov',
+     'opatov','haje'],
+  D:['pankrac','olbrachtova','nove_dvory','nemocnice_krc','libus','pisnice']
+};
+
+// Per-line opening date for every station along that line (drives segment reveal)
+const OPEN = {
+  A:{nemocnice_motol:'2015-04-06',petriny:'2015-04-06',nadrazi_veleslavin:'2015-04-06',borislavka:'2015-04-06',
+     dejvicka:'1978-08-12',hradcanska:'1978-08-12',malostranska:'1978-08-12',staromestska:'1978-08-12',
+     mustek:'1978-08-12',muzeum:'1978-08-12',namesti_miru:'1978-08-12',jz_podebrad:'1980-12-19',flora:'1980-12-19',
+     zelivskeho:'1980-12-19',strasnicka:'1987-11-11',skalka:'1990-11-04',depo_hostivar:'2006-05-26'},
+  B:{zlicin:'1994-11-11',stodulky:'1994-11-11',luka:'1994-11-11',luziny:'1994-11-11',hurka:'1994-11-11',
+     nove_butovice:'1988-10-26',radlicka:'1988-10-26',jinonice:'1988-10-26',andel:'1985-11-02',
+     smichovske_nadrazi:'1985-11-02',karlovo_namesti:'1985-11-02',narodni_trida:'1985-11-02',mustek:'1985-11-02',
+     namesti_republiky:'1985-11-02',florenc:'1985-11-02',krizikova:'1990-11-22',invalidovna:'1990-11-22',
+     palmovka:'1990-11-22',ceskomoravska:'1990-11-22',vysocanska:'1998-11-08',kolbenova:'2001-06-26',
+     hloubetin:'1999-06-08',rajska_zahrada:'1998-11-08',cerny_most:'1998-11-08'},
+  C:{letnany:'2008-05-08',prosek:'2008-05-08',strizkov:'2008-05-08',ladvi:'2004-06-26',kobylisy:'2004-06-26',
+     nadrazi_holesovice:'1984-11-03',vltavska:'1984-11-03',florenc:'1974-05-09',hlavni_nadrazi:'1974-05-09',
+     muzeum:'1974-05-09',ip_pavlova:'1974-05-09',vysehrad:'1974-05-09',prazskeho_povstani:'1974-05-09',
+     pankrac:'1974-05-09',budejovicka:'1974-05-09',kacerov:'1974-05-09',roztyly:'1980-11-11',chodov:'1980-11-11',
+     opatov:'1980-11-11',haje:'1980-11-11'}
+};
+const RENAME_DATE = '1990-02-22';
+
+// Overall "first opened" date per station (earliest across its lines) — used for station dot + labels
+const FIRST_OPEN = {};
+Object.keys(OPEN).forEach(line=>{
+  Object.entries(OPEN[line]).forEach(([id,d])=>{
+    if(!FIRST_OPEN[id] || d < FIRST_OPEN[id]) FIRST_OPEN[id]=d;
+  });
+});
+
+const TODAY = '2026-08-17';
+const START = '1974-05-09';
+const END   = '2029-12-31'; // horizon incl. planned Line D
+
+const EVENTS = [
+  {date:'1974-05-09', line:'C', title:'Prague Metro opens', tag:'C',
+   desc:'Line C launches between Florenc and Kačerov with 9 stations — the birth of the Prague Metro.',
+   stations:['florenc','hlavni_nadrazi','muzeum','ip_pavlova','vysehrad','prazskeho_povstani','pankrac','budejovicka','kacerov']},
+  {date:'1978-08-12', line:'A', title:'Line A opens', tag:'A',
+   desc:'Line A opens from Dejvická to Náměstí Míru — 7 new stations, and Prague\'s first interchange at Muzeum and Můstek (planned).',
+   stations:['dejvicka','hradcanska','malostranska','staromestska','mustek','muzeum','namesti_miru']},
+  {date:'1980-11-11', line:'C', title:'Line C extends south to Háje', tag:'C',
+   desc:'Four new stations serve the growing Jižní Město housing estates.',
+   stations:['roztyly','chodov','opatov','haje']},
+  {date:'1980-12-19', line:'A', title:'Line A extends east to Želivského', tag:'A',
+   desc:'Three stations added through Vinohrady and Žižkov.',
+   stations:['jz_podebrad','flora','zelivskeho']},
+  {date:'1984-11-03', line:'C', title:'Line C reaches Nádraží Holešovice', tag:'C',
+   desc:'Two stations extend the line north across the Vltava.',
+   stations:['vltavska','nadrazi_holesovice']},
+  {date:'1985-11-02', line:'B', title:'Line B opens', tag:'B',
+   desc:'The third line opens between Florenc and Smíchovské nádraží, crossing the city centre.',
+   stations:['namesti_republiky','narodni_trida','karlovo_namesti','smichovske_nadrazi']},
+  {date:'1987-11-11', line:'A', title:'Line A reaches Strašnická', tag:'A',
+   desc:'One more station extends Line A east.', stations:['strasnicka']},
+  {date:'1988-10-26', line:'B', title:'Line B extends to Nové Butovice', tag:'B',
+   desc:'Three stations push Line B further southwest.',
+   stations:['radlicka','jinonice','nove_butovice']},
+  {date:'1990-02-22', line:null, title:'Velvet Revolution: 12 stations renamed', tag:'rename', isRename:true,
+   desc:'Communist-era names — Leninova, Gottwaldova, Moskevská, Sokolovská and others — are replaced after the fall of the regime.',
+   stations:['dejvicka','nove_butovice','jinonice','andel','florenc','nadrazi_holesovice','vysehrad','pankrac','roztyly','chodov','opatov','haje']},
+  {date:'1990-11-04', line:'A', title:'Skalka opens', tag:'A', desc:'A single-station extension of Line A.', stations:['skalka']},
+  {date:'1990-11-22', line:'B', title:'Line B extends to Českomoravská', tag:'B',
+   desc:'Four stations carry the line through Karlín and Libeň.',
+   stations:['krizikova','invalidovna','palmovka','ceskomoravska']},
+  {date:'1994-11-11', line:'B', title:'Line B extends to Zličín', tag:'B',
+   desc:'Five stations open on the southwestern end of the line.',
+   stations:['hurka','luziny','luka','stodulky','zlicin']},
+  {date:'1998-11-08', line:'B', title:'Line B extends to Černý Most', tag:'B',
+   desc:'The line reaches its current northeastern terminus with three new stations.',
+   stations:['vysocanska','rajska_zahrada','cerny_most']},
+  {date:'1999-06-08', line:'B', title:'Hloubětín opens', tag:'B',
+   desc:'An infill station added on the already-built Černý Most section.', stations:['hloubetin']},
+  {date:'2001-06-26', line:'B', title:'Kolbenova opens', tag:'B',
+   desc:'A second infill station completes this stretch of Line B.', stations:['kolbenova']},
+  {date:'2002-08-14', line:null, title:'Catastrophic flooding', tag:'flood', isIncident:true,
+   desc:'Record floods on the Vltava inundate 19 stations; large sections close for months, with damage over 6 billion CZK.'},
+  {date:'2004-06-26', line:'C', title:'Line C extends to Ládví', tag:'C',
+   desc:'Two stations extend the line further north.', stations:['kobylisy','ladvi']},
+  {date:'2006-05-26', line:'A', title:'Line A reaches Depo Hostivař', tag:'A',
+   desc:'A depot station becomes Line A\'s eastern terminus.', stations:['depo_hostivar']},
+  {date:'2008-05-08', line:'C', title:'Line C extends to Letňany', tag:'C',
+   desc:'Three stations bring Line C to its current northern terminus.',
+   stations:['strizkov','prosek','letnany']},
+  {date:'2013-06-03', line:null, title:'Flooding closes stations again', tag:'flood', isIncident:true,
+   desc:'Rising Vltava waters force another round of temporary station closures.'},
+  {date:'2015-04-06', line:'A', title:'Line A extends west to Nemocnice Motol', tag:'A',
+   desc:'Four stations extend Line A to its current western terminus.',
+   stations:['borislavka','nadrazi_veleslavin','petriny','nemocnice_motol']},
+  {date:'2022-03-01', line:'D', title:'Line D construction begins', tag:'D', isFuture:true,
+   desc:'Work starts on Prague\'s fourth metro line, planned to connect the centre with the southern districts (target completion late this decade).'},
+  {date:'2025-12-19', line:'C', title:'Pankrác reopens after modernization', tag:'C',
+   desc:'Pankrác reopens following renovation, preparing it as a future Line D interchange.'}
+];
+
+/* ---------------------------------------------------------------
+   RENDER SETUP
+   --------------------------------------------------------------- */
+const svg = document.getElementById('svg');
+const ghostLayer = document.getElementById('ghostLayer');
+const futureLayer = document.getElementById('futureLayer');
+const liveLayer = document.getElementById('liveLayer');
+const flashLayer = document.getElementById('flashLayer');
+const stationLayer = document.getElementById('stationLayer');
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+
+const LINE_COLOR = {A:'var(--a-color)',B:'var(--b-color)',C:'var(--c-color)',D:'var(--d-color)'};
+const LINE_COLOR_HEX = {A:'#2e8b3d',B:'#f0b400',C:'#da251c',D:'#0f5cab'};
+
+// Build segment list per line (real, not D)
+const segments = []; // {line, a, b, opened}
+['A','B','C'].forEach(line=>{
+  const order = LINE_ORDER[line];
+  for(let i=0;i<order.length-1;i++){
+    const a=order[i], b=order[i+1];
+    const opened = OPEN[line][a] > OPEN[line][b] ? OPEN[line][a] : OPEN[line][b];
+    segments.push({line,a,b,opened});
+  }
+});
+const futureSegments = [];
+{
+  const order = LINE_ORDER['D'];
+  for(let i=0;i<order.length-1;i++) futureSegments.push({line:'D',a:order[i],b:order[i+1]});
+}
+// Phase II exists only on paper: Náměstí Míru – Pankrác (planned northern leg)
+const plannedSegments = [{line:'D',a:'namesti_miru',b:'pankrac',planned:true}];
+
+// Ghost (full network, always faint) — union of all real segments, drawn once
+segments.forEach(seg=>{
+  const A=S[seg.a],B=S[seg.b];
+  ghostLayer.appendChild(el('line',{class:'segment ghost',x1:A.x,y1:A.y,x2:B.x,y2:B.y}));
+});
+futureSegments.concat(plannedSegments).forEach(seg=>{
+  const A=S[seg.a],B=S[seg.b];
+  ghostLayer.appendChild(el('line',{class:'segment ghost',x1:A.x,y1:A.y,x2:B.x,y2:B.y}));
+});
+
+// Live segment elements (colored, revealed over time)
+const segEls = segments.map(seg=>{
+  const A=S[seg.a],B=S[seg.b];
+  const line=el('line',{class:'segment',x1:A.x,y1:A.y,x2:B.x,y2:B.y,
+    stroke:LINE_COLOR_HEX[seg.line],'stroke-width':6,opacity:0});
+  liveLayer.appendChild(line);
+  return {seg,line};
+});
+// Future (Line D) segment elements — under construction + paper-only planned
+const futureEls = futureSegments.concat(plannedSegments).map(seg=>{
+  const A=S[seg.a],B=S[seg.b];
+  const line=el('line',{class:'segment future'+(seg.planned?' planned':''),x1:A.x,y1:A.y,x2:B.x,y2:B.y});
+  futureLayer.appendChild(line);
+  return {seg,line};
+});
+
+// Station elements
+const stationEls = {};
+Object.values(S).forEach(s=>{
+  const g = el('g',{class:'station'+(s.lines.length>1?' interchange':''), 'data-id':s.id, opacity:0});
+  const isFuture = s.lines[0]==='D';
+  const r = s.lines.length>1?9:6;
+  if(s.lines.length>1){
+    g.appendChild(el('circle',{class:'ring',cx:s.x,cy:s.y,r:r,fill:'#fff','stroke-width':0}));
+    g.appendChild(el('circle',{class:'core',cx:s.x,cy:s.y,r:r-3,fill:'#0f1216'}));
+  } else {
+    g.appendChild(el('circle',{class:'dot',cx:s.x,cy:s.y,r:r,
+      fill: isFuture ? 'transparent' : '#fff',
+      stroke: LINE_COLOR_HEX[s.lines[0]], 'stroke-width': isFuture?2:3,
+      'stroke-dasharray': isFuture?'3 3':'none'}));
+  }
+  // label placement: alternate above/below/side based on rough position to reduce collisions
+  const above = (s.lines.includes('C') && !s.lines.includes('A') && !s.lines.includes('B')) ? (s.y<380) : (s.y>500);
+  const t = el('text',{x:s.x + (s.lines.length>1?12:9), y: s.y + (above? -10 : 16),
+    'text-anchor': 'start'});
+  t.textContent = s.name;
+  g.appendChild(t);
+  g.addEventListener('click',()=>showStation(s.id));
+  g.addEventListener('mouseenter',(e)=>showTip(e,s.id));
+  g.addEventListener('mousemove',moveTip);
+  g.addEventListener('mouseleave',hideTip);
+  stationLayer.appendChild(g);
+  stationEls[s.id]=g;
+});
+
+/* ---------------------------------------------------------------
+   TIME CONTROL
+   --------------------------------------------------------------- */
+const startMs = Date.parse(START), endMs = Date.parse(END);
+const slider = document.getElementById('slider');
+const dateLabel = document.getElementById('dateLabel');
+slider.max = 1000;
+
+function msFromSlider(v){ return startMs + (endMs-startMs) * (v/1000); }
+function sliderFromDate(dateStr){ const ms=Date.parse(dateStr); return Math.round((ms-startMs)/(endMs-startMs)*1000); }
+function fmtDate(ms){
+  const d = new Date(ms);
+  return d.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+}
+
+// Tick marks for major events
+const ticksEl = document.getElementById('ticks');
+EVENTS.forEach(ev=>{
+  const pct = sliderFromDate(ev.date)/1000*100;
+  const t = document.createElement('div');
+  t.className='tick major';
+  t.style.left = pct+'%';
+  t.title = ev.title+' — '+ev.date;
+  ticksEl.appendChild(t);
+});
+
+let lastCurveDate = START;
+function render(dateStr){
+  document.getElementById('dateLabel').textContent = fmtDate(Date.parse(dateStr));
+
+  let openCount=0;
+  Object.values(S).forEach(s=>{
+    const g = stationEls[s.id];
+    if(s.lines[0]==='D'){
+      // future station: shown only as hollow marker once construction has started, never "opens"
+      const on = dateStr >= '2022-03-01';
+      g.style.opacity = on?1:0;
+      return;
+    }
+    const fo = FIRST_OPEN[s.id];
+    const isOpen = dateStr >= fo;
+    g.style.opacity = isOpen?1:0;
+    if(isOpen){
+      openCount++;
+      const label = (s.former && dateStr < RENAME_DATE) ? s.former : s.name;
+      const textEl = g.querySelector('text');
+      if(textEl.textContent!==label) textEl.textContent = label;
+      textEl.style.fill = (s.former && dateStr < RENAME_DATE) ? '#d98a8a' : '';
+    }
+  });
+  document.getElementById('statStations').textContent = openCount;
+
+  // "Lines running" counts lines with at least one open SEGMENT — an open
+  // interchange station must not count its other line before that line exists
+  // (Florenc carries B+C, but on opening day 1974 only line C ran).
+  const activeLines=new Set();
+  segEls.forEach(({seg,line})=>{
+    const on = dateStr >= seg.opened;
+    line.style.opacity = on?0.95:0;
+    if(on) activeLines.add(seg.line);
+  });
+  document.getElementById('statLines').textContent = activeLines.size;
+  futureEls.forEach(({line})=>{
+    const on = dateStr >= '2022-03-01';
+    line.classList.toggle('on', on);
+  });
+
+  lastCurveDate = dateStr;
+}
+
+function dateStrFromSliderVal(v){
+  const ms = msFromSlider(v);
+  return new Date(ms).toISOString().slice(0,10);
+}
+
+let prevDateStr = null;
+function onSliderInput(triggerEvents){
+  const v = Number(slider.value);
+  const dateStr = dateStrFromSliderVal(v);
+  render(dateStr);
+  updateEventListActive(dateStr);
+  if(triggerEvents && prevDateStr!==null){
+    checkCrossedEvents(prevDateStr, dateStr);
+  }
+  prevDateStr = dateStr;
+}
+slider.addEventListener('input',()=>onSliderInput(true));
+
+/* ---------------------------------------------------------------
+   EVENTS LIST (sidebar)
+   --------------------------------------------------------------- */
+const eventsListEl = document.getElementById('eventsList');
+EVENTS.forEach((ev,idx)=>{
+  const div = document.createElement('div');
+  div.className = 'ev'+(ev.isFuture?' future':'');
+  div.dataset.idx = idx;
+  const tagLabel = ev.isRename?'RENAME':ev.isIncident?'FLOOD':('LINE '+(ev.line||''));
+  div.innerHTML = `<div class="evdate">${new Date(ev.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+    <div class="evtitle"><span class="tag ${ev.tag}">${tagLabel}</span>${ev.title}</div>
+    <div class="evdesc">${ev.desc||''}</div>`;
+  div.addEventListener('click',()=>{
+    slider.value = sliderFromDate(ev.date);
+    onSliderInput(false);
+    flashEvent(ev);
+  });
+  eventsListEl.appendChild(div);
+});
+function updateEventListActive(dateStr){
+  let activeIdx=-1;
+  EVENTS.forEach((ev,idx)=>{ if(dateStr>=ev.date) activeIdx=idx; });
+  [...eventsListEl.children].forEach((c,idx)=>c.classList.toggle('active', idx===activeIdx));
+}
+
+/* ---------------------------------------------------------------
+   EVENT CROSSING -> BANNER + PULSE
+   --------------------------------------------------------------- */
+const banner = document.getElementById('eventBanner');
+let bannerTimeout;
+function flashEvent(ev){
+  banner.textContent = ev.date.slice(0,4)+' — '+ev.title;
+  banner.classList.add('show');
+  clearTimeout(bannerTimeout);
+  bannerTimeout = setTimeout(()=>banner.classList.remove('show'), 2800);
+
+  (ev.stations||[]).forEach(id=>{
+    const s = S[id];
+    const ring = el('circle',{class:'flashring',cx:s.x,cy:s.y,r:9});
+    flashLayer.appendChild(ring);
+    setTimeout(()=>ring.remove(), 2900);
+  });
+}
+function checkCrossedEvents(prevStr,curStr){
+  const forward = curStr>=prevStr;
+  EVENTS.forEach(ev=>{
+    const crossed = forward ? (ev.date>prevStr && ev.date<=curStr) : (ev.date>curStr && ev.date<=prevStr);
+    if(crossed) flashEvent(ev);
+  });
+}
+
+/* ---------------------------------------------------------------
+   STATION DETAIL / TOOLTIP
+   --------------------------------------------------------------- */
+const detailPanel = document.getElementById('detailPanel');
+function showStation(id){
+  document.querySelector('[data-tab="detail"]').click();
+  const s = S[id];
+  const lineTags = s.lines.map(l=>`<span class="tag ${l}">LINE ${l}</span>`).join(' ');
+  let html = `<h3>${s.name}</h3><div>${lineTags}</div><div class="kv">`;
+  if(s.lines[0]==='D'){
+    html += `<div><b>Status:</b> planned / under construction (Line D)</div>
+      <div><b>Construction start:</b> 2022</div>`;
+  } else {
+    s.lines.forEach(l=>{
+      html += `<div><b>Opened on Line ${l}:</b> ${OPEN[l][id]}</div>`;
+    });
+    if(s.former){
+      html += `<div><b>Former name:</b> <span class="former">${s.former}</span> (until 22 Feb 1990)</div>`;
+    }
+  }
+  html += `</div>`;
+  detailPanel.innerHTML = html;
+}
+const tooltip = document.getElementById('tooltip');
+function showTip(e,id){
+  const s=S[id];
+  let html = `<b>${s.name}</b>`;
+  if(s.former) html += `<div class="former">formerly ${s.former}</div>`;
+  html += `<div class="muted">Line${s.lines.length>1?'s':''} ${s.lines.join(', ')}</div>`;
+  tooltip.innerHTML = html;
+  tooltip.style.opacity=1;
+  moveTip(e);
+}
+function moveTip(e){
+  const rect = document.getElementById('mapCol').getBoundingClientRect();
+  tooltip.style.left = (e.clientX-rect.left+14)+'px';
+  tooltip.style.top = (e.clientY-rect.top+10)+'px';
+}
+function hideTip(){ tooltip.style.opacity=0; }
+
+// Tabs
+document.querySelectorAll('#sideTabs button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#sideTabs button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('eventsList').style.display = btn.dataset.tab==='events'?'block':'none';
+    document.getElementById('detailPanel').style.display = btn.dataset.tab==='detail'?'block':'none';
+  });
+});
+
+/* ---------------------------------------------------------------
+   PLAY / PAUSE ANIMATION
+   --------------------------------------------------------------- */
+const playBtn = document.getElementById('playBtn');
+const speedSel = document.getElementById('speed');
+let playing=false, timer=null;
+playBtn.addEventListener('click',()=>{
+  playing = !playing;
+  playBtn.textContent = playing?'⏸':'▶';
+  if(playing){
+    if(Number(slider.value)>=1000) slider.value=0;
+    tick();
+  } else {
+    clearTimeout(timer);
+  }
+});
+function tick(){
+  if(!playing) return;
+  let v = Number(slider.value)+1;
+  if(v>1000){ playing=false; playBtn.textContent='▶'; return; }
+  slider.value=v;
+  onSliderInput(true);
+  timer = setTimeout(tick, Number(speedSel.value));
+}
+
+/* ---------------------------------------------------------------
+   INIT — default view shows today
+   --------------------------------------------------------------- */
+slider.value = sliderFromDate(TODAY);
+prevDateStr = dateStrFromSliderVal(slider.value);
+render(prevDateStr);
+updateEventListActive(prevDateStr);
+</script>
+</body>
+</html>

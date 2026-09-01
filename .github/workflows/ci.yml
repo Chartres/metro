@@ -1,0 +1,61 @@
+# Flywheel Standard — canonical CI gate (Flywheel Standard §2), stamped from
+# flywheel/docs/standards/ci.template.yml. Blocks ONLY on truth: typecheck,
+# test, build, e2e. Deploy ships dark until CLOUDFLARE_API_TOKEN is set on this
+# repo — until then the flywheel hub's deploy-metro job (which checks out this
+# repo) remains the working deployer.
+name: CI
+on:
+  push:
+  pull_request:
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - name: Build
+        run: npm run build
+        env: # the shared flywheel-core platform env — same names in every web product
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test
+
+  # Ships dark (deploy-console pattern): a no-op notice until the repo carries
+  # the Cloudflare secrets. The flywheel hub's deploy-metro job covers deploys
+  # until then — see AGENTS.md "Release".
+  deploy:
+    needs: gate
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Build and deploy to Cloudflare Pages
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "CLOUDFLARE_API_TOKEN not set — skipping deploy (the flywheel hub's deploy-metro job deploys this repo)."
+            exit 0
+          fi
+          npm ci
+          npm run build
+          npx wrangler@4 pages deploy dist --project-name=metro --branch=main --commit-dirty=true
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
