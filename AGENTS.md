@@ -36,14 +36,12 @@ Then scrub the timeline: opening day 1974 must show exactly 9 stations / 1 line,
 pre-1990 dates must show communist-era names (Leninova, Gottwaldova, …).
 
 ## Release (the finish line)
-Two deployers, one target (Cloudflare Pages project `metro`, real subdomain
-`metro-3q1.pages.dev` — pages.dev names are global — behind `metro.dravec.org`):
-- **This repo's `deploy` job** — ships dark until `CLOUDFLARE_API_TOKEN` +
-  `CLOUDFLARE_ACCOUNT_ID` (and optionally the `VITE_SUPABASE_*` pair) are copied onto
-  this repo. Once they are, a push to `main` here deploys directly.
-- **The flywheel hub's `deploy-metro` job** — checks out THIS repo and deploys with the
-  hub's secrets; it also owns the custom-domain attach + DNS repoint self-heal. Until
-  the secrets are copied, trigger a hub main run (or its workflow_dispatch) to deploy.
+Push to `main` → **Cloudflare Pages builds and deploys it** (Git integration, wired by
+the flywheel hub's `connect-pages` workflow): project `metro`, real subdomain
+`metro-3q1.pages.dev`, custom domain `metro.dravec.org`. Every PR gets a preview URL.
+This repo holds no deploy job and no Cloudflare secrets — credentials live in Cloudflare.
+Build settings + `VITE_SUPABASE_*` env vars are on the Cloudflare project; change them
+by re-running `connect-pages` (idempotent), not here.
 
 ## Analytics (Common Platform)
 Vendored client: `src/platform/flywheel-client.ts` via `src/analytics.ts` (dep-free
