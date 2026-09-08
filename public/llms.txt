@@ -1,0 +1,32 @@
+# Prague Metro — Growth Through Time
+
+> An interactive, single-page map of how the Prague Metro grew: every line extension, station
+> rename and closure from opening day (9 May 1974) to today, plus Line D under construction
+> and its planned phase-II leg. Scrub the timeline or press Play and watch the network grow.
+> Free, no account, no ads, no cookies. English.
+
+## What it is
+- A history visualisation, not a journey planner: pick any date and see which segments and
+  stations were open, how many lines were running, and what changed that year.
+- Lines A (green), B (yellow), C (red) as built, Line D in its official blue — dashed where
+  under construction, dotted where only planned.
+- Station names follow the name valid at the chosen date (renames are events on the timeline).
+- Works on a phone: the map fills the width at its native aspect ratio; tap a station for detail.
+
+## How to use it
+- https://metro.dravec.org/ — drag the year slider, or press Play; click a station for its
+  opening date and renames.
+
+## Data & provenance
+- Opening/closure/rename dates compiled from public sources (Dopravní podnik hl. m. Prahy
+  history, Wikipedia line/station articles); the dataset is embedded in the page and versioned
+  in the repository. Line D dates are the official plan and can slip.
+
+## Links
+- App: https://metro.dravec.org/
+- Source code: https://github.com/Chartres/metro
+- Sitemap: https://metro.dravec.org/sitemap.xml
+- More from the author: https://flywheel.dravec.org/
+
+## Contact
+- Issues: https://github.com/Chartres/metro/issues

@@ -91,3 +91,43 @@ test('phone (390px): map fills the width at content aspect, panels stack below',
   await expect(page.locator('.station[data-id="muzeum"] text')).toBeHidden()
   await shot(page, 'mobile-390')
 })
+
+// Discoverability kit (flywheel Standard §5c): what crawlers, link unfurlers and AI
+// agents read. Asserted by content-type too — an SPA fallback answers 200 text/html
+// for anything missing.
+test('discoverability kit: robots, sitemap, llms.txt, security.txt, 1200×630 share card', async ({
+  page,
+  request,
+}) => {
+  const robots = await request.get('/robots.txt')
+  expect(robots.headers()['content-type']).toMatch(/^text\/plain/)
+  const txt = await robots.text()
+  expect(txt).toMatch(/^User-agent: \*\nAllow: \/$/m)
+  expect(txt).toContain('User-agent: ClaudeBot')
+  expect(txt).toContain('Sitemap: https://metro.dravec.org/sitemap.xml')
+
+  const sitemap = await request.get('/sitemap.xml')
+  expect(sitemap.headers()['content-type']).toMatch(/xml/)
+  expect(await sitemap.text()).toContain('<loc>https://metro.dravec.org/</loc>')
+
+  const llms = await request.get('/llms.txt')
+  expect(llms.headers()['content-type']).toMatch(/^text\/plain/)
+  expect((await llms.text()).startsWith('# Prague Metro')).toBe(true)
+
+  const sec = await request.get('/.well-known/security.txt')
+  expect(await sec.text()).toMatch(/^Contact: https:\/\//m)
+
+  const og = await request.get('/og.png')
+  expect(og.headers()['content-type']).toBe('image/png')
+  const png = await og.body()
+  expect(png.readUInt32BE(16)).toBe(1200) // IHDR width
+  expect(png.readUInt32BE(20)).toBe(630) // IHDR height
+
+  await page.goto('/')
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://metro.dravec.org/')
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://metro.dravec.org/og.png')
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image')
+  const ld = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent()) ?? '{}')
+  expect(ld['@type']).toBe('WebApplication')
+  expect(ld.url).toBe('https://metro.dravec.org/')
+})
