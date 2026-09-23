@@ -203,7 +203,7 @@
       </select>
     </div>
     <div id="stats">
-      <div>Stations open: <b id="statStations">0</b>/58</div>
+      <div>Stations open: <b id="statStations">0</b>/<span id="statTotal">0</span></div>
       <div>Lines running: <b id="statLines">0</b></div>
     </div>
   </div>
@@ -735,6 +735,7 @@ function tick(){
 /* ---------------------------------------------------------------
    INIT — default view shows today
    --------------------------------------------------------------- */
+document.getElementById('statTotal').textContent = Object.values(S).filter(s=>s.lines[0]!=='D').length;
 slider.value = sliderFromDate(TODAY);
 prevDateStr = dateStrFromSliderVal(slider.value);
 render(prevDateStr);
