@@ -92,6 +92,34 @@ test('phone (390px): map fills the width at content aspect, panels stack below',
   await shot(page, 'mobile-390')
 })
 
+test('playBtn: clicking toggles ▶ → ⏸ → ▶', async ({ page }) => {
+  await page.goto('/')
+  const btn = page.locator('#playBtn')
+  await expect(btn).toHaveText('▶')
+  await btn.click()
+  await expect(btn).toHaveText('⏸')
+  await btn.click()
+  await expect(btn).toHaveText('▶')
+})
+
+test('playBtn: first click sets the conversion sessionStorage key, second does not change it', async ({
+  page,
+}) => {
+  await page.goto('/')
+  // key absent before any click
+  const before = await page.evaluate(() => sessionStorage.getItem('metro:conv_fired'))
+  expect(before).toBeNull()
+  await page.locator('#playBtn').click()
+  const after = await page.evaluate(() => sessionStorage.getItem('metro:conv_fired'))
+  expect(after).toBe('1')
+  // pause so the timeline doesn't finish between clicks
+  await page.locator('#playBtn').click()
+  await page.locator('#playBtn').click()
+  // key stays '1' — conversion fires only once per session
+  const still = await page.evaluate(() => sessionStorage.getItem('metro:conv_fired'))
+  expect(still).toBe('1')
+})
+
 // Discoverability kit (flywheel Standard §5c): what crawlers, link unfurlers and AI
 // agents read. Asserted by content-type too — an SPA fallback answers 200 text/html
 // for anything missing.
