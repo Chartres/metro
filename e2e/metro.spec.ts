@@ -30,6 +30,12 @@ test('today view: full network, stats honest, Line D dashed as future', async ({
     getComputedStyle(document.documentElement).getPropertyValue('--d-color').trim(),
   )
   expect(dColor).toBe('#0f5cab')
+  // segment strokes are read back from the :root custom properties — an empty
+  // or drifted lookup would paint the live network black
+  const strokes = await page
+    .locator('#liveLayer line')
+    .evaluateAll((els) => [...new Set(els.map((e) => e.getAttribute('stroke')))].sort())
+  expect(strokes).toEqual(['#2e8b3d', '#da251c', '#f0b400'])
   await shot(page, 'today')
 })
 

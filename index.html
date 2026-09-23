@@ -437,7 +437,13 @@ const stationLayer = document.getElementById('stationLayer');
 const NS='http://www.w3.org/2000/svg';
 function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
 
-const LINE_COLOR_HEX = {A:'#2e8b3d',B:'#f0b400',C:'#da251c',D:'#0f5cab'};
+// The line palette lives once, in the :root custom properties (--a-color …).
+// SVG presentation attributes can't take var(), so read the values back here
+// instead of keeping a second hex table in sync with the stylesheet.
+const rootStyle = getComputedStyle(document.documentElement);
+const LINE_COLOR_HEX = Object.fromEntries(
+  ['A','B','C','D'].map(l=>[l, rootStyle.getPropertyValue(`--${l.toLowerCase()}-color`).trim()])
+);
 
 // Infill stations added to already-running track: the surrounding segments opened
 // when the through-service started, not when the infill station was built.
