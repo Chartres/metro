@@ -434,6 +434,10 @@ const futureLayer = document.getElementById('futureLayer');
 const liveLayer = document.getElementById('liveLayer');
 const flashLayer = document.getElementById('flashLayer');
 const stationLayer = document.getElementById('stationLayer');
+const mapCol = document.getElementById('mapCol');
+const dateLabelEl = document.getElementById('dateLabel');
+const statStationsEl = document.getElementById('statStations');
+const statLinesEl = document.getElementById('statLines');
 const NS='http://www.w3.org/2000/svg';
 function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
 
@@ -530,7 +534,9 @@ Object.values(S).forEach(s=>{
 const startMs = Date.parse(START), endMs = Date.parse(END);
 const slider = document.getElementById('slider');
 
-function msFromSlider(v){ return startMs + (endMs-startMs) * (v/1000); }
+function dateStrFromSliderVal(v){
+  return new Date(startMs + (endMs-startMs) * (v/1000)).toISOString().slice(0,10);
+}
 function sliderFromDate(dateStr){ const ms=Date.parse(dateStr); return Math.round((ms-startMs)/(endMs-startMs)*1000); }
 function fmtDate(ms){
   const d = new Date(ms);
@@ -591,14 +597,9 @@ function renderSegments(dateStr){
 }
 
 function render(dateStr){
-  document.getElementById('dateLabel').textContent = fmtDate(Date.parse(dateStr));
-  document.getElementById('statStations').textContent = renderStations(dateStr);
-  document.getElementById('statLines').textContent = renderSegments(dateStr).size;
-}
-
-function dateStrFromSliderVal(v){
-  const ms = msFromSlider(v);
-  return new Date(ms).toISOString().slice(0,10);
+  dateLabelEl.textContent = fmtDate(Date.parse(dateStr));
+  statStationsEl.textContent = renderStations(dateStr);
+  statLinesEl.textContent = renderSegments(dateStr).size;
 }
 
 let prevDateStr = null;
@@ -700,7 +701,7 @@ function showTip(e,id){
   moveTip(e);
 }
 function moveTip(e){
-  const rect = document.getElementById('mapCol').getBoundingClientRect();
+  const rect = mapCol.getBoundingClientRect();
   tooltip.style.left = (e.clientX-rect.left+14)+'px';
   tooltip.style.top = (e.clientY-rect.top+10)+'px';
 }
