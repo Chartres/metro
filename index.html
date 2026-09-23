@@ -665,7 +665,7 @@ function checkCrossedEvents(prevStr,curStr){
    --------------------------------------------------------------- */
 const detailPanel = document.getElementById('detailPanel');
 function showStation(id){
-  document.querySelector('[data-tab="detail"]').click();
+  selectTab('detail');
   const s = S[id];
   const lineTags = s.lines.map(l=>`<span class="tag ${l}">LINE ${l}</span>`).join(' ');
   let html = `<h3>${s.name}</h3><div>${lineTags}</div><div class="kv">`;
@@ -701,14 +701,13 @@ function moveTip(e){
 function hideTip(){ tooltip.style.opacity=0; }
 
 // Tabs
-document.querySelectorAll('#sideTabs button').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('#sideTabs button').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('eventsList').style.display = btn.dataset.tab==='events'?'block':'none';
-    document.getElementById('detailPanel').style.display = btn.dataset.tab==='detail'?'block':'none';
-  });
-});
+const tabButtons = [...document.querySelectorAll('#sideTabs button')];
+function selectTab(tab){
+  tabButtons.forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  eventsListEl.style.display = tab==='events'?'block':'none';
+  detailPanel.style.display = tab==='detail'?'block':'none';
+}
+tabButtons.forEach(btn=>btn.addEventListener('click',()=>selectTab(btn.dataset.tab)));
 
 /* ---------------------------------------------------------------
    PLAY / PAUSE ANIMATION
