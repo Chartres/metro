@@ -613,7 +613,8 @@ EVENTS.forEach((ev,idx)=>{
   div.className = 'ev'+(ev.isFuture?' future':'');
   div.dataset.idx = idx;
   const tagLabel = ev.isRename?'RENAME':ev.isIncident?'FLOOD':('LINE '+(ev.line||''));
-  div.innerHTML = `<div class="evdate">${new Date(ev.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+  const [ey,em,ed]=ev.date.split('-').map(Number);
+  div.innerHTML = `<div class="evdate">${new Date(ey,em-1,ed).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
     <div class="evtitle"><span class="tag ${ev.tag}">${tagLabel}</span>${ev.title}</div>
     <div class="evdesc">${ev.desc||''}</div>`;
   div.addEventListener('click',()=>{
