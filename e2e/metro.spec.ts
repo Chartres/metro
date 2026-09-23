@@ -5,6 +5,13 @@ import { expect, test, type Page } from '@playwright/test'
 const shot = (page: Page, name: string) =>
   page.screenshot({ path: `e2e/shots/${name}.png`, fullPage: false })
 
+// fill() alone doesn't fire `input` on a range control — the app listens for it.
+const scrubTo = async (page: Page, value: string) => {
+  const slider = page.locator('#slider')
+  await slider.fill(value)
+  await slider.dispatchEvent('input')
+}
+
 test('today view: full network, stats honest, Line D dashed as future', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveTitle(/Prague Metro/)
@@ -29,8 +36,7 @@ test('today view: full network, stats honest, Line D dashed as future', async ({
 test('time travel: 1974 opening day shows only the first 9 stations of line C', async ({ page }) => {
   await page.goto('/')
   // drag to the very beginning
-  await page.locator('#slider').fill('0')
-  await page.locator('#slider').dispatchEvent('input')
+  await scrubTo(page, '0')
   await expect(page.locator('#statStations')).toHaveText('9')
   await expect(page.locator('#statLines')).toHaveText('1')
   // let the scrub-crossing flashrings (one per crossed event) finish before
@@ -69,8 +75,7 @@ test('renamed stations show communist-era names before Feb 1990', async ({ page 
   await expect(page.locator('.station[data-id="dejvicka"] text')).toHaveText('Leninova')
   await shot(page, 'former-names-1988')
   // and back to today the modern name holds
-  await page.locator('#slider').fill('1000')
-  await page.locator('#slider').dispatchEvent('input')
+  await scrubTo(page, '1000')
   await expect(page.locator('.station[data-id="dejvicka"] text')).toHaveText('Dejvická')
 })
 
