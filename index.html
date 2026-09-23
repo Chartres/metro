@@ -361,7 +361,7 @@ Object.keys(OPEN).forEach(line=>{
   });
 });
 
-const TODAY = '2026-08-17';
+const TODAY = new Date().toISOString().slice(0,10);
 const START = '1974-05-09';
 const END   = '2029-12-31'; // horizon incl. planned Line D
 
