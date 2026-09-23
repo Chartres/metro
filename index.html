@@ -456,36 +456,34 @@ const segments = []; // {line, a, b, opened}
     segments.push({line,a,b,opened});
   }
 });
+// Line D: the under-construction legs, plus phase II which exists only on
+// paper (Náměstí Míru – Pankrác, the planned northern leg).
 const futureSegments = [];
-{
-  const order = LINE_ORDER['D'];
-  for(let i=0;i<order.length-1;i++) futureSegments.push({line:'D',a:order[i],b:order[i+1]});
+for(let i=0;i<LINE_ORDER.D.length-1;i++){
+  futureSegments.push({line:'D',a:LINE_ORDER.D[i],b:LINE_ORDER.D[i+1]});
 }
-// Phase II exists only on paper: Náměstí Míru – Pankrác (planned northern leg)
-const plannedSegments = [{line:'D',a:'namesti_miru',b:'pankrac',planned:true}];
+futureSegments.push({line:'D',a:'namesti_miru',b:'pankrac',planned:true});
 
-// Ghost (full network, always faint) — union of all real segments, drawn once
-segments.forEach(seg=>{
+// Every drawn segment is the same line element with endpoints from the station table.
+function segLine(seg,attrs){
   const A=S[seg.a],B=S[seg.b];
-  ghostLayer.appendChild(el('line',{class:'segment ghost',x1:A.x,y1:A.y,x2:B.x,y2:B.y}));
-});
-futureSegments.concat(plannedSegments).forEach(seg=>{
-  const A=S[seg.a],B=S[seg.b];
-  ghostLayer.appendChild(el('line',{class:'segment ghost',x1:A.x,y1:A.y,x2:B.x,y2:B.y}));
+  return el('line',{x1:A.x,y1:A.y,x2:B.x,y2:B.y,...attrs});
+}
+
+// Ghost (full network, always faint) — every segment, real and future, drawn once
+segments.concat(futureSegments).forEach(seg=>{
+  ghostLayer.appendChild(segLine(seg,{class:'segment ghost'}));
 });
 
 // Live segment elements (colored, revealed over time)
 const segEls = segments.map(seg=>{
-  const A=S[seg.a],B=S[seg.b];
-  const line=el('line',{class:'segment',x1:A.x,y1:A.y,x2:B.x,y2:B.y,
-    stroke:LINE_COLOR_HEX[seg.line],'stroke-width':6,opacity:0});
+  const line = segLine(seg,{class:'segment',stroke:LINE_COLOR_HEX[seg.line],'stroke-width':6,opacity:0});
   liveLayer.appendChild(line);
   return {seg,line};
 });
 // Future (Line D) segment elements — under construction + paper-only planned
-const futureEls = futureSegments.concat(plannedSegments).map(seg=>{
-  const A=S[seg.a],B=S[seg.b];
-  const line=el('line',{class:'segment future'+(seg.planned?' planned':''),x1:A.x,y1:A.y,x2:B.x,y2:B.y});
+const futureEls = futureSegments.map(seg=>{
+  const line = segLine(seg,{class:'segment future'+(seg.planned?' planned':'')});
   futureLayer.appendChild(line);
   return {seg,line};
 });
