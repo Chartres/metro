@@ -551,11 +551,13 @@ function render(dateStr){
       // future station: shown only as hollow marker once construction has started, never "opens"
       const on = dateStr >= '2022-03-01';
       g.style.opacity = on?1:0;
+      g.style.pointerEvents = on?'':'none';
       return;
     }
     const fo = FIRST_OPEN[s.id];
     const isOpen = dateStr >= fo;
     g.style.opacity = isOpen?1:0;
+    g.style.pointerEvents = isOpen?'':'none';
     if(isOpen){
       openCount++;
       const label = (s.former && dateStr < RENAME_DATE) ? s.former : s.name;
