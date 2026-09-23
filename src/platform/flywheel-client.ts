@@ -7,17 +7,6 @@
 // Privacy: cookieless, first-party. visitor_id is an anon localStorage UUID;
 // flywheel_uid is the cross-product identity, set only after sign-in.
 
-export const TAXONOMY = [
-  'page_view',
-  'signup_started',
-  'signup_completed',
-  'conversion',
-  'key_action',
-  'feedback_given',
-  'error',
-] as const
-export type TaxonomyEvent = (typeof TAXONOMY)[number]
-
 /** Minimal shape of the bits of supabase-js we use — keeps this dep-free + testable. */
 export interface SupabaseLike {
   from(table: string): { insert(row: unknown): { then?: (ok: () => void, err: () => void) => void } | Promise<unknown> }
