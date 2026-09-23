@@ -5,6 +5,13 @@ import { expect, test, type Page } from '@playwright/test'
 const shot = (page: Page, name: string) =>
   page.screenshot({ path: `e2e/shots/${name}.png`, fullPage: false })
 
+// fill() alone doesn't fire `input` on a range control — the app listens for it.
+const scrubTo = async (page: Page, value: string) => {
+  const slider = page.locator('#slider')
+  await slider.fill(value)
+  await slider.dispatchEvent('input')
+}
+
 test('today view: full network, stats honest, Line D dashed as future', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveTitle(/Prague Metro/)
@@ -23,14 +30,19 @@ test('today view: full network, stats honest, Line D dashed as future', async ({
     getComputedStyle(document.documentElement).getPropertyValue('--d-color').trim(),
   )
   expect(dColor).toBe('#0f5cab')
+  // segment strokes are read back from the :root custom properties — an empty
+  // or drifted lookup would paint the live network black
+  const strokes = await page
+    .locator('#liveLayer line')
+    .evaluateAll((els) => [...new Set(els.map((e) => e.getAttribute('stroke')))].sort())
+  expect(strokes).toEqual(['#2e8b3d', '#da251c', '#f0b400'])
   await shot(page, 'today')
 })
 
 test('time travel: 1974 opening day shows only the first 9 stations of line C', async ({ page }) => {
   await page.goto('/')
   // drag to the very beginning
-  await page.locator('#slider').fill('0')
-  await page.locator('#slider').dispatchEvent('input')
+  await scrubTo(page, '0')
   await expect(page.locator('#statStations')).toHaveText('9')
   await expect(page.locator('#statLines')).toHaveText('1')
   // let the scrub-crossing flashrings (one per crossed event) finish before
@@ -69,8 +81,7 @@ test('renamed stations show communist-era names before Feb 1990', async ({ page 
   await expect(page.locator('.station[data-id="dejvicka"] text')).toHaveText('Leninova')
   await shot(page, 'former-names-1988')
   // and back to today the modern name holds
-  await page.locator('#slider').fill('1000')
-  await page.locator('#slider').dispatchEvent('input')
+  await scrubTo(page, '1000')
   await expect(page.locator('.station[data-id="dejvicka"] text')).toHaveText('Dejvická')
 })
 
@@ -90,6 +101,34 @@ test('phone (390px): map fills the width at content aspect, panels stack below',
   // sub-4px station labels are hidden on phones; dots + tap → detail carry names
   await expect(page.locator('.station[data-id="muzeum"] text')).toBeHidden()
   await shot(page, 'mobile-390')
+})
+
+test('playBtn: clicking toggles ▶ → ⏸ → ▶', async ({ page }) => {
+  await page.goto('/')
+  const btn = page.locator('#playBtn')
+  await expect(btn).toHaveText('▶')
+  await btn.click()
+  await expect(btn).toHaveText('⏸')
+  await btn.click()
+  await expect(btn).toHaveText('▶')
+})
+
+test('playBtn: first click sets the conversion sessionStorage key, second does not change it', async ({
+  page,
+}) => {
+  await page.goto('/')
+  // key absent before any click
+  const before = await page.evaluate(() => sessionStorage.getItem('metro:conv_fired'))
+  expect(before).toBeNull()
+  await page.locator('#playBtn').click()
+  const after = await page.evaluate(() => sessionStorage.getItem('metro:conv_fired'))
+  expect(after).toBe('1')
+  // pause so the timeline doesn't finish between clicks
+  await page.locator('#playBtn').click()
+  await page.locator('#playBtn').click()
+  // key stays '1' — conversion fires only once per session
+  const still = await page.evaluate(() => sessionStorage.getItem('metro:conv_fired'))
+  expect(still).toBe('1')
 })
 
 // Discoverability kit (flywheel Standard §5c): what crawlers, link unfurlers and AI

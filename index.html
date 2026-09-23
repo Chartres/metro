@@ -64,8 +64,7 @@
   #sliderWrap{position:relative;flex:1 1 320px;min-width:220px;}
   #slider{width:100%;accent-color:var(--accent);cursor:pointer;height:22px;}
   #ticks{position:relative;height:14px;margin-top:-2px;pointer-events:none;}
-  .tick{position:absolute;top:0;width:2px;height:8px;background:var(--ink-dim);opacity:.55;transform:translateX(-1px);}
-  .tick.major{height:11px;background:var(--accent);opacity:.9;}
+  .tick.major{position:absolute;top:0;width:2px;height:11px;background:var(--accent);opacity:.9;transform:translateX(-1px);}
   #speedRow{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-dim);}
   select{background:var(--panel2);color:var(--ink);border:1px solid var(--border);border-radius:6px;
     padding:4px 6px;font-size:12px;}
@@ -204,7 +203,7 @@
       </select>
     </div>
     <div id="stats">
-      <div>Stations open: <b id="statStations">0</b>/58</div>
+      <div>Stations open: <b id="statStations">0</b>/<span id="statTotal">0</span></div>
       <div>Lines running: <b id="statLines">0</b></div>
     </div>
   </div>
@@ -352,6 +351,7 @@ const OPEN = {
      opatov:'1980-11-11',haje:'1980-11-11'}
 };
 const RENAME_DATE = '1990-02-22';
+const CONSTRUCTION_START = '2022-03-01'; // Line D: first turf cut — nothing opens
 
 // Overall "first opened" date per station (earliest across its lines) — used for station dot + labels
 const FIRST_OPEN = {};
@@ -361,7 +361,7 @@ Object.keys(OPEN).forEach(line=>{
   });
 });
 
-const TODAY = '2026-08-17';
+const TODAY = new Date().toISOString().slice(0,10);
 const START = '1974-05-09';
 const END   = '2029-12-31'; // horizon incl. planned Line D
 
@@ -383,7 +383,7 @@ const EVENTS = [
    stations:['vltavska','nadrazi_holesovice']},
   {date:'1985-11-02', line:'B', title:'Line B opens', tag:'B',
    desc:'The third line opens between Florenc and Smíchovské nádraží, crossing the city centre.',
-   stations:['namesti_republiky','narodni_trida','karlovo_namesti','smichovske_nadrazi']},
+   stations:['florenc','namesti_republiky','narodni_trida','mustek','karlovo_namesti','andel','smichovske_nadrazi']},
   {date:'1987-11-11', line:'A', title:'Line A reaches Strašnická', tag:'A',
    desc:'One more station extends Line A east.', stations:['strasnicka']},
   {date:'1988-10-26', line:'B', title:'Line B extends to Nové Butovice', tag:'B',
@@ -429,58 +429,72 @@ const EVENTS = [
 /* ---------------------------------------------------------------
    RENDER SETUP
    --------------------------------------------------------------- */
-const svg = document.getElementById('svg');
 const ghostLayer = document.getElementById('ghostLayer');
 const futureLayer = document.getElementById('futureLayer');
 const liveLayer = document.getElementById('liveLayer');
 const flashLayer = document.getElementById('flashLayer');
 const stationLayer = document.getElementById('stationLayer');
+const mapCol = document.getElementById('mapCol');
+const dateLabelEl = document.getElementById('dateLabel');
+const statStationsEl = document.getElementById('statStations');
+const statLinesEl = document.getElementById('statLines');
 const NS='http://www.w3.org/2000/svg';
 function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
 
-const LINE_COLOR = {A:'var(--a-color)',B:'var(--b-color)',C:'var(--c-color)',D:'var(--d-color)'};
-const LINE_COLOR_HEX = {A:'#2e8b3d',B:'#f0b400',C:'#da251c',D:'#0f5cab'};
+// The line palette lives once, in the :root custom properties (--a-color …).
+// SVG presentation attributes can't take var(), so read the values back here
+// instead of keeping a second hex table in sync with the stylesheet.
+const rootStyle = getComputedStyle(document.documentElement);
+const LINE_COLOR_HEX = Object.fromEntries(
+  ['A','B','C','D'].map(l=>[l, rootStyle.getPropertyValue(`--${l.toLowerCase()}-color`).trim()])
+);
 
+// Infill stations added to already-running track: the surrounding segments opened
+// when the through-service started, not when the infill station was built.
+const SEGMENT_OVERRIDE = {
+  'B:vysocanska:kolbenova':'1998-11-08',
+  'B:kolbenova:hloubetin':'1998-11-08',
+  'B:hloubetin:rajska_zahrada':'1998-11-08',
+};
 // Build segment list per line (real, not D)
 const segments = []; // {line, a, b, opened}
 ['A','B','C'].forEach(line=>{
   const order = LINE_ORDER[line];
   for(let i=0;i<order.length-1;i++){
     const a=order[i], b=order[i+1];
-    const opened = OPEN[line][a] > OPEN[line][b] ? OPEN[line][a] : OPEN[line][b];
+    const opened = SEGMENT_OVERRIDE[`${line}:${a}:${b}`] ||
+      (OPEN[line][a] > OPEN[line][b] ? OPEN[line][a] : OPEN[line][b]);
     segments.push({line,a,b,opened});
   }
 });
+// Line D: the under-construction legs, plus phase II which exists only on
+// paper (Náměstí Míru – Pankrác, the planned northern leg).
 const futureSegments = [];
-{
-  const order = LINE_ORDER['D'];
-  for(let i=0;i<order.length-1;i++) futureSegments.push({line:'D',a:order[i],b:order[i+1]});
+for(let i=0;i<LINE_ORDER.D.length-1;i++){
+  futureSegments.push({line:'D',a:LINE_ORDER.D[i],b:LINE_ORDER.D[i+1]});
 }
-// Phase II exists only on paper: Náměstí Míru – Pankrác (planned northern leg)
-const plannedSegments = [{line:'D',a:'namesti_miru',b:'pankrac',planned:true}];
+futureSegments.push({line:'D',a:'namesti_miru',b:'pankrac',planned:true});
 
-// Ghost (full network, always faint) — union of all real segments, drawn once
-segments.forEach(seg=>{
+// Every drawn segment is the same line element with endpoints from the station table.
+function segLine(seg,attrs){
   const A=S[seg.a],B=S[seg.b];
-  ghostLayer.appendChild(el('line',{class:'segment ghost',x1:A.x,y1:A.y,x2:B.x,y2:B.y}));
-});
-futureSegments.concat(plannedSegments).forEach(seg=>{
-  const A=S[seg.a],B=S[seg.b];
-  ghostLayer.appendChild(el('line',{class:'segment ghost',x1:A.x,y1:A.y,x2:B.x,y2:B.y}));
+  return el('line',{x1:A.x,y1:A.y,x2:B.x,y2:B.y,...attrs});
+}
+
+// Ghost (full network, always faint) — every segment, real and future, drawn once
+segments.concat(futureSegments).forEach(seg=>{
+  ghostLayer.appendChild(segLine(seg,{class:'segment ghost'}));
 });
 
 // Live segment elements (colored, revealed over time)
 const segEls = segments.map(seg=>{
-  const A=S[seg.a],B=S[seg.b];
-  const line=el('line',{class:'segment',x1:A.x,y1:A.y,x2:B.x,y2:B.y,
-    stroke:LINE_COLOR_HEX[seg.line],'stroke-width':6,opacity:0});
+  const line = segLine(seg,{class:'segment',stroke:LINE_COLOR_HEX[seg.line],'stroke-width':6,opacity:0});
   liveLayer.appendChild(line);
   return {seg,line};
 });
 // Future (Line D) segment elements — under construction + paper-only planned
-const futureEls = futureSegments.concat(plannedSegments).map(seg=>{
-  const A=S[seg.a],B=S[seg.b];
-  const line=el('line',{class:'segment future'+(seg.planned?' planned':''),x1:A.x,y1:A.y,x2:B.x,y2:B.y});
+const futureEls = futureSegments.map(seg=>{
+  const line = segLine(seg,{class:'segment future'+(seg.planned?' planned':'')});
   futureLayer.appendChild(line);
   return {seg,line};
 });
@@ -519,10 +533,10 @@ Object.values(S).forEach(s=>{
    --------------------------------------------------------------- */
 const startMs = Date.parse(START), endMs = Date.parse(END);
 const slider = document.getElementById('slider');
-const dateLabel = document.getElementById('dateLabel');
-slider.max = 1000;
 
-function msFromSlider(v){ return startMs + (endMs-startMs) * (v/1000); }
+function dateStrFromSliderVal(v){
+  return new Date(startMs + (endMs-startMs) * (v/1000)).toISOString().slice(0,10);
+}
 function sliderFromDate(dateStr){ const ms=Date.parse(dateStr); return Math.round((ms-startMs)/(endMs-startMs)*1000); }
 function fmtDate(ms){
   const d = new Date(ms);
@@ -540,53 +554,52 @@ EVENTS.forEach(ev=>{
   ticksEl.appendChild(t);
 });
 
-let lastCurveDate = START;
-function render(dateStr){
-  document.getElementById('dateLabel').textContent = fmtDate(Date.parse(dateStr));
-
+// Station dots and labels as of dateStr; returns how many are open.
+function renderStations(dateStr){
   let openCount=0;
   Object.values(S).forEach(s=>{
     const g = stationEls[s.id];
     if(s.lines[0]==='D'){
       // future station: shown only as hollow marker once construction has started, never "opens"
-      const on = dateStr >= '2022-03-01';
+      const on = dateStr >= CONSTRUCTION_START;
       g.style.opacity = on?1:0;
+      g.style.pointerEvents = on?'':'none';
       return;
     }
-    const fo = FIRST_OPEN[s.id];
-    const isOpen = dateStr >= fo;
+    const isOpen = dateStr >= FIRST_OPEN[s.id];
     g.style.opacity = isOpen?1:0;
+    g.style.pointerEvents = isOpen?'':'none';
     if(isOpen){
       openCount++;
-      const label = (s.former && dateStr < RENAME_DATE) ? s.former : s.name;
+      const preRename = s.former && dateStr < RENAME_DATE;
+      const label = preRename ? s.former : s.name;
       const textEl = g.querySelector('text');
       if(textEl.textContent!==label) textEl.textContent = label;
-      textEl.style.fill = (s.former && dateStr < RENAME_DATE) ? '#d98a8a' : '';
+      textEl.style.fill = preRename ? '#d98a8a' : '';
     }
   });
-  document.getElementById('statStations').textContent = openCount;
+  return openCount;
+}
 
-  // "Lines running" counts lines with at least one open SEGMENT — an open
-  // interchange station must not count its other line before that line exists
-  // (Florenc carries B+C, but on opening day 1974 only line C ran).
+// Track as of dateStr; returns the set of lines with at least one open SEGMENT —
+// an open interchange station must not count its other line before that line
+// exists (Florenc carries B+C, but on opening day 1974 only line C ran).
+function renderSegments(dateStr){
   const activeLines=new Set();
   segEls.forEach(({seg,line})=>{
     const on = dateStr >= seg.opened;
     line.style.opacity = on?0.95:0;
     if(on) activeLines.add(seg.line);
   });
-  document.getElementById('statLines').textContent = activeLines.size;
-  futureEls.forEach(({line})=>{
-    const on = dateStr >= '2022-03-01';
-    line.classList.toggle('on', on);
-  });
-
-  lastCurveDate = dateStr;
+  const building = dateStr >= CONSTRUCTION_START;
+  futureEls.forEach(({line})=>line.classList.toggle('on', building));
+  return activeLines;
 }
 
-function dateStrFromSliderVal(v){
-  const ms = msFromSlider(v);
-  return new Date(ms).toISOString().slice(0,10);
+function render(dateStr){
+  dateLabelEl.textContent = fmtDate(Date.parse(dateStr));
+  statStationsEl.textContent = renderStations(dateStr);
+  statLinesEl.textContent = renderSegments(dateStr).size;
 }
 
 let prevDateStr = null;
@@ -611,7 +624,8 @@ EVENTS.forEach((ev,idx)=>{
   div.className = 'ev'+(ev.isFuture?' future':'');
   div.dataset.idx = idx;
   const tagLabel = ev.isRename?'RENAME':ev.isIncident?'FLOOD':('LINE '+(ev.line||''));
-  div.innerHTML = `<div class="evdate">${new Date(ev.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+  const [ey,em,ed]=ev.date.split('-').map(Number);
+  div.innerHTML = `<div class="evdate">${new Date(ey,em-1,ed).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
     <div class="evtitle"><span class="tag ${ev.tag}">${tagLabel}</span>${ev.title}</div>
     <div class="evdesc">${ev.desc||''}</div>`;
   div.addEventListener('click',()=>{
@@ -658,7 +672,7 @@ function checkCrossedEvents(prevStr,curStr){
    --------------------------------------------------------------- */
 const detailPanel = document.getElementById('detailPanel');
 function showStation(id){
-  document.querySelector('[data-tab="detail"]').click();
+  selectTab('detail');
   const s = S[id];
   const lineTags = s.lines.map(l=>`<span class="tag ${l}">LINE ${l}</span>`).join(' ');
   let html = `<h3>${s.name}</h3><div>${lineTags}</div><div class="kv">`;
@@ -687,21 +701,20 @@ function showTip(e,id){
   moveTip(e);
 }
 function moveTip(e){
-  const rect = document.getElementById('mapCol').getBoundingClientRect();
+  const rect = mapCol.getBoundingClientRect();
   tooltip.style.left = (e.clientX-rect.left+14)+'px';
   tooltip.style.top = (e.clientY-rect.top+10)+'px';
 }
 function hideTip(){ tooltip.style.opacity=0; }
 
 // Tabs
-document.querySelectorAll('#sideTabs button').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('#sideTabs button').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('eventsList').style.display = btn.dataset.tab==='events'?'block':'none';
-    document.getElementById('detailPanel').style.display = btn.dataset.tab==='detail'?'block':'none';
-  });
-});
+const tabButtons = [...document.querySelectorAll('#sideTabs button')];
+function selectTab(tab){
+  tabButtons.forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  eventsListEl.style.display = tab==='events'?'block':'none';
+  detailPanel.style.display = tab==='detail'?'block':'none';
+}
+tabButtons.forEach(btn=>btn.addEventListener('click',()=>selectTab(btn.dataset.tab)));
 
 /* ---------------------------------------------------------------
    PLAY / PAUSE ANIMATION
@@ -713,7 +726,7 @@ playBtn.addEventListener('click',()=>{
   playing = !playing;
   playBtn.textContent = playing?'⏸':'▶';
   if(playing){
-    if(Number(slider.value)>=1000) slider.value=0;
+    if(Number(slider.value)>=1000){ slider.value=0; prevDateStr=dateStrFromSliderVal(0); }
     tick();
   } else {
     clearTimeout(timer);
@@ -731,6 +744,7 @@ function tick(){
 /* ---------------------------------------------------------------
    INIT — default view shows today
    --------------------------------------------------------------- */
+document.getElementById('statTotal').textContent = Object.values(S).filter(s=>s.lines[0]!=='D').length;
 slider.value = sliderFromDate(TODAY);
 prevDateStr = dateStrFromSliderVal(slider.value);
 render(prevDateStr);
