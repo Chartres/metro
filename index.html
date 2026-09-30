@@ -532,7 +532,7 @@ const dateLabel = document.getElementById('dateLabel');
 slider.max = 1000;
 
 function msFromSlider(v){ return startMs + (endMs-startMs) * (v/1000); }
-function sliderFromDate(dateStr){ const ms=Date.parse(dateStr); return Math.round((ms-startMs)/(endMs-startMs)*1000); }
+function sliderFromDate(dateStr){ const ms=Date.parse(dateStr); return Math.ceil((ms-startMs)/(endMs-startMs)*1000); }
 function fmtDate(ms){
   const d = new Date(ms);
   return d.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
