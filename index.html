@@ -519,6 +519,7 @@ Object.values(S).forEach(s=>{
   g.addEventListener('mouseenter',(e)=>showTip(e,s.id));
   g.addEventListener('mousemove',moveTip);
   g.addEventListener('mouseleave',hideTip);
+  g._t = t; // cache text element to avoid querySelector on every render tick
   stationLayer.appendChild(g);
   stationEls[s.id]=g;
 });
@@ -529,6 +530,8 @@ Object.values(S).forEach(s=>{
 const startMs = Date.parse(START), endMs = Date.parse(END);
 const slider = document.getElementById('slider');
 const dateLabel = document.getElementById('dateLabel');
+const statStationsEl = document.getElementById('statStations');
+const statLinesEl = document.getElementById('statLines');
 slider.max = 1000;
 
 function msFromSlider(v){ return startMs + (endMs-startMs) * (v/1000); }
@@ -570,12 +573,12 @@ function render(dateStr){
     if(isOpen){
       openCount++;
       const label = (s.former && dateStr < RENAME_DATE) ? s.former : s.name;
-      const textEl = g.querySelector('text');
+      const textEl = g._t;
       if(textEl.textContent!==label) textEl.textContent = label;
       textEl.style.fill = (s.former && dateStr < RENAME_DATE) ? '#d98a8a' : '';
     }
   });
-  document.getElementById('statStations').textContent = openCount;
+  statStationsEl.textContent = openCount;
 
   // "Lines running" counts lines with at least one open SEGMENT — an open
   // interchange station must not count its other line before that line exists
@@ -586,7 +589,7 @@ function render(dateStr){
     line.style.opacity = on?0.95:0;
     if(on) activeLines.add(seg.line);
   });
-  document.getElementById('statLines').textContent = activeLines.size;
+  statLinesEl.textContent = activeLines.size;
   futureEls.forEach(({line})=>{
     const on = dateStr >= '2022-03-01';
     line.classList.toggle('on', on);
