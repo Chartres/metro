@@ -722,7 +722,10 @@ playBtn.addEventListener('click',()=>{
   playing = !playing;
   playBtn.textContent = playing?'⏸':'▶';
   if(playing){
-    if(Number(slider.value)>=1000) slider.value=0;
+    if(Number(slider.value)>=1000){
+      slider.value=0;
+      prevDateStr = dateStrFromSliderVal(0); // ponytail: reset anchor so first tick doesn't fire all events backward
+    }
     tick();
   } else {
     clearTimeout(timer);
