@@ -450,6 +450,11 @@ const flashLayer = document.getElementById('flashLayer');
 const stationLayer = document.getElementById('stationLayer');
 const NS='http://www.w3.org/2000/svg';
 function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+// click + Enter/Space for role="button" elements
+function onActivate(node,fn){
+  node.addEventListener('click',fn);
+  node.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fn(); } });
+}
 
 const LINE_COLOR_HEX = {A:'#2e8b3d',B:'#f0b400',C:'#da251c',D:'#0f5cab'};
 
@@ -525,8 +530,7 @@ Object.values(S).forEach(s=>{
     'text-anchor': 'start'});
   t.textContent = s.name;
   g.appendChild(t);
-  g.addEventListener('click',()=>showStation(s.id));
-  g.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); showStation(s.id); } });
+  onActivate(g,()=>showStation(s.id));
   g.addEventListener('mouseenter',(e)=>showTip(e,s.id));
   g.addEventListener('mousemove',moveTip);
   g.addEventListener('mouseleave',hideTip);
@@ -634,9 +638,7 @@ EVENTS.forEach((ev,idx)=>{
   div.innerHTML = `<div class="evdate">${new Date(ev.date+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
     <div class="evtitle"><span class="tag ${ev.tag}">${tagLabel}</span>${ev.title}</div>
     <div class="evdesc">${ev.desc||''}</div>`;
-  const jumpToEvent = ()=>{ slider.value = sliderFromDate(ev.date); onSliderInput(false); flashEvent(ev); };
-  div.addEventListener('click', jumpToEvent);
-  div.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); jumpToEvent(); } });
+  onActivate(div,()=>{ slider.value = sliderFromDate(ev.date); onSliderInput(false); flashEvent(ev); });
   eventsListEl.appendChild(div);
 });
 const eventsListItems = Array.from(eventsListEl.children); // cached; list is static after this
