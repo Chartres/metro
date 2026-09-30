@@ -44,8 +44,9 @@ test('timeline event click jumps the map and flashes the banner', async ({ page 
   await page.locator('.ev', { hasText: 'Line A opens' }).click()
   await expect(page.locator('#eventBanner')).toHaveClass(/show/)
   await expect(page.locator('#eventBanner')).toContainText('Line A opens')
-  // the jump landed mid-1978: line A's first 7 stations joined C's 13
+  // the jump landed mid-1978: line A's first 7 stations joined C's 13 = 20 open
   await expect(page.locator('#statLines')).toHaveText('2')
+  await expect(page.locator('#statStations')).toHaveText('20')
   await shot(page, 'event-jump-1978')
 })
 
