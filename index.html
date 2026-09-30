@@ -333,6 +333,20 @@ const LINE_ORDER = {
   D:['pankrac','olbrachtova','nove_dvory','nemocnice_krc','libus','pisnice']
 };
 
+// ponytail: data-integrity self-check — verifies x-coordinates are monotone along each LINE_ORDER
+// (catches coordinate transpositions like the 2026-10-01 Line B bug)
+;(()=>{
+  Object.entries(LINE_ORDER).forEach(([line,order])=>{
+    const xs=order.map(id=>S[id].x);
+    const dxs=xs.slice(1).map((x,i)=>x-xs[i]);
+    const allUp=dxs.every(d=>d>=0), allDown=dxs.every(d=>d<=0);
+    if(!allUp&&!allDown){
+      const bad=order.filter((_,i)=>i>0&&(allUp?dxs[i-1]<0:dxs[i-1]>0));
+      console.error('Line '+line+' x not monotone near: '+bad.join(', '));
+    }
+  });
+})();
+
 // Per-line opening date for every station along that line (drives segment reveal)
 const OPEN = {
   A:{nemocnice_motol:'2015-04-06',petriny:'2015-04-06',nadrazi_veleslavin:'2015-04-06',borislavka:'2015-04-06',
