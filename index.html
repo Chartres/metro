@@ -352,6 +352,7 @@ const OPEN = {
      opatov:'1980-11-11',haje:'1980-11-11'}
 };
 const RENAME_DATE = '1990-02-22';
+const D_CONSTRUCTION_START = '2022-03-01';
 
 // Overall "first opened" date per station (earliest across its lines) — used for station dot + labels
 const FIRST_OPEN = {};
@@ -555,24 +556,18 @@ function render(dateStr){
   let openCount=0;
   Object.values(S).forEach(s=>{
     const g = stationEls[s.id];
-    if(s.lines[0]==='D'){
-      // future station: shown only as hollow marker once construction has started, never "opens"
-      const on = dateStr >= '2022-03-01';
-      g.style.opacity = on?1:0;
-      g.style.pointerEvents = on?'':'none';
-      return;
-    }
-    const fo = FIRST_OPEN[s.id];
-    const isOpen = dateStr >= fo;
-    g.style.opacity = isOpen?1:0;
-    g.style.pointerEvents = isOpen?'':'none';
-    if(isOpen){
-      openCount++;
-      const label = (s.former && dateStr < RENAME_DATE) ? s.former : s.name;
-      const textEl = g._t;
-      if(textEl.textContent!==label) textEl.textContent = label;
-      textEl.style.fill = (s.former && dateStr < RENAME_DATE) ? '#d98a8a' : '';
-    }
+    // future (Line D) station: shown only as hollow marker once construction has started, never "opens"
+    const isFuture = s.lines[0]==='D';
+    const shown = dateStr >= (isFuture ? D_CONSTRUCTION_START : FIRST_OPEN[s.id]);
+    g.style.opacity = shown?1:0;
+    g.style.pointerEvents = shown?'':'none';
+    if(!shown || isFuture) return;
+    openCount++;
+    const usingFormer = s.former && dateStr < RENAME_DATE;
+    const textEl = g._t;
+    const label = usingFormer ? s.former : s.name;
+    if(textEl.textContent!==label) textEl.textContent = label;
+    textEl.style.fill = usingFormer ? '#d98a8a' : '';
   });
   statStationsEl.textContent = openCount;
 
@@ -586,10 +581,8 @@ function render(dateStr){
     if(on) activeLines.add(seg.line);
   });
   statLinesEl.textContent = activeLines.size;
-  futureEls.forEach(({line})=>{
-    const on = dateStr >= '2022-03-01';
-    line.classList.toggle('on', on);
-  });
+  const dStarted = dateStr >= D_CONSTRUCTION_START;
+  futureEls.forEach(({line})=>line.classList.toggle('on', dStarted));
 
   lastCurveDate = dateStr;
 }
