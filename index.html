@@ -441,13 +441,22 @@ function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in a
 const LINE_COLOR = {A:'var(--a-color)',B:'var(--b-color)',C:'var(--c-color)',D:'var(--d-color)'};
 const LINE_COLOR_HEX = {A:'#2e8b3d',B:'#f0b400',C:'#da251c',D:'#0f5cab'};
 
+// Infill stations (Hloubětín 1999, Kolbenova 2001) opened after the surrounding track;
+// override those segment dates so the already-running track isn't hidden.
+const SEGMENT_OPEN_OVERRIDE = {
+  'B:vysocanska:kolbenova':  '1998-11-08',
+  'B:kolbenova:hloubetin':   '1998-11-08',
+  'B:hloubetin:rajska_zahrada': '1998-11-08',
+};
+
 // Build segment list per line (real, not D)
 const segments = []; // {line, a, b, opened}
 ['A','B','C'].forEach(line=>{
   const order = LINE_ORDER[line];
   for(let i=0;i<order.length-1;i++){
     const a=order[i], b=order[i+1];
-    const opened = OPEN[line][a] > OPEN[line][b] ? OPEN[line][a] : OPEN[line][b];
+    const opened = SEGMENT_OPEN_OVERRIDE[`${line}:${a}:${b}`] ||
+      (OPEN[line][a] > OPEN[line][b] ? OPEN[line][a] : OPEN[line][b]);
     segments.push({line,a,b,opened});
   }
 });
