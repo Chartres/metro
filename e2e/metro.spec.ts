@@ -8,7 +8,9 @@ const shot = (page: Page, name: string) =>
 test('today view: full network, stats honest, Line D dashed as future', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveTitle(/Prague Metro/)
-  // today (init date): all 58 stations open on 3 lines
+  // scrub to 2024 (step 893): all 58 A/B/C stations open, Line D still under construction
+  await page.locator('#slider').fill('893')
+  await page.locator('#slider').dispatchEvent('input')
   await expect(page.locator('#statStations')).toHaveText('58')
   await expect(page.locator('#statLines')).toHaveText('3')
   // Line D exists only as under-construction dashes, never as an open line —
@@ -44,9 +46,9 @@ test('timeline event click jumps the map and flashes the banner', async ({ page 
   await page.locator('.ev', { hasText: 'Line A opens' }).click()
   await expect(page.locator('#eventBanner')).toHaveClass(/show/)
   await expect(page.locator('#eventBanner')).toContainText('Line A opens')
-  // the jump landed mid-1978: line A's first 7 stations joined C's 13 = 20 open
+  // C's 9 original stations + A's 7 − 1 shared interchange (Muzeum) = 15 unique open
   await expect(page.locator('#statLines')).toHaveText('2')
-  await expect(page.locator('#statStations')).toHaveText('20')
+  await expect(page.locator('#statStations')).toHaveText('15')
   await shot(page, 'event-jump-1978')
 })
 
