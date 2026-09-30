@@ -551,7 +551,7 @@ EVENTS.forEach(ev=>{
 
 let lastCurveDate = START;
 function render(dateStr){
-  document.getElementById('dateLabel').textContent = fmtDate(Date.parse(dateStr));
+  dateLabel.textContent = fmtDate(Date.parse(dateStr+'T12:00'));
 
   let openCount=0;
   Object.values(S).forEach(s=>{
