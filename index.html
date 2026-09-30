@@ -378,6 +378,8 @@ Object.keys(OPEN).forEach(line=>{
 
 const START = '1974-05-09';
 const END   = '2029-12-31'; // horizon incl. planned Line D
+// prevDateStr is reset to this on (re)start so the opening-day event fires on the first Play tick
+const DAY_BEFORE_START = new Date(Date.parse(START)-86400000).toISOString().slice(0,10);
 
 const EVENTS = [
   {date:'1974-05-09', line:'C', title:'Prague Metro opens', tag:'C',
@@ -742,7 +744,7 @@ playBtn.addEventListener('click',()=>{
   if(playing){
     if(Number(slider.value)>=1000){
       slider.value=0;
-      prevDateStr = DAY_BEFORE_START; // one day before START so opening-day event fires on first tick forward
+      prevDateStr = DAY_BEFORE_START;
     }
     tick();
   } else {
@@ -761,11 +763,9 @@ function tick(){
 /* ---------------------------------------------------------------
    INIT — start at the beginning so Play replays the full growth
    --------------------------------------------------------------- */
-const DAY_BEFORE_START = new Date(Date.parse(START)-86400000).toISOString().slice(0,10);
 slider.value = 0;
-prevDateStr = DAY_BEFORE_START; // one day before START so the opening-day event fires on first Play tick
-render(dateStrFromSliderVal(0));
-updateEventListActive(dateStrFromSliderVal(0));
+onSliderInput(false);
+prevDateStr = DAY_BEFORE_START;
 </script>
 </body>
 </html>
