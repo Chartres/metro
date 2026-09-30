@@ -635,10 +635,11 @@ EVENTS.forEach((ev,idx)=>{
   });
   eventsListEl.appendChild(div);
 });
+const eventsListItems = Array.from(eventsListEl.children); // cached; list is static after this
 function updateEventListActive(dateStr){
   let activeIdx=-1;
   EVENTS.forEach((ev,idx)=>{ if(dateStr>=ev.date) activeIdx=idx; });
-  [...eventsListEl.children].forEach((c,idx)=>c.classList.toggle('active', idx===activeIdx));
+  eventsListItems.forEach((c,idx)=>c.classList.toggle('active', idx===activeIdx));
 }
 
 /* ---------------------------------------------------------------
