@@ -507,7 +507,7 @@ const futureEls = futureSegments.concat(plannedSegments).map(seg=>{
 const stationEls = {};
 Object.values(S).forEach(s=>{
   const g = el('g',{class:'station'+(s.lines.length>1?' interchange':''), 'data-id':s.id, opacity:0,
-    role:'button', tabindex:'0', 'aria-label':s.name});
+    role:'button', tabindex:'-1', 'aria-label':s.name});
   const isFuture = s.lines[0]==='D';
   const r = s.lines.length>1?9:6;
   if(s.lines.length>1){
@@ -575,6 +575,7 @@ function render(dateStr){
     const shown = dateStr >= (isFuture ? D_CONSTRUCTION_START : FIRST_OPEN[s.id]);
     g.style.opacity = shown?1:0;
     g.style.pointerEvents = shown?'':'none';
+    g.setAttribute('tabindex', shown?'0':'-1');
     if(!shown || isFuture) return;
     openCount++;
     const usingFormer = s.former && dateStr < RENAME_DATE;
