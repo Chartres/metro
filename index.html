@@ -738,10 +738,10 @@ function tick(){
 }
 
 /* ---------------------------------------------------------------
-   INIT — default view shows today
+   INIT — start at the beginning so Play replays the full growth
    --------------------------------------------------------------- */
-slider.value = sliderFromDate(TODAY);
-prevDateStr = dateStrFromSliderVal(slider.value);
+slider.value = 0;
+prevDateStr = dateStrFromSliderVal(0);
 render(prevDateStr);
 updateEventListActive(prevDateStr);
 </script>
