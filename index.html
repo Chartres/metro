@@ -568,7 +568,7 @@ EVENTS.forEach(ev=>{
   ticksEl.appendChild(t);
 });
 
-let lastCurveDate = START;
+let currentDate = START; // last rendered date — tooltip picks former vs current name from it
 function render(dateStr){
   dateLabel.textContent = fmtDate(Date.parse(dateStr+'T12:00'));
   slider.setAttribute('aria-valuetext', dateStr);
@@ -605,7 +605,7 @@ function render(dateStr){
   const dStarted = dateStr >= D_CONSTRUCTION_START;
   futureEls.forEach(({line})=>line.classList.toggle('on', dStarted));
 
-  lastCurveDate = dateStr;
+  currentDate = dateStr;
 }
 
 function dateStrFromSliderVal(v){
@@ -702,7 +702,7 @@ function showStation(id){
 const tooltip = document.getElementById('tooltip');
 function showTip(e,id){
   const s=S[id];
-  const usingFormer = s.former && lastCurveDate < RENAME_DATE;
+  const usingFormer = s.former && currentDate < RENAME_DATE;
   let html = `<b>${usingFormer ? s.former : s.name}</b>`;
   if(s.former && !usingFormer) html += `<div class="former">formerly ${s.former}</div>`;
   html += `<div class="muted">Line${s.lines.length>1?'s':''} ${s.lines.join(', ')}</div>`;
