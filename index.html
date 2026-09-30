@@ -188,10 +188,10 @@
   </header>
 
   <div id="controls">
-    <button id="playBtn" title="Play / pause">▶</button>
-    <div id="dateLabel">—</div>
+    <button id="playBtn" aria-label="Play" aria-pressed="false">▶</button>
+    <div id="dateLabel" aria-live="polite">—</div>
     <div id="sliderWrap">
-      <input type="range" id="slider" min="0" max="1000" value="1000" step="1">
+      <input type="range" id="slider" min="0" max="1000" value="1000" step="1" aria-label="Timeline date">
       <div id="ticks"></div>
     </div>
     <div id="speedRow">
@@ -275,10 +275,10 @@ st('luka','Luka',null,['B'],90,680);
 st('luziny','Lužiny',null,['B'],140,678);
 st('hurka','Hůrka',null,['B'],190,675);
 st('nove_butovice','Nové Butovice','Dukelská',['B'],240,670);
-st('radlicka','Radlická',null,['B'],290,660);
-st('jinonice','Jinonice','Švermova',['B'],340,645);
-st('andel','Anděl','Moskevská',['B'],390,625);
-st('smichovske_nadrazi','Smíchovské nádraží',null,['B'],440,600);
+st('radlicka','Radlická',null,['B'],340,645);
+st('jinonice','Jinonice','Švermova',['B'],290,660);
+st('andel','Anděl','Moskevská',['B'],440,600);
+st('smichovske_nadrazi','Smíchovské nádraží',null,['B'],390,625);
 st('karlovo_namesti','Karlovo náměstí',null,['B'],490,565);
 st('narodni_trida','Národní třída',null,['B'],530,530);
 st('namesti_republiky','Náměstí Republiky',null,['B'],590,440);
@@ -324,7 +324,7 @@ st('pisnice','Depo Písnice',null,['D'],600,860);
 const LINE_ORDER = {
   A:['nemocnice_motol','petriny','nadrazi_veleslavin','borislavka','dejvicka','hradcanska','malostranska',
      'staromestska','mustek','muzeum','namesti_miru','jz_podebrad','flora','zelivskeho','strasnicka','skalka','depo_hostivar'],
-  B:['zlicin','stodulky','luka','luziny','hurka','nove_butovice','radlicka','jinonice','andel','smichovske_nadrazi',
+  B:['zlicin','stodulky','luka','luziny','hurka','nove_butovice','jinonice','radlicka','smichovske_nadrazi','andel',
      'karlovo_namesti','narodni_trida','mustek','namesti_republiky','florenc','krizikova','invalidovna','palmovka',
      'ceskomoravska','vysocanska','kolbenova','hloubetin','rajska_zahrada','cerny_most'],
   C:['letnany','prosek','strizkov','ladvi','kobylisy','nadrazi_holesovice','vltavska','florenc','hlavni_nadrazi',
@@ -333,12 +333,26 @@ const LINE_ORDER = {
   D:['pankrac','olbrachtova','nove_dvory','nemocnice_krc','libus','pisnice']
 };
 
+// ponytail: data-integrity self-check — verifies x-coordinates are monotone along each LINE_ORDER
+// (catches coordinate transpositions like the 2026-10-01 Line B bug)
+;(()=>{
+  Object.entries(LINE_ORDER).forEach(([line,order])=>{
+    const xs=order.map(id=>S[id].x);
+    const dxs=xs.slice(1).map((x,i)=>x-xs[i]);
+    const allUp=dxs.every(d=>d>=0), allDown=dxs.every(d=>d<=0);
+    if(!allUp&&!allDown){
+      const bad=order.filter((_,i)=>i>0&&(allUp?dxs[i-1]<0:dxs[i-1]>0));
+      console.error('Line '+line+' x not monotone near: '+bad.join(', '));
+    }
+  });
+})();
+
 // Per-line opening date for every station along that line (drives segment reveal)
 const OPEN = {
   A:{nemocnice_motol:'2015-04-06',petriny:'2015-04-06',nadrazi_veleslavin:'2015-04-06',borislavka:'2015-04-06',
      dejvicka:'1978-08-12',hradcanska:'1978-08-12',malostranska:'1978-08-12',staromestska:'1978-08-12',
      mustek:'1978-08-12',muzeum:'1978-08-12',namesti_miru:'1978-08-12',jz_podebrad:'1980-12-19',flora:'1980-12-19',
-     zelivskeho:'1980-12-19',strasnicka:'1987-11-11',skalka:'1990-11-04',depo_hostivar:'2006-05-26'},
+     zelivskeho:'1980-12-19',strasnicka:'1987-07-11',skalka:'1990-07-04',depo_hostivar:'2006-05-26'},
   B:{zlicin:'1994-11-11',stodulky:'1994-11-11',luka:'1994-11-11',luziny:'1994-11-11',hurka:'1994-11-11',
      nove_butovice:'1988-10-26',radlicka:'1988-10-26',jinonice:'1988-10-26',andel:'1985-11-02',
      smichovske_nadrazi:'1985-11-02',karlovo_namesti:'1985-11-02',narodni_trida:'1985-11-02',mustek:'1985-11-02',
@@ -352,6 +366,7 @@ const OPEN = {
      opatov:'1980-11-11',haje:'1980-11-11'}
 };
 const RENAME_DATE = '1990-02-22';
+const D_CONSTRUCTION_START = '2022-03-01';
 
 // Overall "first opened" date per station (earliest across its lines) — used for station dot + labels
 const FIRST_OPEN = {};
@@ -361,9 +376,10 @@ Object.keys(OPEN).forEach(line=>{
   });
 });
 
-const TODAY = '2026-08-17';
 const START = '1974-05-09';
 const END   = '2029-12-31'; // horizon incl. planned Line D
+// prevDateStr is reset to this on (re)start so the opening-day event fires on the first Play tick
+const DAY_BEFORE_START = new Date(Date.parse(START)-86400000).toISOString().slice(0,10);
 
 const EVENTS = [
   {date:'1974-05-09', line:'C', title:'Prague Metro opens', tag:'C',
@@ -383,8 +399,8 @@ const EVENTS = [
    stations:['vltavska','nadrazi_holesovice']},
   {date:'1985-11-02', line:'B', title:'Line B opens', tag:'B',
    desc:'The third line opens between Florenc and Smíchovské nádraží, crossing the city centre.',
-   stations:['namesti_republiky','narodni_trida','karlovo_namesti','smichovske_nadrazi']},
-  {date:'1987-11-11', line:'A', title:'Line A reaches Strašnická', tag:'A',
+   stations:['namesti_republiky','narodni_trida','karlovo_namesti','andel','smichovske_nadrazi']},
+  {date:'1987-07-11', line:'A', title:'Line A reaches Strašnická', tag:'A',
    desc:'One more station extends Line A east.', stations:['strasnicka']},
   {date:'1988-10-26', line:'B', title:'Line B extends to Nové Butovice', tag:'B',
    desc:'Three stations push Line B further southwest.',
@@ -392,7 +408,7 @@ const EVENTS = [
   {date:'1990-02-22', line:null, title:'Velvet Revolution: 12 stations renamed', tag:'rename', isRename:true,
    desc:'Communist-era names — Leninova, Gottwaldova, Moskevská, Sokolovská and others — are replaced after the fall of the regime.',
    stations:['dejvicka','nove_butovice','jinonice','andel','florenc','nadrazi_holesovice','vysehrad','pankrac','roztyly','chodov','opatov','haje']},
-  {date:'1990-11-04', line:'A', title:'Skalka opens', tag:'A', desc:'A single-station extension of Line A.', stations:['skalka']},
+  {date:'1990-07-04', line:'A', title:'Skalka opens', tag:'A', desc:'A single-station extension of Line A.', stations:['skalka']},
   {date:'1990-11-22', line:'B', title:'Line B extends to Českomoravská', tag:'B',
    desc:'Four stations carry the line through Karlín and Libeň.',
    stations:['krizikova','invalidovna','palmovka','ceskomoravska']},
@@ -429,7 +445,6 @@ const EVENTS = [
 /* ---------------------------------------------------------------
    RENDER SETUP
    --------------------------------------------------------------- */
-const svg = document.getElementById('svg');
 const ghostLayer = document.getElementById('ghostLayer');
 const futureLayer = document.getElementById('futureLayer');
 const liveLayer = document.getElementById('liveLayer');
@@ -437,9 +452,21 @@ const flashLayer = document.getElementById('flashLayer');
 const stationLayer = document.getElementById('stationLayer');
 const NS='http://www.w3.org/2000/svg';
 function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+// click + Enter/Space for role="button" elements
+function onActivate(node,fn){
+  node.addEventListener('click',fn);
+  node.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fn(); } });
+}
 
-const LINE_COLOR = {A:'var(--a-color)',B:'var(--b-color)',C:'var(--c-color)',D:'var(--d-color)'};
 const LINE_COLOR_HEX = {A:'#2e8b3d',B:'#f0b400',C:'#da251c',D:'#0f5cab'};
+
+// Infill stations (Hloubětín 1999, Kolbenova 2001) opened after the surrounding track;
+// override those segment dates so the already-running track isn't hidden.
+const SEGMENT_OPEN_OVERRIDE = {
+  'B:vysocanska:kolbenova':  '1998-11-08',
+  'B:kolbenova:hloubetin':   '1998-11-08',
+  'B:hloubetin:rajska_zahrada': '1998-11-08',
+};
 
 // Build segment list per line (real, not D)
 const segments = []; // {line, a, b, opened}
@@ -447,40 +474,34 @@ const segments = []; // {line, a, b, opened}
   const order = LINE_ORDER[line];
   for(let i=0;i<order.length-1;i++){
     const a=order[i], b=order[i+1];
-    const opened = OPEN[line][a] > OPEN[line][b] ? OPEN[line][a] : OPEN[line][b];
+    const opened = SEGMENT_OPEN_OVERRIDE[`${line}:${a}:${b}`] ||
+      (OPEN[line][a] > OPEN[line][b] ? OPEN[line][a] : OPEN[line][b]);
     segments.push({line,a,b,opened});
   }
 });
-const futureSegments = [];
-{
-  const order = LINE_ORDER['D'];
-  for(let i=0;i<order.length-1;i++) futureSegments.push({line:'D',a:order[i],b:order[i+1]});
-}
+const futureSegments = LINE_ORDER.D.slice(1).map((b,i)=>({line:'D',a:LINE_ORDER.D[i],b}));
 // Phase II exists only on paper: Náměstí Míru – Pankrác (planned northern leg)
 const plannedSegments = [{line:'D',a:'namesti_miru',b:'pankrac',planned:true}];
 
-// Ghost (full network, always faint) — union of all real segments, drawn once
-segments.forEach(seg=>{
+function segLine(seg,attrs){
   const A=S[seg.a],B=S[seg.b];
-  ghostLayer.appendChild(el('line',{class:'segment ghost',x1:A.x,y1:A.y,x2:B.x,y2:B.y}));
-});
-futureSegments.concat(plannedSegments).forEach(seg=>{
-  const A=S[seg.a],B=S[seg.b];
-  ghostLayer.appendChild(el('line',{class:'segment ghost',x1:A.x,y1:A.y,x2:B.x,y2:B.y}));
+  return el('line',{...attrs,x1:A.x,y1:A.y,x2:B.x,y2:B.y});
+}
+
+// Ghost (full network, always faint) — union of all segments, drawn once
+segments.concat(futureSegments,plannedSegments).forEach(seg=>{
+  ghostLayer.appendChild(segLine(seg,{class:'segment ghost'}));
 });
 
 // Live segment elements (colored, revealed over time)
 const segEls = segments.map(seg=>{
-  const A=S[seg.a],B=S[seg.b];
-  const line=el('line',{class:'segment',x1:A.x,y1:A.y,x2:B.x,y2:B.y,
-    stroke:LINE_COLOR_HEX[seg.line],'stroke-width':6,opacity:0});
+  const line=segLine(seg,{class:'segment',stroke:LINE_COLOR_HEX[seg.line],'stroke-width':6,opacity:0});
   liveLayer.appendChild(line);
   return {seg,line};
 });
 // Future (Line D) segment elements — under construction + paper-only planned
 const futureEls = futureSegments.concat(plannedSegments).map(seg=>{
-  const A=S[seg.a],B=S[seg.b];
-  const line=el('line',{class:'segment future'+(seg.planned?' planned':''),x1:A.x,y1:A.y,x2:B.x,y2:B.y});
+  const line=segLine(seg,{class:'segment future'+(seg.planned?' planned':'')});
   futureLayer.appendChild(line);
   return {seg,line};
 });
@@ -488,7 +509,8 @@ const futureEls = futureSegments.concat(plannedSegments).map(seg=>{
 // Station elements
 const stationEls = {};
 Object.values(S).forEach(s=>{
-  const g = el('g',{class:'station'+(s.lines.length>1?' interchange':''), 'data-id':s.id, opacity:0});
+  const g = el('g',{class:'station'+(s.lines.length>1?' interchange':''), 'data-id':s.id, opacity:0,
+    role:'button', tabindex:'-1', 'aria-label':s.name});
   const isFuture = s.lines[0]==='D';
   const r = s.lines.length>1?9:6;
   if(s.lines.length>1){
@@ -506,10 +528,11 @@ Object.values(S).forEach(s=>{
     'text-anchor': 'start'});
   t.textContent = s.name;
   g.appendChild(t);
-  g.addEventListener('click',()=>showStation(s.id));
+  onActivate(g,()=>showStation(s.id));
   g.addEventListener('mouseenter',(e)=>showTip(e,s.id));
   g.addEventListener('mousemove',moveTip);
   g.addEventListener('mouseleave',hideTip);
+  g._t = t; // cache text element to avoid querySelector on every render tick
   stationLayer.appendChild(g);
   stationEls[s.id]=g;
 });
@@ -520,10 +543,11 @@ Object.values(S).forEach(s=>{
 const startMs = Date.parse(START), endMs = Date.parse(END);
 const slider = document.getElementById('slider');
 const dateLabel = document.getElementById('dateLabel');
-slider.max = 1000;
+const statStationsEl = document.getElementById('statStations');
+const statLinesEl = document.getElementById('statLines');
 
 function msFromSlider(v){ return startMs + (endMs-startMs) * (v/1000); }
-function sliderFromDate(dateStr){ const ms=Date.parse(dateStr); return Math.round((ms-startMs)/(endMs-startMs)*1000); }
+function sliderFromDate(dateStr){ const ms=Date.parse(dateStr); return Math.ceil((ms-startMs)/(endMs-startMs)*1000); }
 function fmtDate(ms){
   const d = new Date(ms);
   return d.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
@@ -540,31 +564,29 @@ EVENTS.forEach(ev=>{
   ticksEl.appendChild(t);
 });
 
-let lastCurveDate = START;
+let currentDate = START; // last rendered date — tooltip picks former vs current name from it
 function render(dateStr){
-  document.getElementById('dateLabel').textContent = fmtDate(Date.parse(dateStr));
+  dateLabel.textContent = fmtDate(Date.parse(dateStr+'T12:00'));
+  slider.setAttribute('aria-valuetext', dateStr);
 
   let openCount=0;
   Object.values(S).forEach(s=>{
     const g = stationEls[s.id];
-    if(s.lines[0]==='D'){
-      // future station: shown only as hollow marker once construction has started, never "opens"
-      const on = dateStr >= '2022-03-01';
-      g.style.opacity = on?1:0;
-      return;
-    }
-    const fo = FIRST_OPEN[s.id];
-    const isOpen = dateStr >= fo;
-    g.style.opacity = isOpen?1:0;
-    if(isOpen){
-      openCount++;
-      const label = (s.former && dateStr < RENAME_DATE) ? s.former : s.name;
-      const textEl = g.querySelector('text');
-      if(textEl.textContent!==label) textEl.textContent = label;
-      textEl.style.fill = (s.former && dateStr < RENAME_DATE) ? '#d98a8a' : '';
-    }
+    // future (Line D) station: shown only as hollow marker once construction has started, never "opens"
+    const isFuture = s.lines[0]==='D';
+    const shown = dateStr >= (isFuture ? D_CONSTRUCTION_START : FIRST_OPEN[s.id]);
+    g.style.opacity = shown?1:0;
+    g.style.pointerEvents = shown?'':'none';
+    g.setAttribute('tabindex', shown?'0':'-1');
+    if(!shown || isFuture) return;
+    openCount++;
+    const usingFormer = s.former && dateStr < RENAME_DATE;
+    const textEl = g._t;
+    const label = usingFormer ? s.former : s.name;
+    if(textEl.textContent!==label) textEl.textContent = label;
+    textEl.style.fill = usingFormer ? '#d98a8a' : '';
   });
-  document.getElementById('statStations').textContent = openCount;
+  statStationsEl.textContent = openCount;
 
   // "Lines running" counts lines with at least one open SEGMENT — an open
   // interchange station must not count its other line before that line exists
@@ -575,13 +597,11 @@ function render(dateStr){
     line.style.opacity = on?0.95:0;
     if(on) activeLines.add(seg.line);
   });
-  document.getElementById('statLines').textContent = activeLines.size;
-  futureEls.forEach(({line})=>{
-    const on = dateStr >= '2022-03-01';
-    line.classList.toggle('on', on);
-  });
+  statLinesEl.textContent = activeLines.size;
+  const dStarted = dateStr >= D_CONSTRUCTION_START;
+  futureEls.forEach(({line})=>line.classList.toggle('on', dStarted));
 
-  lastCurveDate = dateStr;
+  currentDate = dateStr;
 }
 
 function dateStrFromSliderVal(v){
@@ -610,21 +630,20 @@ EVENTS.forEach((ev,idx)=>{
   const div = document.createElement('div');
   div.className = 'ev'+(ev.isFuture?' future':'');
   div.dataset.idx = idx;
+  div.setAttribute('role','button');
+  div.setAttribute('tabindex','0');
   const tagLabel = ev.isRename?'RENAME':ev.isIncident?'FLOOD':('LINE '+(ev.line||''));
-  div.innerHTML = `<div class="evdate">${new Date(ev.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+  div.innerHTML = `<div class="evdate">${new Date(ev.date+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
     <div class="evtitle"><span class="tag ${ev.tag}">${tagLabel}</span>${ev.title}</div>
     <div class="evdesc">${ev.desc||''}</div>`;
-  div.addEventListener('click',()=>{
-    slider.value = sliderFromDate(ev.date);
-    onSliderInput(false);
-    flashEvent(ev);
-  });
+  onActivate(div,()=>{ slider.value = sliderFromDate(ev.date); onSliderInput(false); flashEvent(ev); });
   eventsListEl.appendChild(div);
 });
+const eventsListItems = Array.from(eventsListEl.children); // cached; list is static after this
 function updateEventListActive(dateStr){
   let activeIdx=-1;
   EVENTS.forEach((ev,idx)=>{ if(dateStr>=ev.date) activeIdx=idx; });
-  [...eventsListEl.children].forEach((c,idx)=>c.classList.toggle('active', idx===activeIdx));
+  eventsListItems.forEach((c,idx)=>c.classList.toggle('active', idx===activeIdx));
 }
 
 /* ---------------------------------------------------------------
@@ -679,8 +698,9 @@ function showStation(id){
 const tooltip = document.getElementById('tooltip');
 function showTip(e,id){
   const s=S[id];
-  let html = `<b>${s.name}</b>`;
-  if(s.former) html += `<div class="former">formerly ${s.former}</div>`;
+  const usingFormer = s.former && currentDate < RENAME_DATE;
+  let html = `<b>${usingFormer ? s.former : s.name}</b>`;
+  if(s.former && !usingFormer) html += `<div class="former">formerly ${s.former}</div>`;
   html += `<div class="muted">Line${s.lines.length>1?'s':''} ${s.lines.join(', ')}</div>`;
   tooltip.innerHTML = html;
   tooltip.style.opacity=1;
@@ -694,12 +714,12 @@ function moveTip(e){
 function hideTip(){ tooltip.style.opacity=0; }
 
 // Tabs
-document.querySelectorAll('#sideTabs button').forEach(btn=>{
+const tabButtons = document.querySelectorAll('#sideTabs button');
+tabButtons.forEach(btn=>{
   btn.addEventListener('click',()=>{
-    document.querySelectorAll('#sideTabs button').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('eventsList').style.display = btn.dataset.tab==='events'?'block':'none';
-    document.getElementById('detailPanel').style.display = btn.dataset.tab==='detail'?'block':'none';
+    tabButtons.forEach(b=>b.classList.toggle('active', b===btn));
+    eventsListEl.style.display = btn.dataset.tab==='events'?'block':'none';
+    detailPanel.style.display = btn.dataset.tab==='detail'?'block':'none';
   });
 });
 
@@ -709,11 +729,19 @@ document.querySelectorAll('#sideTabs button').forEach(btn=>{
 const playBtn = document.getElementById('playBtn');
 const speedSel = document.getElementById('speed');
 let playing=false, timer=null;
+function setPlaying(p){
+  playing = p;
+  playBtn.textContent = p?'⏸':'▶';
+  playBtn.setAttribute('aria-label', p?'Pause':'Play');
+  playBtn.setAttribute('aria-pressed', String(p));
+}
 playBtn.addEventListener('click',()=>{
-  playing = !playing;
-  playBtn.textContent = playing?'⏸':'▶';
+  setPlaying(!playing);
   if(playing){
-    if(Number(slider.value)>=1000) slider.value=0;
+    if(Number(slider.value)>=1000){
+      slider.value=0;
+      prevDateStr = DAY_BEFORE_START;
+    }
     tick();
   } else {
     clearTimeout(timer);
@@ -722,19 +750,18 @@ playBtn.addEventListener('click',()=>{
 function tick(){
   if(!playing) return;
   let v = Number(slider.value)+1;
-  if(v>1000){ playing=false; playBtn.textContent='▶'; return; }
+  if(v>1000){ setPlaying(false); return; }
   slider.value=v;
   onSliderInput(true);
   timer = setTimeout(tick, Number(speedSel.value));
 }
 
 /* ---------------------------------------------------------------
-   INIT — default view shows today
+   INIT — start at the beginning so Play replays the full growth
    --------------------------------------------------------------- */
-slider.value = sliderFromDate(TODAY);
-prevDateStr = dateStrFromSliderVal(slider.value);
-render(prevDateStr);
-updateEventListActive(prevDateStr);
+slider.value = 0;
+onSliderInput(false);
+prevDateStr = DAY_BEFORE_START;
 </script>
 </body>
 </html>
