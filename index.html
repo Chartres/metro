@@ -497,7 +497,8 @@ const futureEls = futureSegments.concat(plannedSegments).map(seg=>{
 // Station elements
 const stationEls = {};
 Object.values(S).forEach(s=>{
-  const g = el('g',{class:'station'+(s.lines.length>1?' interchange':''), 'data-id':s.id, opacity:0});
+  const g = el('g',{class:'station'+(s.lines.length>1?' interchange':''), 'data-id':s.id, opacity:0,
+    role:'button', tabindex:'0', 'aria-label':s.name});
   const isFuture = s.lines[0]==='D';
   const r = s.lines.length>1?9:6;
   if(s.lines.length>1){
@@ -516,6 +517,7 @@ Object.values(S).forEach(s=>{
   t.textContent = s.name;
   g.appendChild(t);
   g.addEventListener('click',()=>showStation(s.id));
+  g.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); showStation(s.id); } });
   g.addEventListener('mouseenter',(e)=>showTip(e,s.id));
   g.addEventListener('mousemove',moveTip);
   g.addEventListener('mouseleave',hideTip);
@@ -625,15 +627,15 @@ EVENTS.forEach((ev,idx)=>{
   const div = document.createElement('div');
   div.className = 'ev'+(ev.isFuture?' future':'');
   div.dataset.idx = idx;
+  div.setAttribute('role','button');
+  div.setAttribute('tabindex','0');
   const tagLabel = ev.isRename?'RENAME':ev.isIncident?'FLOOD':('LINE '+(ev.line||''));
   div.innerHTML = `<div class="evdate">${new Date(ev.date+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
     <div class="evtitle"><span class="tag ${ev.tag}">${tagLabel}</span>${ev.title}</div>
     <div class="evdesc">${ev.desc||''}</div>`;
-  div.addEventListener('click',()=>{
-    slider.value = sliderFromDate(ev.date);
-    onSliderInput(false);
-    flashEvent(ev);
-  });
+  const jumpToEvent = ()=>{ slider.value = sliderFromDate(ev.date); onSliderInput(false); flashEvent(ev); };
+  div.addEventListener('click', jumpToEvent);
+  div.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); jumpToEvent(); } });
   eventsListEl.appendChild(div);
 });
 const eventsListItems = Array.from(eventsListEl.children); // cached; list is static after this
