@@ -690,8 +690,9 @@ function showStation(id){
 const tooltip = document.getElementById('tooltip');
 function showTip(e,id){
   const s=S[id];
-  let html = `<b>${s.name}</b>`;
-  if(s.former) html += `<div class="former">formerly ${s.former}</div>`;
+  const usingFormer = s.former && lastCurveDate < RENAME_DATE;
+  let html = `<b>${usingFormer ? s.former : s.name}</b>`;
+  if(s.former && !usingFormer) html += `<div class="former">formerly ${s.former}</div>`;
   html += `<div class="muted">Line${s.lines.length>1?'s':''} ${s.lines.join(', ')}</div>`;
   tooltip.innerHTML = html;
   tooltip.style.opacity=1;
