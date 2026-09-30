@@ -736,7 +736,7 @@ playBtn.addEventListener('click',()=>{
   if(playing){
     if(Number(slider.value)>=1000){
       slider.value=0;
-      prevDateStr = dateStrFromSliderVal(0); // ponytail: reset anchor so first tick doesn't fire all events backward
+      prevDateStr = DAY_BEFORE_START; // one day before START so opening-day event fires on first tick forward
     }
     tick();
   } else {
@@ -755,10 +755,11 @@ function tick(){
 /* ---------------------------------------------------------------
    INIT — start at the beginning so Play replays the full growth
    --------------------------------------------------------------- */
+const DAY_BEFORE_START = new Date(Date.parse(START)-86400000).toISOString().slice(0,10);
 slider.value = 0;
-prevDateStr = dateStrFromSliderVal(0);
-render(prevDateStr);
-updateEventListActive(prevDateStr);
+prevDateStr = DAY_BEFORE_START; // one day before START so the opening-day event fires on first Play tick
+render(dateStrFromSliderVal(0));
+updateEventListActive(dateStrFromSliderVal(0));
 </script>
 </body>
 </html>
