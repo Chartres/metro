@@ -729,11 +729,14 @@ document.querySelectorAll('#sideTabs button').forEach(btn=>{
 const playBtn = document.getElementById('playBtn');
 const speedSel = document.getElementById('speed');
 let playing=false, timer=null;
+function setPlaying(p){
+  playing = p;
+  playBtn.textContent = p?'⏸':'▶';
+  playBtn.setAttribute('aria-label', p?'Pause':'Play');
+  playBtn.setAttribute('aria-pressed', String(p));
+}
 playBtn.addEventListener('click',()=>{
-  playing = !playing;
-  playBtn.textContent = playing?'⏸':'▶';
-  playBtn.setAttribute('aria-label', playing?'Pause':'Play');
-  playBtn.setAttribute('aria-pressed', String(playing));
+  setPlaying(!playing);
   if(playing){
     if(Number(slider.value)>=1000){
       slider.value=0;
@@ -747,7 +750,7 @@ playBtn.addEventListener('click',()=>{
 function tick(){
   if(!playing) return;
   let v = Number(slider.value)+1;
-  if(v>1000){ playing=false; playBtn.textContent='▶'; playBtn.setAttribute('aria-pressed','false'); playBtn.setAttribute('aria-label','Play'); return; }
+  if(v>1000){ setPlaying(false); return; }
   slider.value=v;
   onSliderInput(true);
   timer = setTimeout(tick, Number(speedSel.value));
