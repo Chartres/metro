@@ -188,10 +188,10 @@
   </header>
 
   <div id="controls">
-    <button id="playBtn" title="Play / pause">▶</button>
-    <div id="dateLabel">—</div>
+    <button id="playBtn" aria-label="Play" aria-pressed="false">▶</button>
+    <div id="dateLabel" aria-live="polite">—</div>
     <div id="sliderWrap">
-      <input type="range" id="slider" min="0" max="1000" value="1000" step="1">
+      <input type="range" id="slider" min="0" max="1000" value="1000" step="1" aria-label="Timeline date">
       <div id="ticks"></div>
     </div>
     <div id="speedRow">
@@ -555,6 +555,7 @@ EVENTS.forEach(ev=>{
 let lastCurveDate = START;
 function render(dateStr){
   dateLabel.textContent = fmtDate(Date.parse(dateStr+'T12:00'));
+  slider.setAttribute('aria-valuetext', dateStr);
 
   let openCount=0;
   Object.values(S).forEach(s=>{
@@ -728,6 +729,8 @@ let playing=false, timer=null;
 playBtn.addEventListener('click',()=>{
   playing = !playing;
   playBtn.textContent = playing?'⏸':'▶';
+  playBtn.setAttribute('aria-label', playing?'Pause':'Play');
+  playBtn.setAttribute('aria-pressed', String(playing));
   if(playing){
     if(Number(slider.value)>=1000){
       slider.value=0;
