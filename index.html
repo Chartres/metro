@@ -746,7 +746,7 @@ playBtn.addEventListener('click',()=>{
 function tick(){
   if(!playing) return;
   let v = Number(slider.value)+1;
-  if(v>1000){ playing=false; playBtn.textContent='▶'; return; }
+  if(v>1000){ playing=false; playBtn.textContent='▶'; playBtn.setAttribute('aria-pressed','false'); playBtn.setAttribute('aria-label','Play'); return; }
   slider.value=v;
   onSliderInput(true);
   timer = setTimeout(tick, Number(speedSel.value));
