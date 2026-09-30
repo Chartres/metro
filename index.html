@@ -479,11 +479,7 @@ const segments = []; // {line, a, b, opened}
     segments.push({line,a,b,opened});
   }
 });
-const futureSegments = [];
-{
-  const order = LINE_ORDER['D'];
-  for(let i=0;i<order.length-1;i++) futureSegments.push({line:'D',a:order[i],b:order[i+1]});
-}
+const futureSegments = LINE_ORDER.D.slice(1).map((b,i)=>({line:'D',a:LINE_ORDER.D[i],b}));
 // Phase II exists only on paper: Náměstí Míru – Pankrác (planned northern leg)
 const plannedSegments = [{line:'D',a:'namesti_miru',b:'pankrac',planned:true}];
 
