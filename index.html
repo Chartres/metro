@@ -361,7 +361,6 @@ Object.keys(OPEN).forEach(line=>{
   });
 });
 
-const TODAY = '2026-08-17';
 const START = '1974-05-09';
 const END   = '2029-12-31'; // horizon incl. planned Line D
 
@@ -429,7 +428,6 @@ const EVENTS = [
 /* ---------------------------------------------------------------
    RENDER SETUP
    --------------------------------------------------------------- */
-const svg = document.getElementById('svg');
 const ghostLayer = document.getElementById('ghostLayer');
 const futureLayer = document.getElementById('futureLayer');
 const liveLayer = document.getElementById('liveLayer');
@@ -438,7 +436,6 @@ const stationLayer = document.getElementById('stationLayer');
 const NS='http://www.w3.org/2000/svg';
 function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
 
-const LINE_COLOR = {A:'var(--a-color)',B:'var(--b-color)',C:'var(--c-color)',D:'var(--d-color)'};
 const LINE_COLOR_HEX = {A:'#2e8b3d',B:'#f0b400',C:'#da251c',D:'#0f5cab'};
 
 // Infill stations (Hloubětín 1999, Kolbenova 2001) opened after the surrounding track;
@@ -534,7 +531,6 @@ const slider = document.getElementById('slider');
 const dateLabel = document.getElementById('dateLabel');
 const statStationsEl = document.getElementById('statStations');
 const statLinesEl = document.getElementById('statLines');
-slider.max = 1000;
 
 function msFromSlider(v){ return startMs + (endMs-startMs) * (v/1000); }
 function sliderFromDate(dateStr){ const ms=Date.parse(dateStr); return Math.ceil((ms-startMs)/(endMs-startMs)*1000); }
