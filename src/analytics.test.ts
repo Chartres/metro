@@ -28,11 +28,15 @@ describe('analytics init (DOM side-effects)', () => {
   beforeEach(() => { vi.resetModules() })
   afterEach(() => { vi.unstubAllGlobals() })
 
+  function mockClient(track: (e: string) => void, conversion: () => void): void {
+    vi.doMock('./platform/flywheel-client', () => ({
+      createFlywheelClient: () => ({ track, conversion }),
+    }))
+  }
+
   it('fires page_view on module load when document is present', async () => {
     const tracked: string[] = []
-    vi.doMock('./platform/flywheel-client', () => ({
-      createFlywheelClient: () => ({ track: (e: string) => tracked.push(e), conversion: () => {} }),
-    }))
+    mockClient((e) => tracked.push(e), () => {})
     vi.stubGlobal('document', { getElementById: () => null })
     await import('./analytics')
     expect(tracked).toContain('page_view')
@@ -40,9 +44,7 @@ describe('analytics init (DOM side-effects)', () => {
 
   it('conversion fires only once even when playBtn is clicked twice', async () => {
     const conversions: number[] = []
-    vi.doMock('./platform/flywheel-client', () => ({
-      createFlywheelClient: () => ({ track: () => {}, conversion: () => conversions.push(1) }),
-    }))
+    mockClient(() => {}, () => conversions.push(1))
     const ss: Record<string, string> = {}
     vi.stubGlobal('sessionStorage', {
       getItem: (k: string) => ss[k] ?? null,
