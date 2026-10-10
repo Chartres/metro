@@ -722,9 +722,7 @@ function tick(){
    INIT — default view shows today
    --------------------------------------------------------------- */
 slider.value = sliderFromDate(TODAY);
-prevDateStr = dateStrFromSliderVal(slider.value);
-render(prevDateStr);
-updateEventListActive(prevDateStr);
+onSliderInput(false);
 </script>
 </body>
 </html>
