@@ -42,10 +42,10 @@ export const conversion = fw.conversion
 // network grow) — fire `conversion` once per session on the first press.
 if (typeof document !== 'undefined') {
   track('page_view')
-  let fired = false
+  const FIRED_KEY = 'metro_played_timeline'
   document.getElementById('playBtn')?.addEventListener('click', () => {
-    if (fired) return
-    fired = true
+    if (sessionStorage.getItem(FIRED_KEY)) return
+    sessionStorage.setItem(FIRED_KEY, '1')
     conversion({ action: 'played_timeline' })
   })
 }
