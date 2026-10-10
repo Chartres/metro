@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { restShim } from './analytics'
 
 describe('restShim (the dep-free supabase stand-in)', () => {
@@ -21,5 +21,40 @@ describe('restShim (the dep-free supabase stand-in)', () => {
       .from('events')
       .insert({})
     await expect(result).resolves.toBeUndefined()
+  })
+})
+
+describe('analytics init (DOM side-effects)', () => {
+  beforeEach(() => { vi.resetModules() })
+  afterEach(() => { vi.unstubAllGlobals() })
+
+  it('fires page_view on module load when document is present', async () => {
+    const tracked: string[] = []
+    vi.doMock('./platform/flywheel-client', () => ({
+      createFlywheelClient: () => ({ track: (e: string) => tracked.push(e), conversion: () => {} }),
+    }))
+    vi.stubGlobal('document', { getElementById: () => null })
+    await import('./analytics')
+    expect(tracked).toContain('page_view')
+  })
+
+  it('conversion fires only once even when playBtn is clicked twice', async () => {
+    const conversions: number[] = []
+    vi.doMock('./platform/flywheel-client', () => ({
+      createFlywheelClient: () => ({ track: () => {}, conversion: () => conversions.push(1) }),
+    }))
+    const ss: Record<string, string> = {}
+    vi.stubGlobal('sessionStorage', {
+      getItem: (k: string) => ss[k] ?? null,
+      setItem: (k: string, v: string) => { ss[k] = v },
+    })
+    const handlers: Array<() => void> = []
+    vi.stubGlobal('document', {
+      getElementById: () => ({ addEventListener: (_: string, fn: () => void) => handlers.push(fn) }),
+    })
+    await import('./analytics')
+    handlers[0]?.()
+    handlers[0]?.()
+    expect(conversions).toHaveLength(1)
   })
 })
