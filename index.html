@@ -429,7 +429,6 @@ const EVENTS = [
 /* ---------------------------------------------------------------
    RENDER SETUP
    --------------------------------------------------------------- */
-const svg = document.getElementById('svg');
 const ghostLayer = document.getElementById('ghostLayer');
 const futureLayer = document.getElementById('futureLayer');
 const liveLayer = document.getElementById('liveLayer');
@@ -438,7 +437,6 @@ const stationLayer = document.getElementById('stationLayer');
 const NS='http://www.w3.org/2000/svg';
 function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
 
-const LINE_COLOR = {A:'var(--a-color)',B:'var(--b-color)',C:'var(--c-color)',D:'var(--d-color)'};
 const LINE_COLOR_HEX = {A:'#2e8b3d',B:'#f0b400',C:'#da251c',D:'#0f5cab'};
 
 // Build segment list per line (real, not D)
@@ -519,8 +517,6 @@ Object.values(S).forEach(s=>{
    --------------------------------------------------------------- */
 const startMs = Date.parse(START), endMs = Date.parse(END);
 const slider = document.getElementById('slider');
-const dateLabel = document.getElementById('dateLabel');
-slider.max = 1000;
 
 function msFromSlider(v){ return startMs + (endMs-startMs) * (v/1000); }
 function sliderFromDate(dateStr){ const ms=Date.parse(dateStr); return Math.ceil((ms-startMs)/(endMs-startMs)*1000); }
@@ -540,7 +536,6 @@ EVENTS.forEach(ev=>{
   ticksEl.appendChild(t);
 });
 
-let lastCurveDate = START;
 function render(dateStr){
   document.getElementById('dateLabel').textContent = fmtDate(Date.parse(dateStr));
 
@@ -581,7 +576,6 @@ function render(dateStr){
     line.classList.toggle('on', on);
   });
 
-  lastCurveDate = dateStr;
 }
 
 function dateStrFromSliderVal(v){
