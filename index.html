@@ -352,6 +352,7 @@ const OPEN = {
      opatov:'1980-11-11',haje:'1980-11-11'}
 };
 const RENAME_DATE = '1990-02-22';
+const D_CONSTRUCTION_START = '2022-03-01';
 
 // Overall "first opened" date per station (earliest across its lines) — used for station dot + labels
 const FIRST_OPEN = {};
@@ -540,8 +541,7 @@ function render(dateStr){
     const g = stationEls[s.id];
     if(s.lines[0]==='D'){
       // future station: shown only as hollow marker once construction has started, never "opens"
-      const on = dateStr >= '2022-03-01';
-      g.style.opacity = on?1:0;
+      g.style.opacity = dateStr >= D_CONSTRUCTION_START ? 1 : 0;
       return;
     }
     const fo = FIRST_OPEN[s.id];
@@ -567,10 +567,8 @@ function render(dateStr){
     if(on) activeLines.add(seg.line);
   });
   document.getElementById('statLines').textContent = activeLines.size;
-  futureEls.forEach(({line})=>{
-    const on = dateStr >= '2022-03-01';
-    line.classList.toggle('on', on);
-  });
+  const dUnderway = dateStr >= D_CONSTRUCTION_START;
+  futureEls.forEach(({line})=>line.classList.toggle('on', dUnderway));
 
 }
 
