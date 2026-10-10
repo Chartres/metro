@@ -92,6 +92,39 @@ test('phone (390px): map fills the width at content aspect, panels stack below',
   await shot(page, 'mobile-390')
 })
 
+test('Play button: starts playback, button becomes Pause, slider advances, then pauses', async ({ page }) => {
+  await page.goto('/')
+  const btn = page.locator('#playBtn')
+  const slider = page.locator('#slider')
+
+  const before = Number(await slider.inputValue())
+  await btn.click()
+  await expect(btn).toHaveText('⏸')
+
+  // wait for slider to advance (speed=10ms/tick by default)
+  await page.waitForFunction(
+    (n) => Number((document.getElementById('slider') as HTMLInputElement).value) > n,
+    before,
+    { timeout: 3000 },
+  )
+
+  await btn.click()
+  await expect(btn).toHaveText('▶')
+})
+
+test('Play button: conversion key written to sessionStorage on first press only', async ({ page }) => {
+  await page.goto('/')
+  const before = await page.evaluate(() => sessionStorage.getItem('metro_played_timeline'))
+  expect(before).toBeNull()
+
+  await page.locator('#playBtn').click()
+  const after = await page.evaluate(() => sessionStorage.getItem('metro_played_timeline'))
+  expect(after).toBe('1')
+
+  // pause to keep the page clean for any later tests
+  await page.locator('#playBtn').click()
+})
+
 // Discoverability kit (flywheel Standard §5c): what crawlers, link unfurlers and AI
 // agents read. Asserted by content-type too — an SPA fallback answers 200 text/html
 // for anything missing.
