@@ -549,10 +549,11 @@ function render(dateStr){
     g.style.opacity = isOpen?1:0;
     if(isOpen){
       openCount++;
-      const label = (s.former && dateStr < RENAME_DATE) ? s.former : s.name;
+      const showFormer = s.former && dateStr < RENAME_DATE;
+      const label = showFormer ? s.former : s.name;
       const textEl = g.querySelector('text');
       if(textEl.textContent!==label) textEl.textContent = label;
-      textEl.style.fill = (s.former && dateStr < RENAME_DATE) ? '#d98a8a' : '';
+      textEl.style.fill = showFormer ? '#d98a8a' : '';
     }
   });
   document.getElementById('statStations').textContent = openCount;
