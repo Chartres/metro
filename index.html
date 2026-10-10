@@ -687,8 +687,8 @@ document.querySelectorAll('#sideTabs button').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('#sideTabs button').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById('eventsList').style.display = btn.dataset.tab==='events'?'block':'none';
-    document.getElementById('detailPanel').style.display = btn.dataset.tab==='detail'?'block':'none';
+    eventsListEl.style.display = btn.dataset.tab==='events'?'block':'none';
+    detailPanel.style.display = btn.dataset.tab==='detail'?'block':'none';
   });
 });
 
