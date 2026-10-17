@@ -204,7 +204,7 @@
       </select>
     </div>
     <div id="stats">
-      <div>Stations open: <b id="statStations">0</b>/58</div>
+      <div>Stations open: <b id="statStations">0</b>/<span id="statTotal">0</span></div>
       <div>Lines running: <b id="statLines">0</b></div>
     </div>
   </div>
@@ -399,7 +399,7 @@ const EVENTS = [
    stations:['vltavska','nadrazi_holesovice']},
   {date:'1985-11-02', line:'B', title:'Line B opens', tag:'B',
    desc:'The third line opens between Florenc and Smíchovské nádraží, crossing the city centre.',
-   stations:['namesti_republiky','narodni_trida','karlovo_namesti','andel','smichovske_nadrazi']},
+   stations:['florenc','namesti_republiky','narodni_trida','mustek','karlovo_namesti','andel','smichovske_nadrazi']},
   {date:'1987-07-11', line:'A', title:'Line A reaches Strašnická', tag:'A',
    desc:'One more station extends Line A east.', stations:['strasnicka']},
   {date:'1988-10-26', line:'B', title:'Line B extends to Nové Butovice', tag:'B',
@@ -544,6 +544,7 @@ const startMs = Date.parse(START), endMs = Date.parse(END);
 const slider = document.getElementById('slider');
 const dateLabel = document.getElementById('dateLabel');
 const statStationsEl = document.getElementById('statStations');
+document.getElementById('statTotal').textContent = Object.values(S).filter(s=>s.lines[0]!=='D').length;
 const statLinesEl = document.getElementById('statLines');
 
 function msFromSlider(v){ return startMs + (endMs-startMs) * (v/1000); }
