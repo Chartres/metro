@@ -5,13 +5,19 @@ import { expect, test, type Page } from '@playwright/test'
 const shot = (page: Page, name: string) =>
   page.screenshot({ path: `e2e/shots/${name}.png`, fullPage: false })
 
+// fill() alone doesn't fire `input` on a range control — the app listens for it.
+const scrubTo = async (page: Page, value: string | number) => {
+  const slider = page.locator('#slider')
+  await slider.fill(String(value))
+  await slider.dispatchEvent('input')
+}
+
 test('today view: full network, stats honest, Line D dashed as future', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveTitle(/Prague Metro/)
-  // scrub to 2024 (step 893): all 58 A/B/C stations open, Line D still under construction
-  await page.locator('#slider').fill('893')
-  await page.locator('#slider').dispatchEvent('input')
+  // today (landing view): all 58 stations open on 3 lines, total derived from the data
   await expect(page.locator('#statStations')).toHaveText('58')
+  await expect(page.locator('#statTotal')).toHaveText('58')
   await expect(page.locator('#statLines')).toHaveText('3')
   // Line D exists only as under-construction dashes, never as an open line —
   // and it is BLUE (official DPP color), with the paper-only phase II
@@ -25,14 +31,19 @@ test('today view: full network, stats honest, Line D dashed as future', async ({
     getComputedStyle(document.documentElement).getPropertyValue('--d-color').trim(),
   )
   expect(dColor).toBe('#0f5cab')
+  // segment strokes are read back from the :root custom properties — an empty
+  // or drifted lookup would paint the live network black
+  const strokes = await page
+    .locator('#liveLayer line')
+    .evaluateAll((els) => [...new Set(els.map((e) => e.getAttribute('stroke')))].sort())
+  expect(strokes).toEqual(['#2e8b3d', '#da251c', '#f0b400'])
   await shot(page, 'today')
 })
 
 test('time travel: 1974 opening day shows only the first 9 stations of line C', async ({ page }) => {
   await page.goto('/')
   // drag to the very beginning
-  await page.locator('#slider').fill('0')
-  await page.locator('#slider').dispatchEvent('input')
+  await scrubTo(page, 0)
   await expect(page.locator('#statStations')).toHaveText('9')
   await expect(page.locator('#statLines')).toHaveText('1')
   // let the scrub-crossing flashrings (one per crossed event) finish before
@@ -72,8 +83,7 @@ test('renamed stations show communist-era names before Feb 1990', async ({ page 
   await expect(page.locator('.station[data-id="dejvicka"] text')).toHaveText('Leninova')
   await shot(page, 'former-names-1988')
   // and back to today the modern name holds
-  await page.locator('#slider').fill('1000')
-  await page.locator('#slider').dispatchEvent('input')
+  await scrubTo(page, 1000)
   await expect(page.locator('.station[data-id="dejvicka"] text')).toHaveText('Dejvická')
 })
 
@@ -93,6 +103,119 @@ test('phone (390px): map fills the width at content aspect, panels stack below',
   // sub-4px station labels are hidden on phones; dots + tap → detail carry names
   await expect(page.locator('.station[data-id="muzeum"] text')).toBeHidden()
   await shot(page, 'mobile-390')
+})
+
+test('every timeline event click lands on or after its date', async ({ page }) => {
+  await page.goto('/')
+  // Math.round in sliderFromDate could land up to ~10 days early, showing the
+  // state before the event (and highlighting the previous one)
+  const items = page.locator('.ev')
+  const n = await items.count()
+  for (let i = 0; i < n; i++) {
+    await items.nth(i).click()
+    await expect(items.nth(i)).toHaveClass(/active/)
+  }
+})
+
+test('history data matches the Wikipedia-checked answers', async ({ page }) => {
+  await page.goto('/')
+  // Line B runs Nové Butovice → Jinonice → Radlická → Smíchovské nádraží → Anděl
+  expect(await page.evaluate('LINE_ORDER.B.slice(5, 11)')).toEqual([
+    'nove_butovice', 'jinonice', 'radlicka', 'smichovske_nadrazi', 'andel', 'karlovo_namesti',
+  ])
+  expect(await page.evaluate('[OPEN.A.strasnicka, OPEN.A.skalka]')).toEqual(['1987-07-11', '1990-07-04'])
+  // the 1985 Line B opening had 7 stations, Florenc to Smíchovské nádraží
+  expect(await page.evaluate('EVENTS.find((e) => e.title === "Line B opens").stations.length')).toBe(7)
+})
+
+test('page loads without console errors (the station-order self-check reports there)', async ({ page }) => {
+  const errors: string[] = []
+  page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
+  page.on('pageerror', (e) => errors.push(e.message))
+  await page.goto('/')
+  await expect(page.locator('#statStations')).toHaveText('58')
+  expect(errors).toEqual([])
+})
+
+test('Line B stays drawn through the 1998–2001 infill-station gap', async ({ page }) => {
+  await page.goto('/')
+  await scrubTo(page, await page.evaluate('sliderFromDate("2000-01-01")'))
+  // all 23 Line B segments run in 2000, though Kolbenova only opened in 2001
+  const liveB = await page
+    .locator('#liveLayer line[stroke="#f0b400"]')
+    .evaluateAll((els) => els.filter((e) => (e as SVGElement).style.opacity === '0.95').length)
+  expect(liveB).toBe(23)
+})
+
+test.describe('west of UTC (America/Los_Angeles)', () => {
+  test.use({ timezoneId: 'America/Los_Angeles' })
+  test('dates are not shown a day or a month early', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.locator('.ev', { hasText: 'Line D construction begins' }).locator('.evdate')).toHaveText(
+      '1 Mar 2022',
+    )
+    // every slider position that falls on the 1st of a month labels that month
+    const wrong = await page.evaluate(`(() => {
+      const bad = []
+      for (let v = 0; v <= 1000; v++) {
+        const d = dateStrFromSliderVal(v)
+        if (!d.endsWith('-01')) continue
+        render(d)
+        const want = new Date(d + 'T00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+        if (document.getElementById('dateLabel').textContent !== want) bad.push(d)
+      }
+      return bad
+    })()`)
+    expect(wrong).toEqual([])
+  })
+})
+
+test('Play from the landing view replays from 1974, flashing only opening day', async ({ page }) => {
+  await page.goto('/')
+  await page.locator('#speed').selectOption('60') // slowest: the next event is ~4 s away
+  const btn = page.locator('#playBtn')
+  await btn.click()
+  expect(Number(await page.locator('#slider').inputValue())).toBeLessThan(5)
+  // a stale prevDateStr would flash every event's rings (~150) at once
+  expect(await page.locator('#flashLayer circle').count()).toBeLessThanOrEqual(9)
+  await btn.click()
+  // and again from the very end of the slider
+  await scrubTo(page, 1000)
+  await page.waitForTimeout(3000) // let earlier rings expire
+  await btn.click()
+  expect(Number(await page.locator('#slider').inputValue())).toBeLessThan(5)
+  expect(await page.locator('#flashLayer circle').count()).toBeLessThanOrEqual(9)
+  await btn.click()
+})
+
+test('Play button: starts playback, button becomes Pause, slider advances, then pauses', async ({ page }) => {
+  await page.goto('/')
+  const btn = page.locator('#playBtn')
+  await btn.click()
+  await expect(btn).toHaveText('⏸')
+  await expect(btn).toHaveAttribute('aria-pressed', 'true')
+  await expect(btn).toHaveAttribute('aria-label', 'Pause')
+  const started = Number(await page.locator('#slider').inputValue())
+  // wait for slider to advance (speed=10ms/tick by default)
+  await page.waitForFunction(
+    (n) => Number((document.getElementById('slider') as HTMLInputElement).value) > n,
+    started,
+    { timeout: 3000 },
+  )
+  await btn.click()
+  await expect(btn).toHaveText('▶')
+  await expect(btn).toHaveAttribute('aria-pressed', 'false')
+  await expect(btn).toHaveAttribute('aria-label', 'Play')
+})
+
+test('Play button: conversion key written to sessionStorage on first press only', async ({ page }) => {
+  await page.goto('/')
+  const key = () => page.evaluate(() => sessionStorage.getItem('metro_conversion_fired'))
+  expect(await key()).toBeNull()
+  await page.locator('#playBtn').click()
+  expect(await key()).toBe('1')
+  // pause to keep the page clean for any later tests
+  await page.locator('#playBtn').click()
 })
 
 // Discoverability kit (flywheel Standard §5c): what crawlers, link unfurlers and AI
