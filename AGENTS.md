@@ -21,8 +21,8 @@ npm run build     # vite build → dist/
 ## Test (persona-journey e2e per primary journey)
 ```bash
 npm run typecheck                                   # tsc --noEmit
-npm test                                            # vitest: analytics REST shim
-PW_CHROMIUM=/opt/pw-browsers/chromium npm run test:e2e   # 5 persona journeys + shots (e2e/shots/)
+npm test                                            # vitest: platform client, REST shim, boot side-effects
+PW_CHROMIUM=/opt/pw-browsers/chromium npm run test:e2e   # persona journeys, history data, Play, a11y, TZ + shots (e2e/shots/)
 ```
 Gate: typecheck · test · build must pass. The app itself is a single `index.html` —
 all domain logic (station data, timeline, renames) lives inline there; the e2e suite
@@ -45,7 +45,7 @@ by re-running `connect-pages` (idempotent), not here.
 
 ## Analytics (Common Platform)
 Vendored client: `src/platform/flywheel-client.ts` via `src/analytics.ts` (dep-free
-REST shim). Fires `page_view` on load and `conversion` on the first Play press
+REST shim). Fires `page_view` on load and `conversion` on the first Play press per browser session
 (watching the network grow is the aha). Env-gated: dark without `VITE_SUPABASE_URL`
 + `VITE_SUPABASE_PUBLISHABLE_KEY` at build time.
 
