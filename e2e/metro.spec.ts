@@ -3,12 +3,14 @@
 import { expect, test, type Page } from '@playwright/test'
 
 // Wait out CSS transitions (0.35 s segment/station fades) so a shot never shows a
-// half-faded state; the flash-ring keyframe animations are left running on purpose.
+// half-faded state; the flash-ring keyframe animations are left running on purpose,
+// so pixels differ every run: shots land in e2e/shots/ (tracked) only with UPDATE_SHOTS=1.
+const SHOT_DIR = process.env.UPDATE_SHOTS ? 'e2e/shots' : 'test-results/shots'
 const shot = async (page: Page, name: string) => {
   await page.evaluate(() =>
     Promise.all(document.getAnimations().filter((a) => a instanceof CSSTransition).map((a) => a.finished)),
   )
-  await page.screenshot({ path: `e2e/shots/${name}.png`, fullPage: false })
+  await page.screenshot({ path: `${SHOT_DIR}/${name}.png`, fullPage: false })
 }
 
 // fill() alone doesn't fire `input` on a range control — the app listens for it.
@@ -93,11 +95,14 @@ test('renamed stations show communist-era names before Feb 1990', async ({ page 
   // the tooltip names the station as it was called on that date
   await page.locator('.station[data-id="dejvicka"]').dispatchEvent('mouseenter')
   await expect(page.locator('#tooltip b')).toHaveText('Leninova')
+  // and a screen reader hears the name the map shows
+  await expect(page.locator('.station[data-id="dejvicka"]')).toHaveAttribute('aria-label', 'Leninova')
   await page.locator('.station[data-id="dejvicka"]').dispatchEvent('mouseleave')
   await shot(page, 'former-names-1988')
   // and back to today the modern name holds
   await scrubTo(page, 1000)
   await expect(page.locator('.station[data-id="dejvicka"] text')).toHaveText('Dejvická')
+  await expect(page.locator('.station[data-id="dejvicka"]')).toHaveAttribute('aria-label', 'Dejvická')
 })
 
 test('phone (390px): map fills the width at content aspect, panels stack below', async ({ page }) => {
@@ -194,8 +199,22 @@ test('Line B stays drawn through the 1998–2001 infill-station gap', async ({ p
   expect(liveB).toBe(23)
 })
 
+test.describe('east of UTC (Europe/Prague)', () => {
+  test.use({ timezoneId: 'Europe/Prague' })
+  test('landing view uses the local date: 00:30 on 1 Nov in Prague is November', async ({ page }) => {
+    await page.clock.setFixedTime(new Date('2026-10-31T23:30:00Z')) // 2026-11-01 00:30 CET
+    await page.goto('/')
+    await expect(page.locator('#dateLabel')).toHaveText('November 2026')
+  })
+})
+
 test.describe('west of UTC (America/Los_Angeles)', () => {
   test.use({ timezoneId: 'America/Los_Angeles' })
+  test('landing view uses the local date: 22:00 on 31 Oct in LA is October', async ({ page }) => {
+    await page.clock.setFixedTime(new Date('2026-11-01T05:00:00Z')) // 2026-10-31 22:00 PDT
+    await page.goto('/')
+    await expect(page.locator('#dateLabel')).toHaveText('October 2026')
+  })
   test('dates are not shown a day or a month early', async ({ page }) => {
     await page.goto('/')
     await expect(page.locator('.ev', { hasText: 'Line D construction begins' }).locator('.evdate')).toHaveText(

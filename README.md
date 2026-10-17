@@ -15,5 +15,5 @@ Build/test/release contract: [AGENTS.md](AGENTS.md). Changelog:
 npm ci
 npm run dev                       # local
 npm run typecheck && npm test     # gate
-PW_CHROMIUM=/opt/pw-browsers/chromium npm run test:e2e   # persona journeys + shots
+PW_CHROMIUM=/opt/pw-browsers/chromium npm run test:e2e   # persona journeys; UPDATE_SHOTS=1 refreshes e2e/shots/
 ```

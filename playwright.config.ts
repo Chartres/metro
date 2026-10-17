@@ -1,5 +1,9 @@
 import { defineConfig, devices } from '@playwright/test'
 
+// Never reuse a server already on the port: parallel agents' previews of other
+// repos sit there. PW_PORT picks another port; --strictPort fails instead of drifting.
+const port = Number(process.env.PW_PORT ?? 4173)
+
 export default defineConfig({
   testDir: './e2e',
   projects: [
@@ -16,12 +20,12 @@ export default defineConfig({
     },
   ],
   use: {
-    baseURL: 'http://localhost:4173',
+    baseURL: `http://localhost:${port}`,
     viewport: { width: 1280, height: 800 },
   },
   webServer: {
-    command: 'npm run build && npm run preview',
-    port: 4173,
-    reuseExistingServer: !process.env.CI,
+    command: `npm run build && npm run preview -- --port ${port} --strictPort`,
+    port,
+    reuseExistingServer: false,
   },
 })

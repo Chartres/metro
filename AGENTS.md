@@ -22,7 +22,7 @@ npm run build     # vite build → dist/
 ```bash
 npm run typecheck                                   # tsc --noEmit
 npm test                                            # vitest: platform client, REST shim, boot side-effects
-PW_CHROMIUM=/opt/pw-browsers/chromium npm run test:e2e   # persona journeys, history data, Play, a11y, TZ + shots (e2e/shots/)
+PW_CHROMIUM=/opt/pw-browsers/chromium npm run test:e2e   # persona journeys, history data, Play, a11y, TZ; UPDATE_SHOTS=1 refreshes e2e/shots/, PW_PORT=nnnn if 4173 is taken
 ```
 Gate: typecheck · test · build must pass. The app itself is a single `index.html` —
 all domain logic (station data, timeline, renames) lives inline there; the e2e suite
