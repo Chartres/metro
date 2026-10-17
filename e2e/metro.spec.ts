@@ -2,15 +2,32 @@
 // and answer "when did my station open?" — the two things the toy exists for.
 import { expect, test, type Page } from '@playwright/test'
 
-const shot = (page: Page, name: string) =>
-  page.screenshot({ path: `e2e/shots/${name}.png`, fullPage: false })
+// Wait out CSS transitions (0.35 s segment/station fades) so a shot never shows a
+// half-faded state; the flash-ring keyframe animations are left running on purpose.
+const shot = async (page: Page, name: string) => {
+  await page.evaluate(() =>
+    Promise.all(document.getAnimations().filter((a) => a instanceof CSSTransition).map((a) => a.finished)),
+  )
+  await page.screenshot({ path: `e2e/shots/${name}.png`, fullPage: false })
+}
+
+// fill() alone doesn't fire `input` on a range control — the app listens for it.
+const scrubTo = async (page: Page, value: string | number) => {
+  const slider = page.locator('#slider')
+  await slider.fill(String(value))
+  await slider.dispatchEvent('input')
+}
 
 test('today view: full network, stats honest, Line D dashed as future', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveTitle(/Prague Metro/)
-  // today (init date): all 58 stations open on 3 lines
+  // today (landing view): all 58 stations open on 3 lines, total derived from the data
   await expect(page.locator('#statStations')).toHaveText('58')
+  await expect(page.locator('#statTotal')).toHaveText('58')
   await expect(page.locator('#statLines')).toHaveText('3')
+  await expect(page.locator('#dateLabel')).toHaveText(
+    new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
+  )
   // Line D exists only as under-construction dashes, never as an open line —
   // and it is BLUE (official DPP color), with the paper-only phase II
   // (Náměstí Míru–Pankrác) as a lighter dotted leg
@@ -23,14 +40,19 @@ test('today view: full network, stats honest, Line D dashed as future', async ({
     getComputedStyle(document.documentElement).getPropertyValue('--d-color').trim(),
   )
   expect(dColor).toBe('#0f5cab')
+  // segment strokes are read back from the :root custom properties — an empty
+  // or drifted lookup would paint the live network black
+  const strokes = await page
+    .locator('#liveLayer line')
+    .evaluateAll((els) => [...new Set(els.map((e) => e.getAttribute('stroke')))].sort())
+  expect(strokes).toEqual(['#2e8b3d', '#da251c', '#f0b400'])
   await shot(page, 'today')
 })
 
 test('time travel: 1974 opening day shows only the first 9 stations of line C', async ({ page }) => {
   await page.goto('/')
   // drag to the very beginning
-  await page.locator('#slider').fill('0')
-  await page.locator('#slider').dispatchEvent('input')
+  await scrubTo(page, 0)
   await expect(page.locator('#statStations')).toHaveText('9')
   await expect(page.locator('#statLines')).toHaveText('1')
   // let the scrub-crossing flashrings (one per crossed event) finish before
@@ -44,8 +66,9 @@ test('timeline event click jumps the map and flashes the banner', async ({ page 
   await page.locator('.ev', { hasText: 'Line A opens' }).click()
   await expect(page.locator('#eventBanner')).toHaveClass(/show/)
   await expect(page.locator('#eventBanner')).toContainText('Line A opens')
-  // the jump landed mid-1978: line A's first 7 stations joined C's 13
+  // C's 9 original stations + A's 7 − 1 shared interchange (Muzeum) = 15 unique open
   await expect(page.locator('#statLines')).toHaveText('2')
+  await expect(page.locator('#statStations')).toHaveText('15')
   await shot(page, 'event-jump-1978')
 })
 
@@ -67,10 +90,13 @@ test('renamed stations show communist-era names before Feb 1990', async ({ page 
   // jump to just after the 1988 extension, before the Velvet Revolution renames
   await page.locator('.ev', { hasText: 'Nové Butovice' }).click()
   await expect(page.locator('.station[data-id="dejvicka"] text')).toHaveText('Leninova')
+  // the tooltip names the station as it was called on that date
+  await page.locator('.station[data-id="dejvicka"]').dispatchEvent('mouseenter')
+  await expect(page.locator('#tooltip b')).toHaveText('Leninova')
+  await page.locator('.station[data-id="dejvicka"]').dispatchEvent('mouseleave')
   await shot(page, 'former-names-1988')
   // and back to today the modern name holds
-  await page.locator('#slider').fill('1000')
-  await page.locator('#slider').dispatchEvent('input')
+  await scrubTo(page, 1000)
   await expect(page.locator('.station[data-id="dejvicka"] text')).toHaveText('Dejvická')
 })
 
@@ -90,6 +116,162 @@ test('phone (390px): map fills the width at content aspect, panels stack below',
   // sub-4px station labels are hidden on phones; dots + tap → detail carry names
   await expect(page.locator('.station[data-id="muzeum"] text')).toBeHidden()
   await shot(page, 'mobile-390')
+})
+
+test('every timeline event click shows that event\'s date, not the nearest slider step', async ({ page }) => {
+  await page.goto('/')
+  // a slider step is ~20 days: rounding to it landed up to ~10 days early (the
+  // state before the event), ceil landed up to ~20 days late (Nov 1990 read December)
+  const months: string[] = await page.evaluate(
+    `EVENTS.map((e) => new Date(e.date + 'T12:00').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }))`,
+  )
+  const items = page.locator('.ev')
+  expect(await items.count()).toBe(months.length)
+  for (let i = 0; i < months.length; i++) {
+    await items.nth(i).click()
+    await expect(items.nth(i)).toHaveClass(/active/)
+    await expect(page.locator('#dateLabel')).toHaveText(months[i])
+  }
+})
+
+test('landing view shows today\'s month even when the slider step falls in the next one', async ({ page }) => {
+  // 30 Oct 2026: the first slider step on or after it is 18 Nov 2026
+  await page.clock.setFixedTime(new Date('2026-10-30T12:00:00Z'))
+  await page.goto('/')
+  await expect(page.locator('#dateLabel')).toHaveText('October 2026')
+})
+
+test('stations not yet open ignore the pointer and leave the tab order', async ({ page }) => {
+  await page.goto('/')
+  await page.locator('.ev', { hasText: 'Prague Metro opens' }).click()
+  const dejvicka = page.locator('.station[data-id="dejvicka"]') // Line A, 1978
+  await expect(dejvicka).toHaveCSS('pointer-events', 'none')
+  await expect(dejvicka).toHaveAttribute('tabindex', '-1')
+  const florenc = page.locator('.station[data-id="florenc"]') // Line C, opening day
+  await expect(florenc).not.toHaveCSS('pointer-events', 'none')
+  await expect(florenc).toHaveAttribute('tabindex', '0')
+})
+
+test('keyboard: Enter on an event jumps to it, Space on a station opens its detail', async ({ page }) => {
+  await page.goto('/')
+  const ev = page.locator('.ev', { hasText: 'Line A opens' })
+  await ev.focus()
+  await page.keyboard.press('Enter')
+  await expect(ev).toHaveClass(/active/)
+  await expect(page.locator('#statStations')).toHaveText('15')
+  await page.locator('.station[data-id="muzeum"]').focus()
+  await page.keyboard.press('Space')
+  await expect(page.locator('#detailPanel h3')).toHaveText('Muzeum')
+})
+
+test('history data matches the Wikipedia-checked answers', async ({ page }) => {
+  await page.goto('/')
+  // Line B runs Nové Butovice → Jinonice → Radlická → Smíchovské nádraží → Anděl
+  expect(await page.evaluate('LINE_ORDER.B.slice(5, 11)')).toEqual([
+    'nove_butovice', 'jinonice', 'radlicka', 'smichovske_nadrazi', 'andel', 'karlovo_namesti',
+  ])
+  expect(await page.evaluate('[OPEN.A.strasnicka, OPEN.A.skalka]')).toEqual(['1987-07-11', '1990-07-04'])
+  // the 1985 Line B opening had 7 stations, Florenc to Smíchovské nádraží
+  expect(await page.evaluate('EVENTS.find((e) => e.title === "Line B opens").stations.length')).toBe(7)
+})
+
+test('page loads without console errors (the station-order self-check reports there)', async ({ page }) => {
+  const errors: string[] = []
+  page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
+  page.on('pageerror', (e) => errors.push(e.message))
+  await page.goto('/')
+  await expect(page.locator('#statStations')).toHaveText('58')
+  expect(errors).toEqual([])
+})
+
+test('Line B stays drawn through the 1998–2001 infill-station gap', async ({ page }) => {
+  await page.goto('/')
+  await scrubTo(page, await page.evaluate('sliderFromDate("2000-01-01")'))
+  // all 23 Line B segments run in 2000, though Kolbenova only opened in 2001
+  const liveB = await page
+    .locator('#liveLayer line[stroke="#f0b400"]')
+    .evaluateAll((els) => els.filter((e) => (e as SVGElement).style.opacity === '0.95').length)
+  expect(liveB).toBe(23)
+})
+
+test.describe('west of UTC (America/Los_Angeles)', () => {
+  test.use({ timezoneId: 'America/Los_Angeles' })
+  test('dates are not shown a day or a month early', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.locator('.ev', { hasText: 'Line D construction begins' }).locator('.evdate')).toHaveText(
+      '1 Mar 2022',
+    )
+    // every slider position that falls on the 1st of a month labels that month
+    const wrong = await page.evaluate(`(() => {
+      const bad = []
+      for (let v = 0; v <= 1000; v++) {
+        const d = dateStrFromSliderVal(v)
+        if (!d.endsWith('-01')) continue
+        render(d)
+        const want = new Date(d + 'T00:00Z').toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+        if (document.getElementById('dateLabel').textContent !== want) bad.push(d)
+      }
+      return bad
+    })()`)
+    expect(wrong).toEqual([])
+  })
+})
+
+test('Play from the landing view replays from 1974, flashing only opening day', async ({ page }) => {
+  await page.goto('/')
+  await page.locator('#speed').selectOption('60') // slowest: the next event is ~4 s away
+  const btn = page.locator('#playBtn')
+  const rings = page.locator('#flashLayer circle')
+  const banner = page.locator('#eventBanner')
+  await btn.click()
+  expect(Number(await page.locator('#slider').inputValue())).toBeLessThan(5)
+  // opening day fires exactly once: its 9 rings and its banner. A stale
+  // prevDateStr flashes every event (~150 rings); a reset to START flashes none.
+  await expect(rings).toHaveCount(9)
+  await expect(banner).toContainText('Prague Metro opens')
+  await btn.click()
+  // and again from the very end of the slider
+  await scrubTo(page, 1000)
+  await expect(rings).toHaveCount(0) // the scrub's ~150 rings expire after 2.9 s
+  await expect(banner).not.toContainText('Prague Metro opens')
+  await btn.click()
+  expect(Number(await page.locator('#slider').inputValue())).toBeLessThan(5)
+  await expect(rings).toHaveCount(9)
+  await expect(banner).toContainText('Prague Metro opens')
+  await btn.click()
+})
+
+test('Play button: starts playback, button becomes Pause, slider advances, then pauses', async ({ page }) => {
+  await page.goto('/')
+  const btn = page.locator('#playBtn')
+  await btn.click()
+  await expect(btn).toHaveText('⏸')
+  await expect(btn).toHaveAttribute('aria-pressed', 'true')
+  await expect(btn).toHaveAttribute('aria-label', 'Pause')
+  // the date label changes ~100×/s during Play; as a live region it would flood a
+  // screen reader (the slider's aria-valuetext already carries the date)
+  await expect(page.locator('#dateLabel')).not.toHaveAttribute('aria-live')
+  const started = Number(await page.locator('#slider').inputValue())
+  // wait for slider to advance (speed=10ms/tick by default)
+  await page.waitForFunction(
+    (n) => Number((document.getElementById('slider') as HTMLInputElement).value) > n,
+    started,
+    { timeout: 3000 },
+  )
+  await btn.click()
+  await expect(btn).toHaveText('▶')
+  await expect(btn).toHaveAttribute('aria-pressed', 'false')
+  await expect(btn).toHaveAttribute('aria-label', 'Play')
+})
+
+test('Play button: conversion key written to sessionStorage on first press only', async ({ page }) => {
+  await page.goto('/')
+  const key = () => page.evaluate(() => sessionStorage.getItem('metro_conversion_fired'))
+  expect(await key()).toBeNull()
+  await page.locator('#playBtn').click()
+  expect(await key()).toBe('1')
+  // pause to keep the page clean for any later tests
+  await page.locator('#playBtn').click()
 })
 
 // Discoverability kit (flywheel Standard §5c): what crawlers, link unfurlers and AI
