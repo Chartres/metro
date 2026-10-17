@@ -1,6 +1,5 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { restShim } from './analytics'
-import { createFlywheelClient } from './platform/flywheel-client'
 
 describe('restShim (the dep-free supabase stand-in)', () => {
   it('POSTs the row to /rest/v1/<table> with the publishable key', async () => {
@@ -25,43 +24,61 @@ describe('restShim (the dep-free supabase stand-in)', () => {
   })
 })
 
-describe('createFlywheelClient', () => {
-  it('no-op when supabase is null — track never throws', () => {
-    const fw = createFlywheelClient({ app: 'test', supabase: null })
-    expect(() => fw.track('page_view')).not.toThrow()
+// Boot side-effects (page_view on load, conversion on first Play), from sweep #5;
+// the reload case is the bug the sessionStorage gate fixes (a per-load flag re-fired).
+describe('analytics init (DOM side-effects)', () => {
+  beforeEach(() => { vi.resetModules() })
+  afterEach(() => { vi.unstubAllGlobals() })
+
+  function mockClient(track: (e: string) => void, conversion: () => void): void {
+    vi.doMock('./platform/flywheel-client', () => ({
+      createFlywheelClient: () => ({ track, conversion }),
+    }))
+  }
+
+  // Loads analytics.ts against a fake playBtn; returns its click handlers.
+  async function boot(): Promise<Array<() => void>> {
+    const handlers: Array<() => void> = []
+    vi.stubGlobal('document', {
+      getElementById: () => ({ addEventListener: (_: string, fn: () => void) => handlers.push(fn) }),
+    })
+    vi.resetModules()
+    await import('./analytics')
+    return handlers
+  }
+
+  function stubSessionStorage(): void {
+    const ss: Record<string, string> = {}
+    vi.stubGlobal('sessionStorage', {
+      getItem: (k: string) => ss[k] ?? null,
+      setItem: (k: string, v: string) => { ss[k] = v },
+    })
+  }
+
+  it('fires page_view on module load when document is present', async () => {
+    const tracked: string[] = []
+    mockClient((e) => tracked.push(e), () => {})
+    vi.stubGlobal('document', { getElementById: () => null })
+    await import('./analytics')
+    expect(tracked).toContain('page_view')
   })
 
-  it('track fires insert once per call', () => {
-    const insert = vi.fn()
-    const supabase = { from: () => ({ insert }) }
-    const fw = createFlywheelClient({ app: 'test', supabase })
-    fw.track('page_view')
-    expect(insert).toHaveBeenCalledOnce()
-    expect(insert.mock.calls[0][0]).toMatchObject({ app: 'test', event: 'page_view' })
+  it('conversion fires only once even when playBtn is clicked twice', async () => {
+    const conversions: number[] = []
+    mockClient(() => {}, () => conversions.push(1))
+    stubSessionStorage()
+    const [click] = await boot()
+    click?.()
+    click?.()
+    expect(conversions).toHaveLength(1)
   })
 
-  it('conversion fires only once per session when guarded by sessionStorage', () => {
-    // Simulate the sessionStorage guard from analytics.ts boot code
-    const SESSION_KEY = 'metro_conversion_fired'
-    const ss = { getItem: vi.fn(), setItem: vi.fn() }
-    ss.getItem.mockReturnValue(null)
-
-    const insert = vi.fn()
-    const supabase = { from: () => ({ insert }) }
-    const fw = createFlywheelClient({ app: 'test', supabase })
-
-    // First press: key absent → fire
-    if (!ss.getItem(SESSION_KEY)) {
-      ss.setItem(SESSION_KEY, '1')
-      fw.conversion({ action: 'played_timeline' })
-    }
-    expect(insert).toHaveBeenCalledOnce()
-
-    // Second press: key present → skip
-    ss.getItem.mockReturnValue('1')
-    if (!ss.getItem(SESSION_KEY)) {
-      fw.conversion({ action: 'played_timeline' })
-    }
-    expect(insert).toHaveBeenCalledOnce() // still only once
+  it('conversion does not re-fire after a reload in the same session', async () => {
+    const conversions: number[] = []
+    mockClient(() => {}, () => conversions.push(1))
+    stubSessionStorage()
+    ;(await boot())[0]?.()
+    ;(await boot())[0]?.() // fresh module = page reload; sessionStorage survives
+    expect(conversions).toHaveLength(1)
   })
 })
