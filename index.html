@@ -375,7 +375,8 @@ Object.keys(OPEN).forEach(line=>{
   });
 });
 
-const TODAY = new Date().toISOString().slice(0,10);
+// the viewer's local date: toISOString() alone is the UTC date, a day off near midnight
+const TODAY = new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
 const START = '1974-05-09';
 const END   = '2029-12-31'; // horizon incl. planned Line D
 // prevDateStr is reset to this on (re)start so the opening-day event fires on the first Play tick
@@ -590,7 +591,7 @@ function render(dateStr){
     const usingFormer = s.former && dateStr < RENAME_DATE;
     const textEl = g._t;
     const label = usingFormer ? s.former : s.name;
-    if(textEl.textContent!==label) textEl.textContent = label;
+    if(textEl.textContent!==label){ textEl.textContent = label; g.setAttribute('aria-label', label); }
     textEl.style.fill = usingFormer ? '#d98a8a' : '';
   });
   statStationsEl.textContent = openCount;
