@@ -81,4 +81,14 @@ describe('analytics init (DOM side-effects)', () => {
     ;(await boot())[0]?.() // fresh module = page reload; sessionStorage survives
     expect(conversions).toHaveLength(1)
   })
+
+  it('conversion still fires once per load when site storage is blocked', async () => {
+    const conversions: number[] = []
+    mockClient(() => {}, () => conversions.push(1))
+    const denied = () => { throw new DOMException('The operation is insecure.', 'SecurityError') }
+    vi.stubGlobal('sessionStorage', { getItem: denied, setItem: denied })
+    const [click] = await boot()
+    expect(() => { click?.(); click?.() }).not.toThrow()
+    expect(conversions).toHaveLength(1)
+  })
 })

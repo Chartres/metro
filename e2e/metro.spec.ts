@@ -2,8 +2,14 @@
 // and answer "when did my station open?" — the two things the toy exists for.
 import { expect, test, type Page } from '@playwright/test'
 
-const shot = (page: Page, name: string) =>
-  page.screenshot({ path: `e2e/shots/${name}.png`, fullPage: false })
+// Wait out CSS transitions (0.35 s segment/station fades) so a shot never shows a
+// half-faded state; the flash-ring keyframe animations are left running on purpose.
+const shot = async (page: Page, name: string) => {
+  await page.evaluate(() =>
+    Promise.all(document.getAnimations().filter((a) => a instanceof CSSTransition).map((a) => a.finished)),
+  )
+  await page.screenshot({ path: `e2e/shots/${name}.png`, fullPage: false })
+}
 
 // fill() alone doesn't fire `input` on a range control — the app listens for it.
 const scrubTo = async (page: Page, value: string | number) => {
@@ -19,6 +25,9 @@ test('today view: full network, stats honest, Line D dashed as future', async ({
   await expect(page.locator('#statStations')).toHaveText('58')
   await expect(page.locator('#statTotal')).toHaveText('58')
   await expect(page.locator('#statLines')).toHaveText('3')
+  await expect(page.locator('#dateLabel')).toHaveText(
+    new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
+  )
   // Line D exists only as under-construction dashes, never as an open line —
   // and it is BLUE (official DPP color), with the paper-only phase II
   // (Náměstí Míru–Pankrác) as a lighter dotted leg
@@ -81,6 +90,10 @@ test('renamed stations show communist-era names before Feb 1990', async ({ page 
   // jump to just after the 1988 extension, before the Velvet Revolution renames
   await page.locator('.ev', { hasText: 'Nové Butovice' }).click()
   await expect(page.locator('.station[data-id="dejvicka"] text')).toHaveText('Leninova')
+  // the tooltip names the station as it was called on that date
+  await page.locator('.station[data-id="dejvicka"]').dispatchEvent('mouseenter')
+  await expect(page.locator('#tooltip b')).toHaveText('Leninova')
+  await page.locator('.station[data-id="dejvicka"]').dispatchEvent('mouseleave')
   await shot(page, 'former-names-1988')
   // and back to today the modern name holds
   await scrubTo(page, 1000)
@@ -105,16 +118,50 @@ test('phone (390px): map fills the width at content aspect, panels stack below',
   await shot(page, 'mobile-390')
 })
 
-test('every timeline event click lands on or after its date', async ({ page }) => {
+test('every timeline event click shows that event\'s date, not the nearest slider step', async ({ page }) => {
   await page.goto('/')
-  // Math.round in sliderFromDate could land up to ~10 days early, showing the
-  // state before the event (and highlighting the previous one)
+  // a slider step is ~20 days: rounding to it landed up to ~10 days early (the
+  // state before the event), ceil landed up to ~20 days late (Nov 1990 read December)
+  const months: string[] = await page.evaluate(
+    `EVENTS.map((e) => new Date(e.date + 'T12:00').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }))`,
+  )
   const items = page.locator('.ev')
-  const n = await items.count()
-  for (let i = 0; i < n; i++) {
+  expect(await items.count()).toBe(months.length)
+  for (let i = 0; i < months.length; i++) {
     await items.nth(i).click()
     await expect(items.nth(i)).toHaveClass(/active/)
+    await expect(page.locator('#dateLabel')).toHaveText(months[i])
   }
+})
+
+test('landing view shows today\'s month even when the slider step falls in the next one', async ({ page }) => {
+  // 30 Oct 2026: the first slider step on or after it is 18 Nov 2026
+  await page.clock.setFixedTime(new Date('2026-10-30T12:00:00Z'))
+  await page.goto('/')
+  await expect(page.locator('#dateLabel')).toHaveText('October 2026')
+})
+
+test('stations not yet open ignore the pointer and leave the tab order', async ({ page }) => {
+  await page.goto('/')
+  await page.locator('.ev', { hasText: 'Prague Metro opens' }).click()
+  const dejvicka = page.locator('.station[data-id="dejvicka"]') // Line A, 1978
+  await expect(dejvicka).toHaveCSS('pointer-events', 'none')
+  await expect(dejvicka).toHaveAttribute('tabindex', '-1')
+  const florenc = page.locator('.station[data-id="florenc"]') // Line C, opening day
+  await expect(florenc).not.toHaveCSS('pointer-events', 'none')
+  await expect(florenc).toHaveAttribute('tabindex', '0')
+})
+
+test('keyboard: Enter on an event jumps to it, Space on a station opens its detail', async ({ page }) => {
+  await page.goto('/')
+  const ev = page.locator('.ev', { hasText: 'Line A opens' })
+  await ev.focus()
+  await page.keyboard.press('Enter')
+  await expect(ev).toHaveClass(/active/)
+  await expect(page.locator('#statStations')).toHaveText('15')
+  await page.locator('.station[data-id="muzeum"]').focus()
+  await page.keyboard.press('Space')
+  await expect(page.locator('#detailPanel h3')).toHaveText('Muzeum')
 })
 
 test('history data matches the Wikipedia-checked answers', async ({ page }) => {
@@ -174,17 +221,23 @@ test('Play from the landing view replays from 1974, flashing only opening day', 
   await page.goto('/')
   await page.locator('#speed').selectOption('60') // slowest: the next event is ~4 s away
   const btn = page.locator('#playBtn')
+  const rings = page.locator('#flashLayer circle')
+  const banner = page.locator('#eventBanner')
   await btn.click()
   expect(Number(await page.locator('#slider').inputValue())).toBeLessThan(5)
-  // a stale prevDateStr would flash every event's rings (~150) at once
-  expect(await page.locator('#flashLayer circle').count()).toBeLessThanOrEqual(9)
+  // opening day fires exactly once: its 9 rings and its banner. A stale
+  // prevDateStr flashes every event (~150 rings); a reset to START flashes none.
+  await expect(rings).toHaveCount(9)
+  await expect(banner).toContainText('Prague Metro opens')
   await btn.click()
   // and again from the very end of the slider
   await scrubTo(page, 1000)
-  await page.waitForTimeout(3000) // let earlier rings expire
+  await expect(rings).toHaveCount(0) // the scrub's ~150 rings expire after 2.9 s
+  await expect(banner).not.toContainText('Prague Metro opens')
   await btn.click()
   expect(Number(await page.locator('#slider').inputValue())).toBeLessThan(5)
-  expect(await page.locator('#flashLayer circle').count()).toBeLessThanOrEqual(9)
+  await expect(rings).toHaveCount(9)
+  await expect(banner).toContainText('Prague Metro opens')
   await btn.click()
 })
 
@@ -195,6 +248,9 @@ test('Play button: starts playback, button becomes Pause, slider advances, then 
   await expect(btn).toHaveText('⏸')
   await expect(btn).toHaveAttribute('aria-pressed', 'true')
   await expect(btn).toHaveAttribute('aria-label', 'Pause')
+  // the date label changes ~100×/s during Play; as a live region it would flood a
+  // screen reader (the slider's aria-valuetext already carries the date)
+  await expect(page.locator('#dateLabel')).not.toHaveAttribute('aria-live')
   const started = Number(await page.locator('#slider').inputValue())
   // wait for slider to advance (speed=10ms/tick by default)
   await page.waitForFunction(

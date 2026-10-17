@@ -43,9 +43,15 @@ export const conversion = fw.conversion
 if (typeof document !== 'undefined') {
   track('page_view')
   const SESSION_KEY = 'metro_conversion_fired'
+  let fired = false // fallback when site storage is blocked: once per page load
   document.getElementById('playBtn')?.addEventListener('click', () => {
-    if (sessionStorage.getItem(SESSION_KEY)) return
-    sessionStorage.setItem(SESSION_KEY, '1')
+    try {
+      if (sessionStorage.getItem(SESSION_KEY)) return
+      sessionStorage.setItem(SESSION_KEY, '1')
+    } catch {
+      if (fired) return
+      fired = true
+    }
     conversion({ action: 'played_timeline' })
   })
 }

@@ -188,7 +188,7 @@
 
   <div id="controls">
     <button id="playBtn" aria-label="Play" aria-pressed="false">▶</button>
-    <div id="dateLabel" aria-live="polite">—</div>
+    <div id="dateLabel">—</div>
     <div id="sliderWrap">
       <input type="range" id="slider" min="0" max="1000" value="1000" step="1" aria-label="Timeline date">
       <div id="ticks"></div>
@@ -617,9 +617,9 @@ function dateStrFromSliderVal(v){
 }
 
 let prevDateStr = null;
-function onSliderInput(triggerEvents){
-  const v = Number(slider.value);
-  const dateStr = dateStrFromSliderVal(v);
+// A slider step is ~20 days; pass dateStr when the exact date is known (event jump,
+// landing on today) so the map and label show that date, not the step's.
+function onSliderInput(triggerEvents, dateStr = dateStrFromSliderVal(Number(slider.value))){
   render(dateStr);
   updateEventListActive(dateStr);
   if(triggerEvents && prevDateStr!==null){
@@ -643,7 +643,7 @@ EVENTS.forEach((ev,idx)=>{
   div.innerHTML = `<div class="evdate">${new Date(ev.date+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
     <div class="evtitle"><span class="tag ${ev.tag}">${tagLabel}</span>${ev.title}</div>
     <div class="evdesc">${ev.desc||''}</div>`;
-  onActivate(div,()=>{ slider.value = sliderFromDate(ev.date); onSliderInput(false); flashEvent(ev); });
+  onActivate(div,()=>{ slider.value = sliderFromDate(ev.date); onSliderInput(false, ev.date); flashEvent(ev); });
   eventsListEl.appendChild(div);
 });
 const eventsListItems = Array.from(eventsListEl.children); // cached; list is static after this
@@ -770,7 +770,7 @@ function tick(){
    INIT — default view shows today; Play replays from 1974
    --------------------------------------------------------------- */
 slider.value = TODAY_VAL;
-onSliderInput(false);
+onSliderInput(false, TODAY);
 </script>
 </body>
 </html>
