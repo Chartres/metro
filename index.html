@@ -64,8 +64,7 @@
   #sliderWrap{position:relative;flex:1 1 320px;min-width:220px;}
   #slider{width:100%;accent-color:var(--accent);cursor:pointer;height:22px;}
   #ticks{position:relative;height:14px;margin-top:-2px;pointer-events:none;}
-  .tick{position:absolute;top:0;width:2px;height:8px;background:var(--ink-dim);opacity:.55;transform:translateX(-1px);}
-  .tick.major{height:11px;background:var(--accent);opacity:.9;}
+  .tick.major{position:absolute;top:0;width:2px;height:11px;background:var(--accent);opacity:.9;transform:translateX(-1px);}
   #speedRow{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-dim);}
   select{background:var(--panel2);color:var(--ink);border:1px solid var(--border);border-radius:6px;
     padding:4px 6px;font-size:12px;}
@@ -458,7 +457,13 @@ function onActivate(node,fn){
   node.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fn(); } });
 }
 
-const LINE_COLOR_HEX = {A:'#2e8b3d',B:'#f0b400',C:'#da251c',D:'#0f5cab'};
+// The line palette lives once, in the :root custom properties (--a-color …).
+// SVG presentation attributes can't take var(), so read the values back here
+// instead of keeping a second hex table in sync with the stylesheet.
+const rootStyle = getComputedStyle(document.documentElement);
+const LINE_COLOR_HEX = Object.fromEntries(
+  ['A','B','C','D'].map(l=>[l, rootStyle.getPropertyValue(`--${l.toLowerCase()}-color`).trim()])
+);
 
 // Infill stations (Hloubětín 1999, Kolbenova 2001) opened after the surrounding track;
 // override those segment dates so the already-running track isn't hidden.
@@ -678,7 +683,7 @@ function checkCrossedEvents(prevStr,curStr){
    --------------------------------------------------------------- */
 const detailPanel = document.getElementById('detailPanel');
 function showStation(id){
-  document.querySelector('[data-tab="detail"]').click();
+  selectTab('detail');
   const s = S[id];
   const lineTags = s.lines.map(l=>`<span class="tag ${l}">LINE ${l}</span>`).join(' ');
   let html = `<h3>${s.name}</h3><div>${lineTags}</div><div class="kv">`;
@@ -697,6 +702,7 @@ function showStation(id){
   detailPanel.innerHTML = html;
 }
 const tooltip = document.getElementById('tooltip');
+const mapCol = document.getElementById('mapCol');
 function showTip(e,id){
   const s=S[id];
   const usingFormer = s.former && currentDate < RENAME_DATE;
@@ -708,21 +714,20 @@ function showTip(e,id){
   moveTip(e);
 }
 function moveTip(e){
-  const rect = document.getElementById('mapCol').getBoundingClientRect();
+  const rect = mapCol.getBoundingClientRect();
   tooltip.style.left = (e.clientX-rect.left+14)+'px';
   tooltip.style.top = (e.clientY-rect.top+10)+'px';
 }
 function hideTip(){ tooltip.style.opacity=0; }
 
 // Tabs
-const tabButtons = document.querySelectorAll('#sideTabs button');
-tabButtons.forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    tabButtons.forEach(b=>b.classList.toggle('active', b===btn));
-    eventsListEl.style.display = btn.dataset.tab==='events'?'block':'none';
-    detailPanel.style.display = btn.dataset.tab==='detail'?'block':'none';
-  });
-});
+const tabButtons = [...document.querySelectorAll('#sideTabs button')];
+function selectTab(tab){
+  tabButtons.forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  eventsListEl.style.display = tab==='events'?'block':'none';
+  detailPanel.style.display = tab==='detail'?'block':'none';
+}
+tabButtons.forEach(btn=>btn.addEventListener('click',()=>selectTab(btn.dataset.tab)));
 
 /* ---------------------------------------------------------------
    PLAY / PAUSE ANIMATION
