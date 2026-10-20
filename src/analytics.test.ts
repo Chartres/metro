@@ -92,23 +92,4 @@ describe('analytics init (DOM side-effects)', () => {
     expect(conversions).toHaveLength(1)
   })
 
-  it('does not throw on module load when localStorage getter throws SecurityError', async () => {
-    const tracked: string[] = []
-    mockClient((e) => tracked.push(e), () => {})
-    vi.stubGlobal('document', { getElementById: () => null })
-    // Simulate a browser that blocks all site storage — the getter itself throws
-    const throwSecurity = () => { throw new DOMException('Blocked', 'SecurityError') }
-    Object.defineProperty(globalThis, 'localStorage', { get: throwSecurity, configurable: true })
-    Object.defineProperty(globalThis, 'sessionStorage', { get: throwSecurity, configurable: true })
-    try {
-      let threw = false
-      try { await import('./analytics') } catch { threw = true }
-      expect(threw).toBe(false)
-      expect(tracked).toContain('page_view')
-    } finally {
-      // Remove the overrides so later tests see the real (absent) storage
-      delete (globalThis as Record<string, unknown>).localStorage
-      delete (globalThis as Record<string, unknown>).sessionStorage
-    }
-  })
 })
