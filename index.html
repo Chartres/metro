@@ -596,6 +596,7 @@ function render(dateStr){
     g.style.opacity = shown?1:0;
     g.style.pointerEvents = shown?'':'none';
     g.setAttribute('tabindex', shown?'0':'-1');
+    g.setAttribute('aria-hidden', shown?'false':'true');
     if(!shown || isFuture) return;
     openCount++;
     const textEl = g._t;
