@@ -513,12 +513,15 @@ const futureEls = futureSegments.concat(plannedSegments).map(seg=>{
   return {seg,line};
 });
 
+// Line D stations are planned / under construction, never "open"
+function isLineD(s){ return s.lines[0]==='D'; }
+
 // Station elements
 const stationEls = {};
 Object.values(S).forEach(s=>{
   const g = el('g',{class:'station'+(s.lines.length>1?' interchange':''), 'data-id':s.id, opacity:0,
     role:'button', tabindex:'-1', 'aria-label':s.name});
-  const isFuture = s.lines[0]==='D';
+  const isFuture = isLineD(s);
   const r = s.lines.length>1?9:6;
   if(s.lines.length>1){
     const ring = el('circle',{class:'ring',cx:s.x,cy:s.y,r:r,fill:'#fff','stroke-width':0});
@@ -556,7 +559,7 @@ const startMs = Date.parse(START), endMs = Date.parse(END);
 const slider = document.getElementById('slider');
 const dateLabel = document.getElementById('dateLabel');
 const statStationsEl = document.getElementById('statStations');
-document.getElementById('statTotal').textContent = Object.values(S).filter(s=>s.lines[0]!=='D').length;
+document.getElementById('statTotal').textContent = Object.values(S).filter(s=>!isLineD(s)).length;
 const statLinesEl = document.getElementById('statLines');
 
 function msFromSlider(v){ return startMs + (endMs-startMs) * (v/1000); }
@@ -588,7 +591,7 @@ function render(dateStr){
   Object.values(S).forEach(s=>{
     const g = stationEls[s.id];
     // future (Line D) station: shown only as hollow marker once construction has started, never "opens"
-    const isFuture = s.lines[0]==='D';
+    const isFuture = isLineD(s);
     const shown = dateStr >= (isFuture ? D_CONSTRUCTION_START : FIRST_OPEN[s.id]);
     g.style.opacity = shown?1:0;
     g.style.pointerEvents = shown?'':'none';
@@ -706,7 +709,7 @@ function showStation(id){
   const s = S[id];
   const lineTags = s.lines.map(l=>`<span class="tag ${l}">LINE ${l}</span>`).join(' ');
   let html = `<h3>${displayName(s, currentDate)}</h3><div>${lineTags}</div><div class="kv">`;
-  if(s.lines[0]==='D'){
+  if(isLineD(s)){
     html += `<div><b>Status:</b> planned / under construction (Line D)</div>
       <div><b>Construction start:</b> 2022</div>`;
   } else {
