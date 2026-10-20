@@ -631,6 +631,7 @@ function render(dateStr){
   futureEls.forEach(({line})=>line.classList.toggle('on', dStarted));
 
   currentDate = dateStr;
+  renderDetailPanel(dateStr);
 }
 
 function dateStrFromSliderVal(v){
@@ -705,24 +706,31 @@ function checkCrossedEvents(prevStr,curStr){
    STATION DETAIL / TOOLTIP
    --------------------------------------------------------------- */
 const detailPanel = document.getElementById('detailPanel');
-function showStation(id){
-  selectTab('detail');
+let selectedStation = null;
+function renderDetailPanel(dateStr){
+  if(!selectedStation) return;
+  const id = selectedStation;
   const s = S[id];
   const lineTags = s.lines.map(l=>`<span class="tag ${l}">LINE ${l}</span>`).join(' ');
-  let html = `<h3>${displayName(s, currentDate)}</h3><div>${lineTags}</div><div class="kv">`;
+  let html = `<h3>${displayName(s, dateStr)}</h3><div>${lineTags}</div><div class="kv">`;
   if(isLineD(s)){
     html += `<div><b>Status:</b> planned / under construction (Line D)</div>
-      <div><b>Construction start:</b> 2022</div>`;
+      <div><b>Construction start:</b> ${fmtDate(Date.parse(D_CONSTRUCTION_START+'T12:00'))}</div>`;
   } else {
     s.lines.forEach(l=>{
       html += `<div><b>Opened on Line ${l}:</b> ${OPEN[l][id]}</div>`;
     });
     if(s.former){
-      html += `<div><b>Former name:</b> <span class="former">${s.former}</span> (until 22 Feb 1990)</div>`;
+      html += `<div><b>Former name:</b> <span class="former">${s.former}</span> (until ${fmtDate(Date.parse(RENAME_DATE+'T12:00'))})</div>`;
     }
   }
   html += `</div>`;
   detailPanel.innerHTML = html;
+}
+function showStation(id){
+  selectTab('detail');
+  selectedStation = id;
+  renderDetailPanel(currentDate);
 }
 const tooltip = document.getElementById('tooltip');
 const mapCol = document.getElementById('mapCol');
