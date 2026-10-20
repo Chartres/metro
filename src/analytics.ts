@@ -5,8 +5,7 @@
 import { createFlywheelClient, type SupabaseLike } from './platform/flywheel-client'
 
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
-const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
-  import.meta.env.VITE_SUPABASE_ANON_KEY) as string | undefined
+const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined
 
 export function restShim(baseUrl: string, apikey: string, doFetch = fetch): SupabaseLike {
   return {
