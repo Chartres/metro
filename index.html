@@ -578,6 +578,8 @@ EVENTS.forEach(ev=>{
 });
 
 let currentDate = START; // last rendered date — tooltip picks former vs current name from it
+// Communist-era name before the 1990 rename, current name after
+function displayName(s, dateStr){ return s.former && dateStr < RENAME_DATE ? s.former : s.name; }
 function render(dateStr){
   dateLabel.textContent = fmtDate(Date.parse(dateStr+'T12:00'));
   slider.setAttribute('aria-valuetext', dateStr);
@@ -593,9 +595,9 @@ function render(dateStr){
     g.setAttribute('tabindex', shown?'0':'-1');
     if(!shown || isFuture) return;
     openCount++;
-    const usingFormer = s.former && dateStr < RENAME_DATE;
     const textEl = g._t;
-    const label = usingFormer ? s.former : s.name;
+    const label = displayName(s, dateStr);
+    const usingFormer = label !== s.name;
     if(textEl.textContent!==label){ textEl.textContent = label; g.setAttribute('aria-label', label); }
     textEl.style.fill = usingFormer ? '#d98a8a' : '';
     // For interchange stations, show the ring only when ≥2 of its lines are open at dateStr
@@ -703,8 +705,7 @@ function showStation(id){
   selectTab('detail');
   const s = S[id];
   const lineTags = s.lines.map(l=>`<span class="tag ${l}">LINE ${l}</span>`).join(' ');
-  const displayName = (s.former && currentDate < RENAME_DATE) ? s.former : s.name;
-  let html = `<h3>${displayName}</h3><div>${lineTags}</div><div class="kv">`;
+  let html = `<h3>${displayName(s, currentDate)}</h3><div>${lineTags}</div><div class="kv">`;
   if(s.lines[0]==='D'){
     html += `<div><b>Status:</b> planned / under construction (Line D)</div>
       <div><b>Construction start:</b> 2022</div>`;
@@ -723,9 +724,9 @@ const tooltip = document.getElementById('tooltip');
 const mapCol = document.getElementById('mapCol');
 function showTip(e,id){
   const s=S[id];
-  const usingFormer = s.former && currentDate < RENAME_DATE;
-  let html = `<b>${usingFormer ? s.former : s.name}</b>`;
-  if(s.former && !usingFormer) html += `<div class="former">formerly ${s.former}</div>`;
+  const name = displayName(s, currentDate);
+  let html = `<b>${name}</b>`;
+  if(s.former && name === s.name) html += `<div class="former">formerly ${s.former}</div>`;
   html += `<div class="muted">Line${s.lines.length>1?'s':''} ${s.lines.join(', ')}</div>`;
   tooltip.innerHTML = html;
   tooltip.style.opacity=1;
