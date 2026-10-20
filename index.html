@@ -517,15 +517,11 @@ const futureEls = futureSegments.concat(plannedSegments).map(seg=>{
   return {seg,line};
 });
 
-// Line D Phase 1 opened 2024-12-19; D stations are now live like any other line
-function isLineD(s){ return false; }
-
 // Station elements
 const stationEls = {};
 Object.values(S).forEach(s=>{
   const g = el('g',{class:'station'+(s.lines.length>1?' interchange':''), 'data-id':s.id, opacity:0,
     role:'button', tabindex:'-1', 'aria-label':s.name});
-  const isFuture = isLineD(s);
   const r = s.lines.length>1?9:6;
   if(s.lines.length>1){
     const ring = el('circle',{class:'ring',cx:s.x,cy:s.y,r:r,fill:'#fff','stroke-width':0});
@@ -536,10 +532,8 @@ Object.values(S).forEach(s=>{
     g.appendChild(ring); g.appendChild(core); g.appendChild(dot);
     g._ring=ring; g._core=core; g._dot=dot;
   } else {
-    g.appendChild(el('circle',{class:'dot',cx:s.x,cy:s.y,r:r,
-      fill: isFuture ? 'transparent' : '#fff',
-      stroke: LINE_COLOR_HEX[s.lines[0]], 'stroke-width': isFuture?2:3,
-      'stroke-dasharray': isFuture?'3 3':'none'}));
+    g.appendChild(el('circle',{class:'dot',cx:s.x,cy:s.y,r:r,fill:'#fff',
+      stroke:LINE_COLOR_HEX[s.lines[0]],'stroke-width':3,'stroke-dasharray':'none'}));
   }
   // label placement: alternate above/below/side based on rough position to reduce collisions
   const above = (s.lines.includes('C') && !s.lines.includes('A') && !s.lines.includes('B')) ? (s.y<380) : (s.y>500);
@@ -593,14 +587,12 @@ function render(dateStr){
   let openCount=0;
   Object.values(S).forEach(s=>{
     const g = stationEls[s.id];
-    // future (Line D) station: shown only as hollow marker once construction has started, never "opens"
-    const isFuture = isLineD(s);
-    const shown = dateStr >= (isFuture ? D_CONSTRUCTION_START : FIRST_OPEN[s.id]);
+    const shown = dateStr >= FIRST_OPEN[s.id];
     g.style.opacity = shown?1:0;
     g.style.pointerEvents = shown?'':'none';
     g.setAttribute('tabindex', shown?'0':'-1');
     g.setAttribute('aria-hidden', shown?'false':'true');
-    if(!shown || isFuture) return;
+    if(!shown) return;
     openCount++;
     const textEl = g._t;
     const label = displayName(s, dateStr);
@@ -715,16 +707,11 @@ function renderDetailPanel(dateStr){
   const s = S[id];
   const lineTags = s.lines.map(l=>`<span class="tag ${l}">LINE ${l}</span>`).join(' ');
   let html = `<h3>${displayName(s, dateStr)}</h3><div>${lineTags}</div><div class="kv">`;
-  if(isLineD(s)){
-    html += `<div><b>Status:</b> planned / under construction (Line D)</div>
-      <div><b>Construction start:</b> ${fmtDate(D_CONSTRUCTION_START)}</div>`;
-  } else {
-    s.lines.forEach(l=>{
-      html += `<div><b>Opened on Line ${l}:</b> ${OPEN[l][id]}</div>`;
-    });
-    if(s.former){
-      html += `<div><b>Former name:</b> <span class="former">${s.former}</span> (until ${fmtDate(RENAME_DATE)})</div>`;
-    }
+  s.lines.forEach(l=>{
+    html += `<div><b>Opened on Line ${l}:</b> ${OPEN[l][id]}</div>`;
+  });
+  if(s.former){
+    html += `<div><b>Former name:</b> <span class="former">${s.former}</span> (until ${fmtDate(RENAME_DATE)})</div>`;
   }
   html += `</div>`;
   detailPanel.innerHTML = html;
