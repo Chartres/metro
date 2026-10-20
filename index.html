@@ -651,7 +651,7 @@ slider.addEventListener('input',()=>onSliderInput(true));
 const eventsListEl = document.getElementById('eventsList');
 EVENTS.forEach((ev,idx)=>{
   const div = document.createElement('div');
-  div.className = 'ev'+(ev.isFuture?' future':'');
+  div.className = 'ev'+(ev.date>TODAY?' future':'');
   div.dataset.idx = idx;
   div.setAttribute('role','button');
   div.setAttribute('tabindex','0');
