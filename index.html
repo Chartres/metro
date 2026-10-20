@@ -383,7 +383,7 @@ const END   = '2029-12-31'; // horizon incl. planned Line D
 const DAY_BEFORE_START = new Date(Date.parse(START)-86400000).toISOString().slice(0,10);
 
 const EVENTS = [
-  {date:'1974-05-09', line:'C', title:'Prague Metro opens', tag:'C',
+  {date:START, line:'C', title:'Prague Metro opens', tag:'C',
    desc:'Line C launches between Florenc and Kačerov with 9 stations — the birth of the Prague Metro.',
    stations:['florenc','hlavni_nadrazi','muzeum','ip_pavlova','vysehrad','prazskeho_povstani','pankrac','budejovicka','kacerov']},
   {date:'1978-08-12', line:'A', title:'Line A opens', tag:'A',
@@ -406,7 +406,7 @@ const EVENTS = [
   {date:'1988-10-26', line:'B', title:'Line B extends to Nové Butovice', tag:'B',
    desc:'Three stations push Line B further southwest.',
    stations:['radlicka','jinonice','nove_butovice']},
-  {date:'1990-02-22', line:null, title:'Velvet Revolution: 12 stations renamed', tag:'rename', isRename:true,
+  {date:RENAME_DATE, line:null, title:'Velvet Revolution: 12 stations renamed', tag:'rename', isRename:true,
    desc:'Communist-era names — Leninova, Gottwaldova, Moskevská, Sokolovská and others — are replaced after the fall of the regime.',
    stations:['dejvicka','nove_butovice','jinonice','andel','florenc','nadrazi_holesovice','vysehrad','pankrac','roztyly','chodov','opatov','haje']},
   {date:'1990-07-04', line:'A', title:'Skalka opens', tag:'A', desc:'A single-station extension of Line A.', stations:['skalka']},
@@ -437,7 +437,7 @@ const EVENTS = [
   {date:'2015-04-06', line:'A', title:'Line A extends west to Nemocnice Motol', tag:'A',
    desc:'Four stations extend Line A to its current western terminus.',
    stations:['borislavka','nadrazi_veleslavin','petriny','nemocnice_motol']},
-  {date:'2022-03-01', line:'D', title:'Line D construction begins', tag:'D', isFuture:true,
+  {date:D_CONSTRUCTION_START, line:'D', title:'Line D construction begins', tag:'D', isFuture:true,
    desc:'Work starts on Prague\'s fourth metro line, planned to connect the centre with the southern districts (target completion late this decade).'},
   {date:'2025-12-19', line:'C', title:'Pankrác reopens after modernization', tag:'C',
    desc:'Pankrác reopens following renovation, preparing it as a future Line D interchange.'}
