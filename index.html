@@ -463,7 +463,7 @@ function onActivate(node,fn){
 // instead of keeping a second hex table in sync with the stylesheet.
 const rootStyle = getComputedStyle(document.documentElement);
 const LINE_COLOR_HEX = Object.fromEntries(
-  ['A','B','C','D'].map(l=>[l, rootStyle.getPropertyValue(`--${l.toLowerCase()}-color`).trim()])
+  Object.keys(LINE_ORDER).map(l=>[l, rootStyle.getPropertyValue(`--${l.toLowerCase()}-color`).trim()])
 );
 
 // Infill stations (Hloubětín 1999, Kolbenova 2001) opened after the surrounding track;
@@ -476,8 +476,7 @@ const SEGMENT_OPEN_OVERRIDE = {
 
 // Build segment list per line
 const segments = []; // {line, a, b, opened}
-['A','B','C','D'].forEach(line=>{
-  const order = LINE_ORDER[line];
+Object.entries(LINE_ORDER).forEach(([line,order])=>{
   for(let i=0;i<order.length-1;i++){
     const a=order[i], b=order[i+1];
     const opened = SEGMENT_OPEN_OVERRIDE[`${line}:${a}:${b}`] ||
