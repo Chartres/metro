@@ -703,7 +703,8 @@ function showStation(id){
   selectTab('detail');
   const s = S[id];
   const lineTags = s.lines.map(l=>`<span class="tag ${l}">LINE ${l}</span>`).join(' ');
-  let html = `<h3>${s.name}</h3><div>${lineTags}</div><div class="kv">`;
+  const displayName = (s.former && currentDate < RENAME_DATE) ? s.former : s.name;
+  let html = `<h3>${displayName}</h3><div>${lineTags}</div><div class="kv">`;
   if(s.lines[0]==='D'){
     html += `<div><b>Status:</b> planned / under construction (Line D)</div>
       <div><b>Construction start:</b> 2022</div>`;
