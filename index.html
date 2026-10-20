@@ -594,7 +594,7 @@ function render(dateStr){
     textEl.style.fill = usingFormer ? '#d98a8a' : '';
     // For interchange stations, show the ring only when ≥2 of its lines are open at dateStr
     if(g._ring){
-      const activeLinesHere = s.lines.filter(l=>OPEN[l]&&dateStr>=OPEN[l][s.id]);
+      const activeLinesHere = s.lines.filter(l=>dateStr>=OPEN[l][s.id]);
       const isInterchangeNow = activeLinesHere.length>1;
       g._ring.style.display=isInterchangeNow?'':'none';
       g._core.style.display=isInterchangeNow?'':'none';
