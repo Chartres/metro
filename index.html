@@ -564,9 +564,9 @@ const statLinesEl = document.getElementById('statLines');
 
 function msFromSlider(v){ return startMs + (endMs-startMs) * (v/1000); }
 function sliderFromDate(dateStr){ const ms=Date.parse(dateStr); return Math.ceil((ms-startMs)/(endMs-startMs)*1000); }
-function fmtDate(ms){
-  const d = new Date(ms);
-  return d.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+// noon local time keeps the month stable in every timezone
+function fmtDate(dateStr){
+  return new Date(dateStr+'T12:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
 }
 
 // Tick marks for major events
@@ -584,7 +584,7 @@ let currentDate = START; // last rendered date — tooltip picks former vs curre
 // Communist-era name before the 1990 rename, current name after
 function displayName(s, dateStr){ return s.former && dateStr < RENAME_DATE ? s.former : s.name; }
 function render(dateStr){
-  dateLabel.textContent = fmtDate(Date.parse(dateStr+'T12:00'));
+  dateLabel.textContent = fmtDate(dateStr);
   slider.setAttribute('aria-valuetext', dateStr);
 
   let openCount=0;
@@ -715,13 +715,13 @@ function renderDetailPanel(dateStr){
   let html = `<h3>${displayName(s, dateStr)}</h3><div>${lineTags}</div><div class="kv">`;
   if(isLineD(s)){
     html += `<div><b>Status:</b> planned / under construction (Line D)</div>
-      <div><b>Construction start:</b> ${fmtDate(Date.parse(D_CONSTRUCTION_START+'T12:00'))}</div>`;
+      <div><b>Construction start:</b> ${fmtDate(D_CONSTRUCTION_START)}</div>`;
   } else {
     s.lines.forEach(l=>{
       html += `<div><b>Opened on Line ${l}:</b> ${OPEN[l][id]}</div>`;
     });
     if(s.former){
-      html += `<div><b>Former name:</b> <span class="former">${s.former}</span> (until ${fmtDate(Date.parse(RENAME_DATE+'T12:00'))})</div>`;
+      html += `<div><b>Former name:</b> <span class="former">${s.former}</span> (until ${fmtDate(RENAME_DATE)})</div>`;
     }
   }
   html += `</div>`;
