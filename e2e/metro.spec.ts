@@ -164,6 +164,21 @@ test('keyboard: Enter on an event jumps to it, Space on a station opens its deta
   await expect(page.locator('#detailPanel h3')).toHaveText('Muzeum')
 })
 
+test('interchange dot visible on single-line date, ring replaces it when second line opens', async ({ page }) => {
+  await page.goto('/')
+  // 1974-05-09: Muzeum is open on Line C only — should show a dot, not a ring
+  await page.locator('.ev', { hasText: 'Prague Metro opens' }).click()
+  const muzeum = page.locator('.station[data-id="muzeum"]')
+  const dot = muzeum.locator('circle.dot')
+  const ring = muzeum.locator('circle.ring')
+  await expect(dot).toBeVisible()
+  await expect(ring).toBeHidden()
+  // 1978-08-12: Line A also open at Muzeum — ring replaces dot
+  await page.locator('.ev', { hasText: 'Line A opens' }).click()
+  await expect(dot).toBeHidden()
+  await expect(ring).toBeVisible()
+})
+
 test('history data matches the Wikipedia-checked answers', async ({ page }) => {
   await page.goto('/')
   // Line B runs Nové Butovice → Jinonice → Radlická → Smíchovské nádraží → Anděl

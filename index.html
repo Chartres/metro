@@ -523,7 +523,7 @@ Object.values(S).forEach(s=>{
     const ring = el('circle',{class:'ring',cx:s.x,cy:s.y,r:9,fill:'#fff','stroke-width':0});
     const core = el('circle',{class:'core',cx:s.x,cy:s.y,r:6,fill:'#0f1216'});
     // interchange: dot shown only when one of its lines is active at currentDate
-    dot.setAttribute('display','none');
+    dot.style.display='none';
     g.appendChild(ring); g.appendChild(core);
     g._ring=ring; g._core=core; g._dot=dot;
   }
