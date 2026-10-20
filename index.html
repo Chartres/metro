@@ -312,10 +312,11 @@ st('chodov','Chodov','Budovatelů',['C'],740,800);
 st('opatov','Opatov','Družby',['C'],755,840);
 st('haje','Háje','Kosmonautů',['C'],770,880);
 
-// Planned Line D (not open — under construction from 2022)
+// Line D (Phase 1 open since 2024-12-19)
 st('olbrachtova','Olbrachtova',null,['D'],660,700);
-st('nove_dvory','Nové Dvory',null,['D'],645,740);
+st('nadrazi_krc','Nádraží Krč',null,['D'],650,740);
 st('nemocnice_krc','Nemocnice Krč',null,['D'],630,780);
+st('nove_dvory','Nové Dvory',null,['D'],622,800);
 st('libus','Libuš',null,['D'],615,820);
 st('pisnice','Depo Písnice',null,['D'],600,860);
 
@@ -329,7 +330,7 @@ const LINE_ORDER = {
   C:['letnany','prosek','strizkov','ladvi','kobylisy','nadrazi_holesovice','vltavska','florenc','hlavni_nadrazi',
      'muzeum','ip_pavlova','vysehrad','prazskeho_povstani','pankrac','budejovicka','kacerov','roztyly','chodov',
      'opatov','haje'],
-  D:['pankrac','olbrachtova','nove_dvory','nemocnice_krc','libus','pisnice']
+  D:['pankrac','olbrachtova','nadrazi_krc','nemocnice_krc','nove_dvory','libus','pisnice']
 };
 
 // ponytail: data-integrity self-check — verifies x-coordinates are monotone along each LINE_ORDER
@@ -362,7 +363,9 @@ const OPEN = {
      nadrazi_holesovice:'1984-11-03',vltavska:'1984-11-03',florenc:'1974-05-09',hlavni_nadrazi:'1974-05-09',
      muzeum:'1974-05-09',ip_pavlova:'1974-05-09',vysehrad:'1974-05-09',prazskeho_povstani:'1974-05-09',
      pankrac:'1974-05-09',budejovicka:'1974-05-09',kacerov:'1974-05-09',roztyly:'1980-11-11',chodov:'1980-11-11',
-     opatov:'1980-11-11',haje:'1980-11-11'}
+     opatov:'1980-11-11',haje:'1980-11-11'},
+  D:{pankrac:'2024-12-19',olbrachtova:'2024-12-19',nadrazi_krc:'2024-12-19',
+     nemocnice_krc:'2024-12-19',nove_dvory:'2024-12-19',libus:'2024-12-19',pisnice:'2024-12-19'}
 };
 const RENAME_DATE = '1990-02-22';
 const D_CONSTRUCTION_START = '2022-03-01';
@@ -439,8 +442,9 @@ const EVENTS = [
    stations:['borislavka','nadrazi_veleslavin','petriny','nemocnice_motol']},
   {date:D_CONSTRUCTION_START, line:'D', title:'Line D construction begins', tag:'D', isFuture:true,
    desc:'Work starts on Prague\'s fourth metro line, planned to connect the centre with the southern districts (target completion late this decade).'},
-  {date:'2025-12-19', line:'C', title:'Pankrác reopens after modernization', tag:'C',
-   desc:'Pankrác reopens following renovation, preparing it as a future Line D interchange.'}
+  {date:'2024-12-19', line:'D', title:'Line D opens', tag:'D',
+   desc:'Line D opens its first phase from Pankrác to Depo Písnice — 6 new stations, completing Prague\'s fourth metro line.',
+   stations:['olbrachtova','nadrazi_krc','nemocnice_krc','nove_dvory','libus','pisnice']}
 ];
 
 /* ---------------------------------------------------------------
@@ -475,9 +479,9 @@ const SEGMENT_OPEN_OVERRIDE = {
   'B:hloubetin:rajska_zahrada': '1998-11-08',
 };
 
-// Build segment list per line (real, not D)
+// Build segment list per line
 const segments = []; // {line, a, b, opened}
-['A','B','C'].forEach(line=>{
+['A','B','C','D'].forEach(line=>{
   const order = LINE_ORDER[line];
   for(let i=0;i<order.length-1;i++){
     const a=order[i], b=order[i+1];
@@ -486,7 +490,7 @@ const segments = []; // {line, a, b, opened}
     segments.push({line,a,b,opened});
   }
 });
-const futureSegments = LINE_ORDER.D.slice(1).map((b,i)=>({line:'D',a:LINE_ORDER.D[i],b}));
+const futureSegments = []; // Phase 1 D is live; only the paper Phase 2 leg remains planned
 // Phase II exists only on paper: Náměstí Míru – Pankrác (planned northern leg)
 const plannedSegments = [{line:'D',a:'namesti_miru',b:'pankrac',planned:true}];
 
@@ -513,8 +517,8 @@ const futureEls = futureSegments.concat(plannedSegments).map(seg=>{
   return {seg,line};
 });
 
-// Line D stations are planned / under construction, never "open"
-function isLineD(s){ return s.lines[0]==='D'; }
+// Line D Phase 1 opened 2024-12-19; D stations are now live like any other line
+function isLineD(s){ return false; }
 
 // Station elements
 const stationEls = {};
@@ -559,7 +563,7 @@ const startMs = Date.parse(START), endMs = Date.parse(END);
 const slider = document.getElementById('slider');
 const dateLabel = document.getElementById('dateLabel');
 const statStationsEl = document.getElementById('statStations');
-document.getElementById('statTotal').textContent = Object.values(S).filter(s=>!isLineD(s)).length;
+document.getElementById('statTotal').textContent = Object.values(S).filter(s=>FIRST_OPEN[s.id]).length;
 const statLinesEl = document.getElementById('statLines');
 
 function sliderFromDate(dateStr){ const ms=Date.parse(dateStr); return Math.ceil((ms-startMs)/(endMs-startMs)*1000); }

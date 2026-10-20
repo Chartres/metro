@@ -20,23 +20,18 @@ const scrubTo = async (page: Page, value: string | number) => {
   await slider.dispatchEvent('input')
 }
 
-test('today view: full network, stats honest, Line D dashed as future', async ({ page }) => {
+test('today view: full network, stats honest, Line D open', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveTitle(/Prague Metro/)
-  // today (landing view): all 58 stations open on 3 lines, total derived from the data
-  await expect(page.locator('#statStations')).toHaveText('58')
-  await expect(page.locator('#statTotal')).toHaveText('58')
-  await expect(page.locator('#statLines')).toHaveText('3')
+  // today (landing view): all 64 stations open on 4 lines (Line D Phase 1 opened 2024-12-19)
+  await expect(page.locator('#statStations')).toHaveText('64')
+  await expect(page.locator('#statTotal')).toHaveText('64')
+  await expect(page.locator('#statLines')).toHaveText('4')
   await expect(page.locator('#dateLabel')).toHaveText(
     new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
   )
-  // Line D exists only as under-construction dashes, never as an open line —
-  // and it is BLUE (official DPP color), with the paper-only phase II
-  // (Náměstí Míru–Pankrác) as a lighter dotted leg
-  const future = page.locator('.segment.future.on').first()
-  await expect(future).toBeVisible()
-  await expect(future).toHaveAttribute('class', /future/)
-  expect(await page.locator('.segment.future').count()).toBe(6) // 5 construction + 1 planned
+  // Only the paper-only Phase 2 leg (Náměstí Míru–Pankrác) remains future/planned
+  expect(await page.locator('.segment.future').count()).toBe(1) // 1 planned Phase 2 leg
   await expect(page.locator('.segment.future.planned')).toHaveClass(/on/)
   const dColor = await page.evaluate(() =>
     getComputedStyle(document.documentElement).getPropertyValue('--d-color').trim(),
@@ -47,7 +42,7 @@ test('today view: full network, stats honest, Line D dashed as future', async ({
   const strokes = await page
     .locator('#liveLayer line')
     .evaluateAll((els) => [...new Set(els.map((e) => e.getAttribute('stroke')))].sort())
-  expect(strokes).toEqual(['#2e8b3d', '#da251c', '#f0b400'])
+  expect(strokes).toEqual(['#0f5cab', '#2e8b3d', '#da251c', '#f0b400'])
   await shot(page, 'today')
 })
 
@@ -185,7 +180,7 @@ test('page loads without console errors (the station-order self-check reports th
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
   page.on('pageerror', (e) => errors.push(e.message))
   await page.goto('/')
-  await expect(page.locator('#statStations')).toHaveText('58')
+  await expect(page.locator('#statStations')).toHaveText('64')
   expect(errors).toEqual([])
 })
 
