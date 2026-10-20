@@ -404,7 +404,7 @@ const EVENTS = [
   {date:'1988-10-26', line:'B', title:'Line B extends to Nové Butovice', tag:'B',
    desc:'Three stations push Line B further southwest.',
    stations:['radlicka','jinonice','nove_butovice']},
-  {date:RENAME_DATE, line:null, title:'Velvet Revolution: 12 stations renamed', tag:'rename', isRename:true,
+  {date:RENAME_DATE, line:null, title:'Velvet Revolution: 12 stations renamed', tag:'rename',
    desc:'Communist-era names — Leninova, Gottwaldova, Moskevská, Sokolovská and others — are replaced after the fall of the regime.',
    stations:['dejvicka','nove_butovice','jinonice','andel','florenc','nadrazi_holesovice','vysehrad','pankrac','roztyly','chodov','opatov','haje']},
   {date:'1990-07-04', line:'A', title:'Skalka opens', tag:'A', desc:'A single-station extension of Line A.', stations:['skalka']},
@@ -421,7 +421,7 @@ const EVENTS = [
    desc:'An infill station added on the already-built Černý Most section.', stations:['hloubetin']},
   {date:'2001-06-26', line:'B', title:'Kolbenova opens', tag:'B',
    desc:'A second infill station completes this stretch of Line B.', stations:['kolbenova']},
-  {date:'2002-08-14', line:null, title:'Catastrophic flooding', tag:'flood', isIncident:true,
+  {date:'2002-08-14', line:null, title:'Catastrophic flooding', tag:'flood',
    desc:'Record floods on the Vltava inundate 19 stations; large sections close for months, with damage over 6 billion CZK.'},
   {date:'2004-06-26', line:'C', title:'Line C extends to Ládví', tag:'C',
    desc:'Two stations extend the line further north.', stations:['kobylisy','ladvi']},
@@ -430,7 +430,7 @@ const EVENTS = [
   {date:'2008-05-08', line:'C', title:'Line C extends to Letňany', tag:'C',
    desc:'Three stations bring Line C to its current northern terminus.',
    stations:['strizkov','prosek','letnany']},
-  {date:'2013-06-03', line:null, title:'Flooding closes stations again', tag:'flood', isIncident:true,
+  {date:'2013-06-03', line:null, title:'Flooding closes stations again', tag:'flood',
    desc:'Rising Vltava waters force another round of temporary station closures.'},
   {date:'2015-04-06', line:'A', title:'Line A extends west to Nemocnice Motol', tag:'A',
    desc:'Four stations extend Line A to its current western terminus.',
@@ -658,7 +658,9 @@ EVENTS.forEach((ev,idx)=>{
   div.dataset.idx = idx;
   div.setAttribute('role','button');
   div.setAttribute('tabindex','0');
-  const tagLabel = ev.isRename?'RENAME':ev.isIncident?'FLOOD':('LINE '+(ev.line||''));
+  let tagLabel = 'LINE '+ev.line;
+  if(ev.tag==='rename') tagLabel = 'RENAME';
+  else if(ev.tag==='flood') tagLabel = 'FLOOD';
   div.innerHTML = `<div class="evdate">${new Date(ev.date+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
     <div class="evtitle"><span class="tag ${ev.tag}">${tagLabel}</span>${ev.title}</div>
     <div class="evdesc">${ev.desc||''}</div>`;
