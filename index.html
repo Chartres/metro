@@ -519,19 +519,17 @@ const stationEls = {};
 Object.values(S).forEach(s=>{
   const g = el('g',{class:'station'+(s.lines.length>1?' interchange':''), 'data-id':s.id, opacity:0,
     role:'button', tabindex:'-1', 'aria-label':s.name});
-  const r = s.lines.length>1?9:6;
+  const dot = el('circle',{class:'dot',cx:s.x,cy:s.y,r:6,fill:'#fff',
+    stroke:LINE_COLOR_HEX[s.lines[0]],'stroke-width':3});
   if(s.lines.length>1){
-    const ring = el('circle',{class:'ring',cx:s.x,cy:s.y,r:r,fill:'#fff','stroke-width':0});
-    const core = el('circle',{class:'core',cx:s.x,cy:s.y,r:r-3,fill:'#0f1216'});
-    // dot shown when only one of the interchange lines is active at currentDate
-    const dot = el('circle',{class:'dot',cx:s.x,cy:s.y,r:6,fill:'#fff',
-      stroke:LINE_COLOR_HEX[s.lines[0]],'stroke-width':3,'stroke-dasharray':'none',display:'none'});
-    g.appendChild(ring); g.appendChild(core); g.appendChild(dot);
+    const ring = el('circle',{class:'ring',cx:s.x,cy:s.y,r:9,fill:'#fff','stroke-width':0});
+    const core = el('circle',{class:'core',cx:s.x,cy:s.y,r:6,fill:'#0f1216'});
+    // interchange: dot shown only when one of its lines is active at currentDate
+    dot.setAttribute('display','none');
+    g.appendChild(ring); g.appendChild(core);
     g._ring=ring; g._core=core; g._dot=dot;
-  } else {
-    g.appendChild(el('circle',{class:'dot',cx:s.x,cy:s.y,r:r,fill:'#fff',
-      stroke:LINE_COLOR_HEX[s.lines[0]],'stroke-width':3,'stroke-dasharray':'none'}));
   }
+  g.appendChild(dot);
   // label placement: alternate above/below/side based on rough position to reduce collisions
   const above = (s.lines.includes('C') && !s.lines.includes('A') && !s.lines.includes('B')) ? (s.y<380) : (s.y>500);
   const t = el('text',{x:s.x + (s.lines.length>1?12:9), y: s.y + (above? -10 : 16),
