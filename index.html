@@ -521,8 +521,13 @@ Object.values(S).forEach(s=>{
   const isFuture = s.lines[0]==='D';
   const r = s.lines.length>1?9:6;
   if(s.lines.length>1){
-    g.appendChild(el('circle',{class:'ring',cx:s.x,cy:s.y,r:r,fill:'#fff','stroke-width':0}));
-    g.appendChild(el('circle',{class:'core',cx:s.x,cy:s.y,r:r-3,fill:'#0f1216'}));
+    const ring = el('circle',{class:'ring',cx:s.x,cy:s.y,r:r,fill:'#fff','stroke-width':0});
+    const core = el('circle',{class:'core',cx:s.x,cy:s.y,r:r-3,fill:'#0f1216'});
+    // dot shown when only one of the interchange lines is active at currentDate
+    const dot = el('circle',{class:'dot',cx:s.x,cy:s.y,r:6,fill:'#fff',
+      stroke:LINE_COLOR_HEX[s.lines[0]],'stroke-width':3,'stroke-dasharray':'none',display:'none'});
+    g.appendChild(ring); g.appendChild(core); g.appendChild(dot);
+    g._ring=ring; g._core=core; g._dot=dot;
   } else {
     g.appendChild(el('circle',{class:'dot',cx:s.x,cy:s.y,r:r,
       fill: isFuture ? 'transparent' : '#fff',
@@ -593,6 +598,16 @@ function render(dateStr){
     const label = usingFormer ? s.former : s.name;
     if(textEl.textContent!==label){ textEl.textContent = label; g.setAttribute('aria-label', label); }
     textEl.style.fill = usingFormer ? '#d98a8a' : '';
+    // For interchange stations, show the ring only when ≥2 of its lines are open at dateStr
+    if(g._ring){
+      const activeLinesHere = s.lines.filter(l=>OPEN[l]&&dateStr>=OPEN[l][s.id]);
+      const isInterchangeNow = activeLinesHere.length>1;
+      g._ring.style.display=isInterchangeNow?'':'none';
+      g._core.style.display=isInterchangeNow?'':'none';
+      g._dot.style.display=isInterchangeNow?'none':'';
+      if(!isInterchangeNow&&activeLinesHere.length===1)
+        g._dot.setAttribute('stroke',LINE_COLOR_HEX[activeLinesHere[0]]);
+    }
   });
   statStationsEl.textContent = openCount;
 
