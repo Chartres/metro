@@ -562,7 +562,6 @@ const statStationsEl = document.getElementById('statStations');
 document.getElementById('statTotal').textContent = Object.values(S).filter(s=>!isLineD(s)).length;
 const statLinesEl = document.getElementById('statLines');
 
-function msFromSlider(v){ return startMs + (endMs-startMs) * (v/1000); }
 function sliderFromDate(dateStr){ const ms=Date.parse(dateStr); return Math.ceil((ms-startMs)/(endMs-startMs)*1000); }
 // noon local time keeps the month stable in every timezone
 function fmtDate(dateStr){
@@ -635,8 +634,7 @@ function render(dateStr){
 }
 
 function dateStrFromSliderVal(v){
-  const ms = msFromSlider(v);
-  return new Date(ms).toISOString().slice(0,10);
+  return new Date(startMs + (endMs-startMs) * (v/1000)).toISOString().slice(0,10);
 }
 
 let prevDateStr = null;
