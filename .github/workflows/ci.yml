@@ -24,8 +24,5 @@ jobs:
       - run: npm test
       - name: Build
         run: npm run build
-        env: # the shared flywheel-core platform env — same names in every web product
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test
