@@ -526,7 +526,9 @@ Object.values(S).forEach(s=>{
     const core = el('circle',{class:'core',cx:s.x,cy:s.y,r:r-3,fill:'#0f1216'});
     // dot shown when only one of the interchange lines is active at currentDate
     const dot = el('circle',{class:'dot',cx:s.x,cy:s.y,r:6,fill:'#fff',
-      stroke:LINE_COLOR_HEX[s.lines[0]],'stroke-width':3,'stroke-dasharray':'none',display:'none'});
+      stroke:LINE_COLOR_HEX[s.lines[0]],'stroke-width':3,'stroke-dasharray':'none'});
+    // inline style, not a display attribute: render() clears it with style.display=''
+    dot.style.display='none';
     g.appendChild(ring); g.appendChild(core); g.appendChild(dot);
     g._ring=ring; g._core=core; g._dot=dot;
   } else {

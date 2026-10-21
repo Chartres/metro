@@ -169,6 +169,55 @@ test('keyboard: Enter on an event jumps to it, Space on a station opens its deta
   await expect(page.locator('#detailPanel h3')).toHaveText('Muzeum')
 })
 
+test('interchange dot visible on single-line date, ring replaces it when second line opens', async ({ page }) => {
+  await page.goto('/')
+  // 1974-05-09: Muzeum is open on Line C only — a dot, not a ring
+  await page.locator('.ev', { hasText: 'Prague Metro opens' }).click()
+  const muzeum = page.locator('.station[data-id="muzeum"]')
+  const dot = muzeum.locator('circle.dot')
+  const ring = muzeum.locator('circle.ring')
+  await expect(dot).toBeVisible()
+  await expect(ring).toBeHidden()
+  // 1978-08-12: Line A also open at Muzeum — ring replaces dot
+  await page.locator('.ev', { hasText: 'Line A opens' }).click()
+  await expect(dot).toBeHidden()
+  await expect(ring).toBeVisible()
+})
+
+test('station detail follows the timeline: former name before 1990, current after', async ({ page }) => {
+  await page.goto('/')
+  await page.locator('.ev', { hasText: 'Nové Butovice' }).click()
+  await page.locator('.station[data-id="dejvicka"]').dispatchEvent('click')
+  await expect(page.locator('#detailPanel h3')).toHaveText('Leninova')
+  // scrubbing past the rename re-renders the open panel
+  await page.evaluate(`render('1990-03-01')`)
+  await expect(page.locator('#detailPanel h3')).toHaveText('Dejvická')
+})
+
+test('not-yet-open stations are hidden from screen readers', async ({ page }) => {
+  await page.goto('/')
+  await page.locator('.ev', { hasText: 'Prague Metro opens' }).click()
+  await expect(page.locator('.station[data-id="dejvicka"]')).toHaveAttribute('aria-hidden', 'true')
+  await expect(page.locator('.station[data-id="muzeum"]')).toHaveAttribute('aria-hidden', 'false')
+})
+
+test('speed labels match the tick ratio to 1× (60 ms)', async ({ page }) => {
+  await page.goto('/')
+  const opts = await page.locator('#speed option').evaluateAll((els) =>
+    els.map((e) => [(e as HTMLOptionElement).value, e.textContent]),
+  )
+  for (const [v, label] of opts) expect(label).toBe(`${+(60 / Number(v)).toFixed(1)}×`)
+})
+
+test('Line C reaches Háje on 7 Nov 1980', async ({ page }) => {
+  await page.goto('/')
+  const haje = page.locator('.station[data-id="haje"]')
+  await page.evaluate(`render('1980-11-06')`)
+  await expect(haje).toHaveAttribute('aria-hidden', 'true')
+  await page.evaluate(`render('1980-11-07')`)
+  await expect(haje).toHaveAttribute('aria-hidden', 'false')
+})
+
 test('history data matches the Wikipedia-checked answers', async ({ page }) => {
   await page.goto('/')
   // Line B runs Nové Butovice → Jinonice → Radlická → Smíchovské nádraží → Anděl
