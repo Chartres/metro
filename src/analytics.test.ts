@@ -91,4 +91,5 @@ describe('analytics init (DOM side-effects)', () => {
     expect(() => { click?.(); click?.() }).not.toThrow()
     expect(conversions).toHaveLength(1)
   })
+
 })
