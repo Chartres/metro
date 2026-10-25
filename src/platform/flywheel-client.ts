@@ -77,8 +77,12 @@ function readId(storage: Storage | undefined, key: string): string {
 }
 
 export function resolveIds(storage?: Storage): { visitor_id: string; session_id: string } {
-  const ls = storage ?? (typeof localStorage !== 'undefined' ? localStorage : undefined)
-  const ss = typeof sessionStorage !== 'undefined' ? sessionStorage : ls
+  let ls: Storage | undefined = storage
+  if (!ls) {
+    try { ls = typeof localStorage !== 'undefined' ? localStorage : undefined } catch { /* blocked */ }
+  }
+  let ss: Storage | undefined
+  try { ss = typeof sessionStorage !== 'undefined' ? sessionStorage : ls } catch { ss = ls }
   return {
     visitor_id: readId(ls, 'fw:vid'),
     session_id: readId(ss, 'fw:sid'),

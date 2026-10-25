@@ -46,6 +46,21 @@ describe('resolveIds', () => {
     const ids = resolveIds(bad)
     expect(ids.visitor_id).toBe('anon')
   })
+
+  it('returns "anon" for both ids when global localStorage/sessionStorage getter throws SecurityError', () => {
+    // Covers browsers that block all site storage at the property-access level
+    const throwSecurity = () => { throw new DOMException('Blocked', 'SecurityError') }
+    Object.defineProperty(globalThis, 'localStorage', { get: throwSecurity, configurable: true })
+    Object.defineProperty(globalThis, 'sessionStorage', { get: throwSecurity, configurable: true })
+    try {
+      const ids = resolveIds()
+      expect(ids.visitor_id).toBe('anon')
+      expect(ids.session_id).toBe('anon')
+    } finally {
+      delete (globalThis as Record<string, unknown>).localStorage
+      delete (globalThis as Record<string, unknown>).sessionStorage
+    }
+  })
 })
 
 describe('createFlywheelClient', () => {

@@ -99,7 +99,6 @@
   .station{cursor:pointer;}
   .station circle{transition:r .25s, fill .25s, stroke .25s, opacity .3s;}
   .station text{font-size:9.5px;fill:var(--ink-dim);pointer-events:none;transition:opacity .3s, fill .3s;}
-  .station.interchange circle.core{fill:#0f1216;}
   .segment{fill:none;stroke-linecap:round;transition:opacity .35s, stroke-width .3s;}
   .segment.ghost{opacity:.14;stroke:#5a6270;stroke-width:3;stroke-dasharray:1 7;}
   .segment.future{stroke:var(--d-color);stroke-width:4;stroke-dasharray:6 6;opacity:0;transition:opacity .5s;}
@@ -161,7 +160,6 @@
     #mapCol{flex:none;width:100%;}
     #mapCol svg{width:100%;height:auto;aspect-ratio:1180/880;display:block;}
     #side{width:100%;flex:none;border-left:0;border-top:1px solid var(--border);}
-    #sidePanels{max-height:none;}
     header{padding:10px 14px 8px;}
     header p{display:none;}
     #controls{padding:8px 12px;gap:10px;}
@@ -197,9 +195,9 @@
       Speed
       <select id="speed">
         <option value="60">1×</option>
-        <option value="25">3×</option>
+        <option value="25">2.4×</option>
         <option value="10" selected>6×</option>
-        <option value="4">12×</option>
+        <option value="4">15×</option>
       </select>
     </div>
     <div id="stats">
@@ -361,8 +359,8 @@ const OPEN = {
   C:{letnany:'2008-05-08',prosek:'2008-05-08',strizkov:'2008-05-08',ladvi:'2004-06-26',kobylisy:'2004-06-26',
      nadrazi_holesovice:'1984-11-03',vltavska:'1984-11-03',florenc:'1974-05-09',hlavni_nadrazi:'1974-05-09',
      muzeum:'1974-05-09',ip_pavlova:'1974-05-09',vysehrad:'1974-05-09',prazskeho_povstani:'1974-05-09',
-     pankrac:'1974-05-09',budejovicka:'1974-05-09',kacerov:'1974-05-09',roztyly:'1980-11-11',chodov:'1980-11-11',
-     opatov:'1980-11-11',haje:'1980-11-11'}
+     pankrac:'1974-05-09',budejovicka:'1974-05-09',kacerov:'1974-05-09',roztyly:'1980-11-07',chodov:'1980-11-07',
+     opatov:'1980-11-07',haje:'1980-11-07'}
 };
 const RENAME_DATE = '1990-02-22';
 const D_CONSTRUCTION_START = '2022-03-01';
@@ -383,13 +381,13 @@ const END   = '2029-12-31'; // horizon incl. planned Line D
 const DAY_BEFORE_START = new Date(Date.parse(START)-86400000).toISOString().slice(0,10);
 
 const EVENTS = [
-  {date:'1974-05-09', line:'C', title:'Prague Metro opens', tag:'C',
+  {date:START, line:'C', title:'Prague Metro opens', tag:'C',
    desc:'Line C launches between Florenc and Kačerov with 9 stations — the birth of the Prague Metro.',
    stations:['florenc','hlavni_nadrazi','muzeum','ip_pavlova','vysehrad','prazskeho_povstani','pankrac','budejovicka','kacerov']},
   {date:'1978-08-12', line:'A', title:'Line A opens', tag:'A',
    desc:'Line A opens from Dejvická to Náměstí Míru — 7 new stations, and Prague\'s first interchange at Muzeum and Můstek (planned).',
    stations:['dejvicka','hradcanska','malostranska','staromestska','mustek','muzeum','namesti_miru']},
-  {date:'1980-11-11', line:'C', title:'Line C extends south to Háje', tag:'C',
+  {date:'1980-11-07', line:'C', title:'Line C extends south to Háje', tag:'C',
    desc:'Four new stations serve the growing Jižní Město housing estates.',
    stations:['roztyly','chodov','opatov','haje']},
   {date:'1980-12-19', line:'A', title:'Line A extends east to Želivského', tag:'A',
@@ -406,7 +404,7 @@ const EVENTS = [
   {date:'1988-10-26', line:'B', title:'Line B extends to Nové Butovice', tag:'B',
    desc:'Three stations push Line B further southwest.',
    stations:['radlicka','jinonice','nove_butovice']},
-  {date:'1990-02-22', line:null, title:'Velvet Revolution: 12 stations renamed', tag:'rename', isRename:true,
+  {date:RENAME_DATE, line:null, title:'Velvet Revolution: 12 stations renamed', tag:'rename',
    desc:'Communist-era names — Leninova, Gottwaldova, Moskevská, Sokolovská and others — are replaced after the fall of the regime.',
    stations:['dejvicka','nove_butovice','jinonice','andel','florenc','nadrazi_holesovice','vysehrad','pankrac','roztyly','chodov','opatov','haje']},
   {date:'1990-07-04', line:'A', title:'Skalka opens', tag:'A', desc:'A single-station extension of Line A.', stations:['skalka']},
@@ -423,7 +421,7 @@ const EVENTS = [
    desc:'An infill station added on the already-built Černý Most section.', stations:['hloubetin']},
   {date:'2001-06-26', line:'B', title:'Kolbenova opens', tag:'B',
    desc:'A second infill station completes this stretch of Line B.', stations:['kolbenova']},
-  {date:'2002-08-14', line:null, title:'Catastrophic flooding', tag:'flood', isIncident:true,
+  {date:'2002-08-14', line:null, title:'Catastrophic flooding', tag:'flood',
    desc:'Record floods on the Vltava inundate 19 stations; large sections close for months, with damage over 6 billion CZK.'},
   {date:'2004-06-26', line:'C', title:'Line C extends to Ládví', tag:'C',
    desc:'Two stations extend the line further north.', stations:['kobylisy','ladvi']},
@@ -432,12 +430,12 @@ const EVENTS = [
   {date:'2008-05-08', line:'C', title:'Line C extends to Letňany', tag:'C',
    desc:'Three stations bring Line C to its current northern terminus.',
    stations:['strizkov','prosek','letnany']},
-  {date:'2013-06-03', line:null, title:'Flooding closes stations again', tag:'flood', isIncident:true,
+  {date:'2013-06-03', line:null, title:'Flooding closes stations again', tag:'flood',
    desc:'Rising Vltava waters force another round of temporary station closures.'},
   {date:'2015-04-06', line:'A', title:'Line A extends west to Nemocnice Motol', tag:'A',
    desc:'Four stations extend Line A to its current western terminus.',
    stations:['borislavka','nadrazi_veleslavin','petriny','nemocnice_motol']},
-  {date:'2022-03-01', line:'D', title:'Line D construction begins', tag:'D', isFuture:true,
+  {date:D_CONSTRUCTION_START, line:'D', title:'Line D construction begins', tag:'D', isFuture:true,
    desc:'Work starts on Prague\'s fourth metro line, planned to connect the centre with the southern districts (target completion late this decade).'},
   {date:'2025-12-19', line:'C', title:'Pankrác reopens after modernization', tag:'C',
    desc:'Pankrác reopens following renovation, preparing it as a future Line D interchange.'}
@@ -513,16 +511,26 @@ const futureEls = futureSegments.concat(plannedSegments).map(seg=>{
   return {seg,line};
 });
 
+// Line D stations are planned / under construction, never "open"
+function isLineD(s){ return s.lines[0]==='D'; }
+
 // Station elements
 const stationEls = {};
 Object.values(S).forEach(s=>{
   const g = el('g',{class:'station'+(s.lines.length>1?' interchange':''), 'data-id':s.id, opacity:0,
     role:'button', tabindex:'-1', 'aria-label':s.name});
-  const isFuture = s.lines[0]==='D';
+  const isFuture = isLineD(s);
   const r = s.lines.length>1?9:6;
   if(s.lines.length>1){
-    g.appendChild(el('circle',{class:'ring',cx:s.x,cy:s.y,r:r,fill:'#fff','stroke-width':0}));
-    g.appendChild(el('circle',{class:'core',cx:s.x,cy:s.y,r:r-3,fill:'#0f1216'}));
+    const ring = el('circle',{class:'ring',cx:s.x,cy:s.y,r:r,fill:'#fff','stroke-width':0});
+    const core = el('circle',{class:'core',cx:s.x,cy:s.y,r:r-3,fill:'#0f1216'});
+    // dot shown when only one of the interchange lines is active at currentDate
+    const dot = el('circle',{class:'dot',cx:s.x,cy:s.y,r:6,fill:'#fff',
+      stroke:LINE_COLOR_HEX[s.lines[0]],'stroke-width':3,'stroke-dasharray':'none'});
+    // inline style, not a display attribute: render() clears it with style.display=''
+    dot.style.display='none';
+    g.appendChild(ring); g.appendChild(core); g.appendChild(dot);
+    g._ring=ring; g._core=core; g._dot=dot;
   } else {
     g.appendChild(el('circle',{class:'dot',cx:s.x,cy:s.y,r:r,
       fill: isFuture ? 'transparent' : '#fff',
@@ -551,14 +559,13 @@ const startMs = Date.parse(START), endMs = Date.parse(END);
 const slider = document.getElementById('slider');
 const dateLabel = document.getElementById('dateLabel');
 const statStationsEl = document.getElementById('statStations');
-document.getElementById('statTotal').textContent = Object.values(S).filter(s=>s.lines[0]!=='D').length;
+document.getElementById('statTotal').textContent = Object.values(S).filter(s=>!isLineD(s)).length;
 const statLinesEl = document.getElementById('statLines');
 
-function msFromSlider(v){ return startMs + (endMs-startMs) * (v/1000); }
 function sliderFromDate(dateStr){ const ms=Date.parse(dateStr); return Math.ceil((ms-startMs)/(endMs-startMs)*1000); }
-function fmtDate(ms){
-  const d = new Date(ms);
-  return d.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+// noon local time keeps the month stable in every timezone
+function fmtDate(dateStr){
+  return new Date(dateStr+'T12:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
 }
 
 // Tick marks for major events
@@ -573,26 +580,39 @@ EVENTS.forEach(ev=>{
 });
 
 let currentDate = START; // last rendered date — tooltip picks former vs current name from it
+// Communist-era name before the 1990 rename, current name after
+function displayName(s, dateStr){ return s.former && dateStr < RENAME_DATE ? s.former : s.name; }
 function render(dateStr){
-  dateLabel.textContent = fmtDate(Date.parse(dateStr+'T12:00'));
+  dateLabel.textContent = fmtDate(dateStr);
   slider.setAttribute('aria-valuetext', dateStr);
 
   let openCount=0;
   Object.values(S).forEach(s=>{
     const g = stationEls[s.id];
     // future (Line D) station: shown only as hollow marker once construction has started, never "opens"
-    const isFuture = s.lines[0]==='D';
+    const isFuture = isLineD(s);
     const shown = dateStr >= (isFuture ? D_CONSTRUCTION_START : FIRST_OPEN[s.id]);
     g.style.opacity = shown?1:0;
     g.style.pointerEvents = shown?'':'none';
     g.setAttribute('tabindex', shown?'0':'-1');
+    g.setAttribute('aria-hidden', shown?'false':'true');
     if(!shown || isFuture) return;
     openCount++;
-    const usingFormer = s.former && dateStr < RENAME_DATE;
     const textEl = g._t;
-    const label = usingFormer ? s.former : s.name;
+    const label = displayName(s, dateStr);
+    const usingFormer = label !== s.name;
     if(textEl.textContent!==label){ textEl.textContent = label; g.setAttribute('aria-label', label); }
     textEl.style.fill = usingFormer ? '#d98a8a' : '';
+    // For interchange stations, show the ring only when ≥2 of its lines are open at dateStr
+    if(g._ring){
+      const activeLinesHere = s.lines.filter(l=>OPEN[l]&&dateStr>=OPEN[l][s.id]);
+      const isInterchangeNow = activeLinesHere.length>1;
+      g._ring.style.display=isInterchangeNow?'':'none';
+      g._core.style.display=isInterchangeNow?'':'none';
+      g._dot.style.display=isInterchangeNow?'none':'';
+      if(!isInterchangeNow&&activeLinesHere.length===1)
+        g._dot.setAttribute('stroke',LINE_COLOR_HEX[activeLinesHere[0]]);
+    }
   });
   statStationsEl.textContent = openCount;
 
@@ -610,11 +630,11 @@ function render(dateStr){
   futureEls.forEach(({line})=>line.classList.toggle('on', dStarted));
 
   currentDate = dateStr;
+  renderDetailPanel(dateStr);
 }
 
 function dateStrFromSliderVal(v){
-  const ms = msFromSlider(v);
-  return new Date(ms).toISOString().slice(0,10);
+  return new Date(startMs + (endMs-startMs) * (v/1000)).toISOString().slice(0,10);
 }
 
 let prevDateStr = null;
@@ -640,7 +660,9 @@ EVENTS.forEach((ev,idx)=>{
   div.dataset.idx = idx;
   div.setAttribute('role','button');
   div.setAttribute('tabindex','0');
-  const tagLabel = ev.isRename?'RENAME':ev.isIncident?'FLOOD':('LINE '+(ev.line||''));
+  let tagLabel = 'LINE '+ev.line;
+  if(ev.tag==='rename') tagLabel = 'RENAME';
+  else if(ev.tag==='flood') tagLabel = 'FLOOD';
   div.innerHTML = `<div class="evdate">${new Date(ev.date+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
     <div class="evtitle"><span class="tag ${ev.tag}">${tagLabel}</span>${ev.title}</div>
     <div class="evdesc">${ev.desc||''}</div>`;
@@ -684,32 +706,39 @@ function checkCrossedEvents(prevStr,curStr){
    STATION DETAIL / TOOLTIP
    --------------------------------------------------------------- */
 const detailPanel = document.getElementById('detailPanel');
-function showStation(id){
-  selectTab('detail');
+let selectedStation = null;
+function renderDetailPanel(dateStr){
+  if(!selectedStation) return;
+  const id = selectedStation;
   const s = S[id];
   const lineTags = s.lines.map(l=>`<span class="tag ${l}">LINE ${l}</span>`).join(' ');
-  let html = `<h3>${s.name}</h3><div>${lineTags}</div><div class="kv">`;
-  if(s.lines[0]==='D'){
+  let html = `<h3>${displayName(s, dateStr)}</h3><div>${lineTags}</div><div class="kv">`;
+  if(isLineD(s)){
     html += `<div><b>Status:</b> planned / under construction (Line D)</div>
-      <div><b>Construction start:</b> 2022</div>`;
+      <div><b>Construction start:</b> ${fmtDate(D_CONSTRUCTION_START)}</div>`;
   } else {
     s.lines.forEach(l=>{
       html += `<div><b>Opened on Line ${l}:</b> ${OPEN[l][id]}</div>`;
     });
     if(s.former){
-      html += `<div><b>Former name:</b> <span class="former">${s.former}</span> (until 22 Feb 1990)</div>`;
+      html += `<div><b>Former name:</b> <span class="former">${s.former}</span> (until ${fmtDate(RENAME_DATE)})</div>`;
     }
   }
   html += `</div>`;
   detailPanel.innerHTML = html;
 }
+function showStation(id){
+  selectTab('detail');
+  selectedStation = id;
+  renderDetailPanel(currentDate);
+}
 const tooltip = document.getElementById('tooltip');
 const mapCol = document.getElementById('mapCol');
 function showTip(e,id){
   const s=S[id];
-  const usingFormer = s.former && currentDate < RENAME_DATE;
-  let html = `<b>${usingFormer ? s.former : s.name}</b>`;
-  if(s.former && !usingFormer) html += `<div class="former">formerly ${s.former}</div>`;
+  const name = displayName(s, currentDate);
+  let html = `<b>${name}</b>`;
+  if(s.former && name === s.name) html += `<div class="former">formerly ${s.former}</div>`;
   html += `<div class="muted">Line${s.lines.length>1?'s':''} ${s.lines.join(', ')}</div>`;
   tooltip.innerHTML = html;
   tooltip.style.opacity=1;
