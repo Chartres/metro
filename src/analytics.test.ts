@@ -41,6 +41,7 @@ describe('analytics init (DOM side-effects)', () => {
     const handlers: Array<() => void> = []
     vi.stubGlobal('document', {
       getElementById: () => ({ addEventListener: (_: string, fn: () => void) => handlers.push(fn) }),
+      addEventListener: () => {},
     })
     vi.resetModules()
     await import('./analytics')
@@ -58,9 +59,26 @@ describe('analytics init (DOM side-effects)', () => {
   it('fires page_view on module load when document is present', async () => {
     const tracked: string[] = []
     mockClient((e) => tracked.push(e), () => {})
-    vi.stubGlobal('document', { getElementById: () => null })
+    vi.stubGlobal('document', { getElementById: () => null, addEventListener: () => {} })
     await import('./analytics')
     expect(tracked).toContain('page_view')
+  })
+
+  // The map is a classic inline script; it reports actions as `metro:action`
+  // DOM events, and this module turns each into an allow-listed key_action.
+  it('relays metro:action events from the inline app as key_action', async () => {
+    const calls: Array<[string, unknown]> = []
+    vi.doMock('./platform/flywheel-client', () => ({
+      createFlywheelClient: () => ({ track: (e: string, p?: unknown) => calls.push([e, p]), conversion: () => {} }),
+    }))
+    const listeners: Record<string, (e: { detail: unknown }) => void> = {}
+    vi.stubGlobal('document', {
+      getElementById: () => null,
+      addEventListener: (type: string, fn: (e: { detail: unknown }) => void) => { listeners[type] = fn },
+    })
+    await import('./analytics')
+    listeners['metro:action']?.({ detail: { action: 'decade_jump', year: '1990', today: false } })
+    expect(calls).toContainEqual(['key_action', { action: 'decade_jump', year: '1990', today: false }])
   })
 
   it('conversion fires only once even when playBtn is clicked twice', async () => {

@@ -36,8 +36,10 @@ test('today view: full network, stats honest, Line D dashed as future', async ({
   const future = page.locator('.segment.future.on').first()
   await expect(future).toBeVisible()
   await expect(future).toHaveAttribute('class', /future/)
-  expect(await page.locator('.segment.future').count()).toBe(6) // 5 construction + 1 planned
-  await expect(page.locator('.segment.future.planned')).toHaveClass(/on/)
+  // under construction: Pankrác–Ryšánka (2022) + Ryšánka–Nové Dvory (2026, 3 segments);
+  // on paper only: Nové Dvory–Depo Písnice (3) + Náměstí Míru–Pankrác (1)
+  expect(await page.locator('.segment.future').count()).toBe(8)
+  expect(await page.locator('.segment.future.planned.on').count()).toBe(4)
   const dColor = await page.evaluate(() =>
     getComputedStyle(document.documentElement).getPropertyValue('--d-color').trim(),
   )
@@ -229,6 +231,23 @@ test('history data matches the Wikipedia-checked answers', async ({ page }) => {
   expect(await page.evaluate('EVENTS.find((e) => e.title === "Line B opens").stations.length')).toBe(7)
 })
 
+test('Line D follows the current DPP plan (Wikipedia, checked 2026-10-27)', async ({ page }) => {
+  await page.goto('/')
+  expect(await page.evaluate('LINE_ORDER.D.map((id) => S[id].name)')).toEqual([
+    'Pankrác', 'Ryšánka', 'Nádraží Krč', 'Nemocnice Krč', 'Nové Dvory', 'Libuš', 'Písnice', 'Depo Písnice',
+  ])
+  expect(await page.evaluate('S.rysanka.former')).toBe(null) // "Olbrachtova" was a working name, never in service
+  expect(await page.evaluate('D_CONSTRUCTION_START')).toBe('2022-04-21')
+  // before June 2026 only Pankrác–Ryšánka is a building site; the rest of the line is dotted
+  await page.evaluate(`render('2025-01-01')`)
+  expect(await page.locator('.segment.future.on:not(.planned)').count()).toBe(1)
+  await page.evaluate(`render('2026-07-01')`)
+  expect(await page.locator('.segment.future.on:not(.planned)').count()).toBe(4)
+  // the opening estimate is DPP's 2032, not "late this decade"
+  expect(await page.locator('#eventsList').textContent()).toContain('2032')
+  expect(await page.locator('#eventsList').textContent()).not.toContain('late this decade')
+})
+
 test('page loads without console errors (the station-order self-check reports there)', async ({ page }) => {
   const errors: string[] = []
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
@@ -267,7 +286,7 @@ test.describe('west of UTC (America/Los_Angeles)', () => {
   test('dates are not shown a day or a month early', async ({ page }) => {
     await page.goto('/')
     await expect(page.locator('.ev', { hasText: 'Line D construction begins' }).locator('.evdate')).toHaveText(
-      '1 Mar 2022',
+      '21 Apr 2022',
     )
     // every slider position that falls on the 1st of a month labels that month
     const wrong = await page.evaluate(`(() => {
@@ -364,6 +383,12 @@ test('discoverability kit: robots, sitemap, llms.txt, security.txt, 1200×630 sh
   expect(llms.headers()['content-type']).toMatch(/^text\/plain/)
   expect((await llms.text()).startsWith('# Prague Metro')).toBe(true)
 
+  // IndexNow key file (one POST after deploy reaches Bing, Seznam, Yandex): served as the bare key
+  const key = '7d9b591952b995ae3add3c5ac63db35e'
+  const keyFile = await request.get(`/${key}.txt`)
+  expect(keyFile.headers()['content-type']).toMatch(/^text\/plain/)
+  expect(await keyFile.text()).toBe(key)
+
   const sec = await request.get('/.well-known/security.txt')
   expect(await sec.text()).toMatch(/^Contact: https:\/\//m)
 
@@ -377,7 +402,7 @@ test('discoverability kit: robots, sitemap, llms.txt, security.txt, 1200×630 sh
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://metro.dravec.org/')
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://metro.dravec.org/og.png')
   await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image')
-  const ld = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent()) ?? '{}')
+  const ld = JSON.parse((await page.locator('script[type="application/ld+json"]').first().textContent()) ?? '{}')
   expect(ld['@type']).toBe('WebApplication')
   expect(ld.url).toBe('https://metro.dravec.org/')
 })

@@ -1,30 +1,44 @@
 # Prague Metro — Growth Through Time
 
 > An interactive, single-page map of how the Prague Metro grew: every line extension, station
-> rename and closure from opening day (9 May 1974) to today, plus Line D under construction
-> and its planned phase-II leg. Scrub the timeline or press Play and watch the network grow.
-> Free, no account, no ads, no cookies. English.
+> rename and closure from opening day (9 May 1974) to today, plus Line D under construction.
+> Pick any date and see that day's network with that day's station names. Free, no account,
+> no ads, no cookies. English, with a short Czech summary.
 
 ## What it is
-- A history visualisation, not a journey planner: pick any date and see which segments and
-  stations were open, how many lines were running, and what changed that year.
-- Lines A (green), B (yellow), C (red) as built, Line D in its official blue — dashed where
+- A history visualisation, not a journey planner. Scrub the timeline or press Play to watch
+  the network grow; tap a station for its opening date and former name.
+- Six small maps (1974, 1980, 1990, 2000, 2010, today) show the whole history at a glance;
+  each moves the main map to that date. The slider's track is a chart of stations open.
+- Lines A (green), B (yellow), C (red) as built; Line D in its official blue, dashed where
   under construction, dotted where only planned.
-- Station names follow the name valid at the chosen date (renames are events on the timeline).
-- Works on a phone: the map fills the width at its native aspect ratio; tap a station for detail.
+- Below the map: a table of every opening, the complete 1990 rename list, and Line D status,
+  readable without JavaScript.
 
-## How to use it
-- https://metro.dravec.org/ — drag the year slider, or press Play; click a station for its
-  opening date and renames.
+## Facts (as shown in the app, checked 27 Oct 2026)
+- Opened 9 May 1974: line C, 9 stations, Florenc – Kačerov. Line A opened 12 Aug 1978, line B
+  2 Nov 1985.
+- Today: 58 stations on lines A, B, C; interchanges Muzeum (A/C), Můstek (A/B), Florenc (B/C).
+  Latest opening: line A west to Nemocnice Motol, 6 Apr 2015.
+- Renamed 22 Feb 1990 (12 stations): Leninova → Dejvická, Dukelská → Nové Butovice,
+  Švermova → Jinonice, Moskevská → Anděl, Sokolovská → Florenc, Fučíkova → Nádraží
+  Holešovice, Gottwaldova → Vyšehrad, Mládežnická → Pankrác, Primátora Vacka → Roztyly,
+  Budovatelů → Chodov, Družby → Opatov, Kosmonautů → Háje.
+- Floods: August 2002 (19 stations flooded, sections closed for months); June 2013.
+- Line D: Pankrác, Ryšánka, Nádraží Krč, Nemocnice Krč, Nové Dvory, Libuš, Písnice, Depo
+  Písnice (plus a planned leg north to Náměstí Míru). Construction began 21 Apr 2022
+  (Pankrác – Ryšánka) and June 2026 (Ryšánka – Nové Dvory). DPP expects Pankrác – Nové
+  Dvory to open in the second half of 2032.
 
 ## Data & provenance
-- Opening/closure/rename dates compiled from public sources (Dopravní podnik hl. m. Prahy
-  history, Wikipedia line/station articles); the dataset is embedded in the page and versioned
-  in the repository. Line D dates are the official plan and can slip.
+- Dates come from Dopravní podnik hl. m. Prahy (DPP) history pages and press releases and
+  Wikipedia's line and station articles. The dataset is embedded in the page and versioned
+  in the repository; tests hold the page's text to the map's data. Line D dates are DPP's
+  current plan and can slip.
 
 ## Links
 - App: https://metro.dravec.org/
-- Source code: https://github.com/Chartres/metro
+- Source code and corrections: https://github.com/Chartres/metro
 - Sitemap: https://metro.dravec.org/sitemap.xml
 - More from the author: https://flywheel.dravec.org/
 
