@@ -383,6 +383,12 @@ test('discoverability kit: robots, sitemap, llms.txt, security.txt, 1200×630 sh
   expect(llms.headers()['content-type']).toMatch(/^text\/plain/)
   expect((await llms.text()).startsWith('# Prague Metro')).toBe(true)
 
+  // IndexNow key file (one POST after deploy reaches Bing, Seznam, Yandex): served as the bare key
+  const key = '7d9b591952b995ae3add3c5ac63db35e'
+  const keyFile = await request.get(`/${key}.txt`)
+  expect(keyFile.headers()['content-type']).toMatch(/^text\/plain/)
+  expect(await keyFile.text()).toBe(key)
+
   const sec = await request.get('/.well-known/security.txt')
   expect(await sec.text()).toMatch(/^Contact: https:\/\//m)
 
