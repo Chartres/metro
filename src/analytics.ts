@@ -53,4 +53,9 @@ if (typeof document !== 'undefined') {
     }
     conversion({ action: 'played_timeline' })
   })
+  // the inline map script can't import this module; it reports what people do
+  // (a decade small-multiple jump, …) as DOM events instead
+  document.addEventListener('metro:action', (e) => {
+    track('key_action', (e as CustomEvent<Record<string, unknown>>).detail)
+  })
 }

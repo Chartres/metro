@@ -40,3 +40,21 @@ Sweep consolidation (#3, #4, #5 folded into #6).
 - Dropped a 1.2.0 line that claimed a live-region fix main never needed.
 - e2e: never reuses a server already on the port (`PW_PORT` picks another), and
   writes screenshots to `e2e/shots/` only with `UPDATE_SHOTS=1`.
+
+## 1.3.0 — 2026-10-27
+Deep round (signature, corrections, findability).
+- Small multiples: six small maps of the network (1974, 1980, 1990, 2000, 2010, today)
+  with station counts, at the top of the timeline; a tap moves the main map there and is
+  logged as `key_action` `decade_jump`.
+- Growth line: the slider's track is a step chart of stations open on each date, with a
+  marker at the current date.
+- Corrections. Line D construction began on 21 April 2022, not 1 March. Line D has 8
+  stations south of Pankrác in the order Pankrác, Ryšánka (working name Olbrachtova),
+  Nádraží Krč, Nemocnice Krč, Nové Dvory, Libuš, Písnice, Depo Písnice; the map had 5, in
+  the wrong order. Only Pankrác – Nové Dvory is under construction (from 2022 and June
+  2026); the rest is drawn as planned. DPP now expects Pankrác – Nové Dvory in the second
+  half of 2032; the app said "late this decade".
+- Static history text below the map (openings table, the 1990 renames, floods, Line D, a
+  Czech summary) and FAQ structured data, so the page has content without JavaScript.
+  Tests hold the text to the map's data.
+- Play button is a 44 px touch target; the header emoji is gone.
