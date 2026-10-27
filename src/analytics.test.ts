@@ -77,8 +77,8 @@ describe('analytics init (DOM side-effects)', () => {
       addEventListener: (type: string, fn: (e: { detail: unknown }) => void) => { listeners[type] = fn },
     })
     await import('./analytics')
-    listeners['metro:action']?.({ detail: { action: 'decade_jump', year: 1990 } })
-    expect(calls).toContainEqual(['key_action', { action: 'decade_jump', year: 1990 }])
+    listeners['metro:action']?.({ detail: { action: 'decade_jump', year: '1990', today: false } })
+    expect(calls).toContainEqual(['key_action', { action: 'decade_jump', year: '1990', today: false }])
   })
 
   it('conversion fires only once even when playBtn is clicked twice', async () => {

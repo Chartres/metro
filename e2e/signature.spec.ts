@@ -29,7 +29,9 @@ test('small multiples: six dated maps with honest station counts, each jumps the
   await tiles.nth(2).click()
   await expect(page.locator('#dateLabel')).toHaveText('December 1990')
   await expect(page.locator('#statStations')).toHaveText('38')
-  await expect(tiles.nth(2)).toHaveAttribute('aria-pressed', 'true')
+  // the tile for the shown date is the current one (not a toggle: pressing again doesn't undo it)
+  await expect(tiles.nth(2)).toHaveAttribute('aria-current', 'true')
+  await expect(tiles.nth(5)).not.toHaveAttribute('aria-current', 'true')
   await expect(tiles.nth(2)).toHaveAttribute('aria-label', /1990.*38 stations/)
   await shot(page, 'small-multiples')
 })
@@ -39,10 +41,16 @@ test('small multiples report the jump as a key_action', async ({ page }) => {
   const seen = await page.evaluate(() => {
     const got: unknown[] = []
     document.addEventListener('metro:action', (e) => got.push((e as CustomEvent).detail))
-    ;(document.querySelectorAll('#multiples .multiple')[1] as HTMLElement).click()
+    const tiles = document.querySelectorAll('#multiples .multiple')
+    ;(tiles[1] as HTMLElement).click()
+    ;(tiles[5] as HTMLElement).click()
     return got
   })
-  expect(seen).toEqual([{ action: 'decade_jump', year: '1980' }])
+  const thisYear = String(new Date().getFullYear())
+  expect(seen).toEqual([
+    { action: 'decade_jump', year: '1980', today: false },
+    { action: 'decade_jump', year: thisYear, today: true },
+  ])
 })
 
 test('keyboard: Enter on a small multiple jumps there', async ({ page }) => {

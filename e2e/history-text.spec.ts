@@ -25,12 +25,36 @@ test.describe('with JavaScript', () => {
 
   test('openings table matches the timeline events', async ({ page }) => {
     await page.goto('/')
+    // "new stations" = stations first opened that day: an interchange counts once, on its first line
     const want = await page.evaluate(`EVENTS.filter((e) => ['A', 'B', 'C'].includes(e.tag) && e.stations)
-      .map((e) => [e.date, e.line, String(e.stations.length)])`)
+      .map((e) => [e.date,
+        new Date(e.date + 'T12:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+        e.line, String(Object.values(S).filter((s) => FIRST_OPEN[s.id] === e.date).length)])`)
     const got = await page.locator('#openings tbody tr').evaluateAll((rows) =>
-      rows.map((r) => [r.getAttribute('data-date'), r.children[1].textContent!.trim(), r.children[3].textContent!.trim()]),
+      rows.map((r) => [r.getAttribute('data-date'), r.children[0].textContent!.trim(),
+        r.children[1].textContent!.trim(), r.children[3].textContent!.trim()]),
     )
     expect(got).toEqual(want)
+    // so the column adds up to today's total
+    const total = await page.evaluate('stationsOpenOn(TODAY)')
+    expect(got.reduce((n, r) => n + Number(r[3]), 0)).toBe(total)
+  })
+
+  test('prose and FAQ answers agree with the data', async ({ page }) => {
+    await page.goto('/')
+    const total = String(await page.evaluate('stationsOpenOn(TODAY)'))
+    const pairs = (await page.evaluate(`Object.values(S).filter((s) => s.former).map((s) => s.former + ' → ' + s.name)`)) as string[]
+    const faq = (await page.locator('script[type="application/ld+json"]').allTextContents())
+      .map((b) => JSON.parse(b)).find((b) => b['@type'] === 'FAQPage')
+    const answers = faq.mainEntity.map((q: { acceptedAnswer: { text: string } }) => q.acceptedAnswer.text).join('\n')
+    for (const p of pairs) expect(answers).toContain(p)
+    expect(answers).toContain(`${total} stations`)
+    expect(await page.locator('#history > p').first().textContent()).toContain(`${total} stations`)
+    const dStart = await page.evaluate(
+      `new Date(D_CONSTRUCTION_START + 'T12:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })`,
+    )
+    expect(answers).toContain(dStart)
+    expect(await page.locator('#history').textContent()).toContain(dStart)
   })
 
   test('rename table and Czech summary match the station data', async ({ page }) => {

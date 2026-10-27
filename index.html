@@ -144,7 +144,7 @@
   .multiple{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:4px 4px 6px;
     cursor:pointer;min-height:44px;}
   .multiple:hover{border-color:#4a525e;}
-  .multiple[aria-pressed="true"]{border-color:var(--accent);}
+  .multiple[aria-current="true"]{border-color:var(--accent);}
   .multiple:focus-visible,.ev:focus-visible,.station:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
   .multiple svg{width:100%;height:auto;aspect-ratio:1180/880;}
   .multiple line{stroke-linecap:round;stroke-width:26;}
@@ -178,7 +178,7 @@
 
   #history{max-width:760px;margin:0 auto;padding:48px 20px;font-size:17px;line-height:26px;color:var(--ink);}
   #history h2{font-size:20px;line-height:26px;margin:48px 0 8px;}
-  #history h2:first-child{margin-top:0;}
+  #history > h2:first-child{margin-top:0;}
   #history p{margin:0 0 24px;}
   #history table{width:100%;border-collapse:collapse;margin-bottom:24px;}
   #history th{font-size:13px;line-height:18px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-dim);
@@ -231,7 +231,7 @@
     <button id="playBtn" aria-label="Play" aria-pressed="false">▶</button>
     <div id="dateLabel">—</div>
     <div id="sliderWrap">
-      <svg id="growth" role="img" viewBox="0 0 1000 22" preserveAspectRatio="none">
+      <svg id="growth" role="img" aria-label="Stations open over time" viewBox="0 0 1000 22" preserveAspectRatio="none">
         <path id="growthPath"></path><line id="growthNow" x1="0" x2="0" y1="0" y2="22"></line>
       </svg>
       <input type="range" id="slider" min="0" max="1000" value="1000" step="1" aria-label="Timeline date">
@@ -290,6 +290,7 @@
 <article id="history">
   <h2>The Prague Metro, 1974 to today</h2>
   <p>The Prague Metro opened on <b>9 May 1974</b> with line C: 9 stations between Florenc and Kačerov.
+    (In the table below an interchange counts once, on the day it first opened.)
     Line A followed in 1978 and line B in 1985. Today the three lines have 58 stations, with interchanges
     at Muzeum (A/C), Můstek (A/B) and Florenc (B/C). The newest stations are the four at the west end
     of line A, to Nemocnice Motol, opened on 6 April 2015.</p>
@@ -299,11 +300,11 @@
     <thead><tr><th>Opened</th><th>Line</th><th>Section</th><th>New stations</th></tr></thead>
     <tbody>
       <tr data-date="1974-05-09"><td>9 May 1974</td><td>C</td><td>Florenc – Kačerov</td><td>9</td></tr>
-      <tr data-date="1978-08-12"><td>12 Aug 1978</td><td>A</td><td>Dejvická – Náměstí Míru</td><td>7</td></tr>
+      <tr data-date="1978-08-12"><td>12 Aug 1978</td><td>A</td><td>Dejvická – Náměstí Míru</td><td>6</td></tr>
       <tr data-date="1980-11-07"><td>7 Nov 1980</td><td>C</td><td>Kačerov – Háje</td><td>4</td></tr>
       <tr data-date="1980-12-19"><td>19 Dec 1980</td><td>A</td><td>Náměstí Míru – Želivského</td><td>3</td></tr>
       <tr data-date="1984-11-03"><td>3 Nov 1984</td><td>C</td><td>Florenc – Nádraží Holešovice</td><td>2</td></tr>
-      <tr data-date="1985-11-02"><td>2 Nov 1985</td><td>B</td><td>Smíchovské nádraží – Florenc</td><td>7</td></tr>
+      <tr data-date="1985-11-02"><td>2 Nov 1985</td><td>B</td><td>Smíchovské nádraží – Florenc</td><td>5</td></tr>
       <tr data-date="1987-07-11"><td>11 Jul 1987</td><td>A</td><td>Želivského – Strašnická</td><td>1</td></tr>
       <tr data-date="1988-10-26"><td>26 Oct 1988</td><td>B</td><td>Smíchovské nádraží – Nové Butovice</td><td>3</td></tr>
       <tr data-date="1990-07-04"><td>4 Jul 1990</td><td>A</td><td>Strašnická – Skalka</td><td>1</td></tr>
@@ -509,7 +510,7 @@ Object.keys(OPEN).forEach(line=>{
 // the viewer's local date: toISOString() alone is the UTC date, a day off near midnight
 const TODAY = new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
 const START = '1974-05-09';
-const END   = '2029-12-31'; // horizon incl. planned Line D
+const END   = '2029-12-31'; // slider horizon; Line D never "opens" in the app (DPP: 2032), so this only sets the scale
 // prevDateStr is reset to this on (re)start so the opening-day event fires on the first Play tick
 const DAY_BEFORE_START = new Date(Date.parse(START)-86400000).toISOString().slice(0,10);
 
@@ -744,7 +745,6 @@ const multipleEls = SNAPSHOTS.map(date=>{
   tile.className = 'multiple';
   tile.setAttribute('role','button');
   tile.setAttribute('tabindex','0');
-  tile.setAttribute('aria-pressed','false');
   tile.setAttribute('aria-label', `Jump to ${date===TODAY?'today':fmtDate(date)}: ${n} stations`);
   const svg = el('svg',{viewBox:'-40 60 1180 880','aria-hidden':'true'});
   segments.forEach(seg=>{
@@ -759,7 +759,8 @@ const multipleEls = SNAPSHOTS.map(date=>{
   onActivate(tile,()=>{
     slider.value = Math.min(1000, sliderFromDate(date));
     onSliderInput(false, date);
-    document.dispatchEvent(new CustomEvent('metro:action',{detail:{action:'decade_jump',year:year.toLowerCase()}}));
+    document.dispatchEvent(new CustomEvent('metro:action',
+      {detail:{action:'decade_jump',year:date.slice(0,4),today:date===TODAY}}));
   });
   multiplesEl.appendChild(tile);
   return {date,tile};
@@ -821,7 +822,9 @@ function render(dateStr){
   const gx = Math.max(0, Math.min(1000, sliderFromDate(dateStr)));
   growthNow.setAttribute('x1', gx); growthNow.setAttribute('x2', gx);
   growthNow.setAttribute('y1', growthY(openCount));
-  multipleEls.forEach(({date,tile})=>tile.setAttribute('aria-pressed', String(date===dateStr)));
+  multipleEls.forEach(({date,tile})=>{
+    if(date===dateStr) tile.setAttribute('aria-current','true'); else tile.removeAttribute('aria-current');
+  });
 
   currentDate = dateStr;
   renderDetailPanel(dateStr);
