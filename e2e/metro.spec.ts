@@ -229,6 +229,11 @@ test('history data matches the Wikipedia-checked answers', async ({ page }) => {
   expect(await page.evaluate('[OPEN.A.strasnicka, OPEN.A.skalka]')).toEqual(['1987-07-11', '1990-07-04'])
   // the 1985 Line B opening had 7 stations, Florenc to Smíchovské nádraží
   expect(await page.evaluate('EVENTS.find((e) => e.title === "Line B opens").stations.length')).toBe(7)
+  // Line A's 1978 opening: 7 stations, but Muzeum (line C, 1974) was not new; Můstek
+  // became an interchange only when line B arrived in 1985
+  const a1978 = (await page.evaluate('EVENTS.find((e) => e.title === "Line A opens").desc')) as string
+  expect(a1978).toContain('6 of them new')
+  expect(a1978).not.toContain('(planned)')
 })
 
 test('Line D follows the current DPP plan (Wikipedia, checked 2026-10-27)', async ({ page }) => {
