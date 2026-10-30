@@ -11,6 +11,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Prague Metro — Growth Through Time">
 <meta property="og:locale" content="en_GB">
+<meta property="og:locale:alternate" content="cs_CZ">
 <meta property="og:url" content="https://metro.dravec.org/">
 <meta property="og:title" content="Prague Metro — Growth Through Time">
 <meta property="og:description" content="Every extension, rename and closure since 1974 on a scrubbable map — plus Line D under construction.">
@@ -26,7 +27,7 @@
 {"@context":"https://schema.org","@type":"WebApplication","name":"Prague Metro — Growth Through Time",
  "url":"https://metro.dravec.org/",
  "description":"Interactive map of the Prague Metro's growth from opening day 1974 to today — every extension, rename and closure.",
- "applicationCategory":"EducationalApplication","operatingSystem":"Any","inLanguage":"en",
+ "applicationCategory":"EducationalApplication","operatingSystem":"Any","inLanguage":["en","cs"],
  "isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"CZK"}}
 </script>
 <script type="application/ld+json">
@@ -38,7 +39,15 @@
  {"@type":"Question","name":"How many stations does the Prague Metro have?",
   "acceptedAnswer":{"@type":"Answer","text":"58 stations on three lines (A, B, C), with interchanges at Muzeum, Můstek and Florenc. The last ones to open were the four at the west end of line A, on 6 April 2015."}},
  {"@type":"Question","name":"When will Prague Metro line D open?",
-  "acceptedAnswer":{"@type":"Answer","text":"Construction began on 21 April 2022 (Pankrác – Ryšánka) and on Ryšánka – Nové Dvory in June 2026. DPP expects Pankrác – Nové Dvory to open in the second half of 2032."}}
+  "acceptedAnswer":{"@type":"Answer","text":"Construction began on 21 April 2022 (Pankrác – Ryšánka) and on 19 June 2026 (Ryšánka – Nové Dvory). DPP expects Pankrác – Nové Dvory to open in the second half of 2032."}},
+ {"@type":"Question","inLanguage":"cs","name":"Kdy bylo otevřeno pražské metro?",
+  "acceptedAnswer":{"@type":"Answer","inLanguage":"cs","text":"9. května 1974, trasou C: 9 stanic mezi Florencí a Kačerovem. Trasa A přibyla v roce 1978 a trasa B v roce 1985."}},
+ {"@type":"Question","inLanguage":"cs","name":"Které stanice pražského metra byly v roce 1990 přejmenovány?",
+  "acceptedAnswer":{"@type":"Answer","inLanguage":"cs","text":"12 stanic, 22. února 1990: Leninova → Dejvická, Dukelská → Nové Butovice, Švermova → Jinonice, Moskevská → Anděl, Sokolovská → Florenc, Fučíkova → Nádraží Holešovice, Gottwaldova → Vyšehrad, Mládežnická → Pankrác, Primátora Vacka → Roztyly, Budovatelů → Chodov, Družby → Opatov, Kosmonautů → Háje."}},
+ {"@type":"Question","inLanguage":"cs","name":"Kolik stanic má pražské metro?",
+  "acceptedAnswer":{"@type":"Answer","inLanguage":"cs","text":"58 stanic na třech trasách (A, B, C), s přestupy Muzeum, Můstek a Florenc. Naposledy byly otevřeny čtyři stanice na západním konci trasy A, 6. dubna 2015."}},
+ {"@type":"Question","inLanguage":"cs","name":"Kdy se otevře trasa D pražského metra?",
+  "acceptedAnswer":{"@type":"Answer","inLanguage":"cs","text":"Stavba začala 21. dubna 2022 (Pankrác – Ryšánka) a 19. června 2026 (Ryšánka – Nové Dvory). DPP očekává otevření úseku Pankrác – Nové Dvory ve druhé polovině roku 2032."}}
 ]}
 </script>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -64,7 +73,11 @@
 
   header{padding:14px 20px 10px;border-bottom:1px solid var(--border);background:var(--panel);flex:0 0 auto;}
   header h1{margin:0 0 2px;font-size:19px;font-weight:700;letter-spacing:.2px;}
+  header{position:relative;}
   header p{margin:0;color:var(--ink-dim);font-size:12.5px;}
+  #csLink{position:absolute;right:20px;top:50%;transform:translateY(-50%);color:var(--ink-dim);font-size:13px;
+    line-height:44px;padding:0 4px;}
+  #csLink:hover{color:var(--ink);}
 
   #controls{display:flex;align-items:center;gap:14px;padding:10px 20px;background:var(--panel);
     border-bottom:1px solid var(--border);flex:0 0 auto;flex-wrap:wrap;}
@@ -99,7 +112,6 @@
   #legend .row{display:flex;align-items:center;gap:8px;margin:3px 0;}
   #legend .sw{width:20px;height:4px;border-radius:2px;}
   #legend .sw.dashed{background:none;border-top:3px dashed var(--d-color);height:0;}
-  #legend .sw.dashed.planned{border-top-style:dotted;opacity:.6;}
 
   #eventBanner{position:absolute;top:14px;left:50%;transform:translateX(-50%);
     background:rgba(255,209,102,.14);border:1px solid var(--accent);color:var(--accent);
@@ -121,8 +133,6 @@
   .segment.ghost{opacity:.14;stroke:#5a6270;stroke-width:3;stroke-dasharray:1 7;}
   .segment.future{stroke:var(--d-color);stroke-width:4;stroke-dasharray:6 6;opacity:0;transition:opacity .5s;}
   .segment.future.on{opacity:.85;}
-  .segment.future.planned{stroke-width:3;stroke-dasharray:2 7;}
-  .segment.future.planned.on{opacity:.55;}
 
   @keyframes pulseRing{
     0%{ stroke-opacity:.9; stroke-width:2; r:9; }
@@ -175,6 +185,8 @@
   #detailPanel .kv{margin-top:8px;}
   #detailPanel .kv div{margin-bottom:3px;}
   #detailPanel .kv b{color:var(--ink);}
+  #detailPanel .dsec{margin-top:6px;}
+  #detailPanel .dsec a{display:block;color:var(--ink-dim);}
 
   #history{max-width:760px;margin:0 auto;padding:48px 20px;font-size:17px;line-height:26px;color:var(--ink);}
   #history h2{font-size:20px;line-height:26px;margin:48px 0 8px;}
@@ -184,9 +196,19 @@
   #history th{font-size:13px;line-height:18px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-dim);
     text-align:left;font-weight:600;padding:8px 8px 8px 0;border-bottom:1px solid var(--border);}
   #history td{padding:8px 8px 8px 0;border-bottom:1px solid var(--border);vertical-align:top;}
-  #openings td:first-child,#openings td:last-child{font-variant-numeric:tabular-nums;}
+  #openings td:first-child,#openings td:last-child,#openings-cs td:first-child,#openings-cs td:last-child{
+    font-variant-numeric:tabular-nums;}
+  #openings td:first-child,#openings-cs td:first-child{font-size:13px;}
   #history .src{font-size:13px;line-height:18px;color:var(--ink-dim);}
   #history a{color:var(--ink);}
+
+  /* small phones: the openings tables' longest station names must still fit without sideways scroll */
+  @media (max-width:420px){
+    #history{padding:48px 16px;}
+    #history th{letter-spacing:0;}
+    #history th,#history td{padding-right:6px;}
+    #openings td,#openings-cs td{overflow-wrap:anywhere;}
+  }
 
   ::-webkit-scrollbar{width:8px;}
   ::-webkit-scrollbar-thumb{background:#333a44;border-radius:4px;}
@@ -204,6 +226,8 @@
     #mapCol svg{width:100%;height:auto;aspect-ratio:1180/880;display:block;}
     #side{width:100%;flex:none;border-left:0;border-top:1px solid var(--border);}
     header{padding:10px 14px 8px;}
+    header h1{padding-right:64px;}
+    #csLink{right:14px;}
     header p{display:none;}
     #controls{padding:8px 12px;gap:10px;}
     #stats{width:100%;justify-content:space-between;}
@@ -225,6 +249,7 @@
   <header>
     <h1>Prague Metro — Growth Through Time</h1>
     <p>The network's full extent from opening day (9 May 1974) to today, with every extension, rename and closure along the way.</p>
+    <a id="csLink" href="#history-cs" lang="cs" hreflang="cs">Česky</a>
   </header>
 
   <div id="controls">
@@ -266,7 +291,6 @@
         <div class="row"><div class="sw" style="background:var(--b-color)"></div>Line B</div>
         <div class="row"><div class="sw" style="background:var(--c-color)"></div>Line C</div>
         <div class="row"><div class="sw dashed"></div>Line D — under construction</div>
-        <div class="row"><div class="sw dashed planned"></div>Line D — planned extension</div>
         <div class="row"><div class="sw" style="background:#5a6270;opacity:.4"></div>Not yet built</div>
       </div>
       <div id="eventBanner"></div>
@@ -348,22 +372,82 @@
   <p>Line D is Prague's fourth line, from the centre to the southern districts: Pankrác, Ryšánka,
     Nádraží Krč, Nemocnice Krč, Nové Dvory, Libuš, Písnice and Depo Písnice, with a later leg north from
     Pankrác to Náměstí Míru. Work on Pankrác – Ryšánka began on 21 April 2022 and on Ryšánka – Nové
-    Dvory in June 2026. DPP expects Pankrác – Nové Dvory to open in the second half of 2032.</p>
+    Dvory on 19 June 2026. The map draws only these two sections; the rest is not under construction yet. DPP expects Pankrác – Nové Dvory to open in the second half of 2032.</p>
 
-  <section lang="cs">
-    <h2>Stručně česky</h2>
-    <p>Pražské metro zahájilo provoz 9. května 1974 trasou C mezi Florencí a Kačerovem (9 stanic).
-      Trasa A přibyla v roce 1978, trasa B v roce 1985; dnes mají tři trasy 58 stanic. Po sametové revoluci
-      bylo 22. února 1990 přejmenováno 12 stanic: Leninova → Dejvická, Dukelská → Nové Butovice,
-      Švermova → Jinonice, Moskevská → Anděl, Sokolovská → Florenc, Fučíkova → Nádraží Holešovice,
-      Gottwaldova → Vyšehrad, Mládežnická → Pankrác, Primátora Vacka → Roztyly, Budovatelů → Chodov,
-      Družby → Opatov, Kosmonautů → Háje. Trasa D se staví od 21. dubna 2022; DPP očekává otevření
-      úseku Pankrác – Nové Dvory ve druhé polovině roku 2032.</p>
-  </section>
 
   <p class="src">Sources: Dopravní podnik hl. m. Prahy (DPP) history and press releases; Wikipedia articles
     on the Prague Metro and its lines. Data and corrections:
     <a href="https://github.com/Chartres/metro">github.com/Chartres/metro</a>.</p>
+
+  <section id="history-cs" lang="cs">
+    <h2>Pražské metro od roku 1974 do dneška</h2>
+    <p>Pražské metro zahájilo provoz <b>9. května 1974</b> trasou C: 9 stanic mezi Florencí a Kačerovem.
+      (V tabulce níže se přestupní stanice počítá jednou, v den, kdy byla poprvé otevřena.)
+      Trasa A přibyla v roce 1978 a trasa B v roce 1985. Dnes mají tři trasy 58 stanic a přestupní stanice
+      Muzeum (A/C), Můstek (A/B) a Florenc (B/C). Nejnovější jsou čtyři stanice na západním konci trasy A,
+      do Nemocnice Motol, otevřené 6. dubna 2015.</p>
+
+    <h2>Kdy se otevíraly jednotlivé úseky</h2>
+    <table id="openings-cs">
+      <thead><tr><th>Otevřeno</th><th>Trasa</th><th>Úsek</th><th>Nové stanice</th></tr></thead>
+      <tbody>
+        <tr data-date="1974-05-09"><td>9. 5. 1974</td><td>C</td><td>Florenc – Kačerov</td><td>9</td></tr>
+        <tr data-date="1978-08-12"><td>12. 8. 1978</td><td>A</td><td>Dejvická – Náměstí Míru</td><td>6</td></tr>
+        <tr data-date="1980-11-07"><td>7. 11. 1980</td><td>C</td><td>Kačerov – Háje</td><td>4</td></tr>
+        <tr data-date="1980-12-19"><td>19. 12. 1980</td><td>A</td><td>Náměstí Míru – Želivského</td><td>3</td></tr>
+        <tr data-date="1984-11-03"><td>3. 11. 1984</td><td>C</td><td>Florenc – Nádraží Holešovice</td><td>2</td></tr>
+        <tr data-date="1985-11-02"><td>2. 11. 1985</td><td>B</td><td>Smíchovské nádraží – Florenc</td><td>5</td></tr>
+        <tr data-date="1987-07-11"><td>11. 7. 1987</td><td>A</td><td>Želivského – Strašnická</td><td>1</td></tr>
+        <tr data-date="1988-10-26"><td>26. 10. 1988</td><td>B</td><td>Smíchovské nádraží – Nové Butovice</td><td>3</td></tr>
+        <tr data-date="1990-07-04"><td>4. 7. 1990</td><td>A</td><td>Strašnická – Skalka</td><td>1</td></tr>
+        <tr data-date="1990-11-22"><td>22. 11. 1990</td><td>B</td><td>Florenc – Českomoravská</td><td>4</td></tr>
+        <tr data-date="1994-11-11"><td>11. 11. 1994</td><td>B</td><td>Nové Butovice – Zličín</td><td>5</td></tr>
+        <tr data-date="1998-11-08"><td>8. 11. 1998</td><td>B</td><td>Českomoravská – Černý Most</td><td>3</td></tr>
+        <tr data-date="1999-06-08"><td>8. 6. 1999</td><td>B</td><td>Hloubětín (dodatečně vložená stanice)</td><td>1</td></tr>
+        <tr data-date="2001-06-26"><td>26. 6. 2001</td><td>B</td><td>Kolbenova (dodatečně vložená stanice)</td><td>1</td></tr>
+        <tr data-date="2004-06-26"><td>26. 6. 2004</td><td>C</td><td>Nádraží Holešovice – Ládví</td><td>2</td></tr>
+        <tr data-date="2006-05-26"><td>26. 5. 2006</td><td>A</td><td>Skalka – Depo Hostivař</td><td>1</td></tr>
+        <tr data-date="2008-05-08"><td>8. 5. 2008</td><td>C</td><td>Ládví – Letňany</td><td>3</td></tr>
+        <tr data-date="2015-04-06"><td>6. 4. 2015</td><td>A</td><td>Dejvická – Nemocnice Motol</td><td>4</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Stanice přejmenované v roce 1990</h2>
+    <p>Po sametové revoluci, 22. února 1990, dostalo nová jména 12 stanic pojmenovaných v komunistické éře:
+      Leninova → Dejvická, Dukelská → Nové Butovice, Švermova → Jinonice, Moskevská → Anděl, Sokolovská → Florenc, Fučíkova → Nádraží Holešovice, Gottwaldova → Vyšehrad, Mládežnická → Pankrác, Primátora Vacka → Roztyly, Budovatelů → Chodov, Družby → Opatov, Kosmonautů → Háje.</p>
+    <table id="renames-cs">
+      <thead><tr><th>Název do roku 1990</th><th>Název od roku 1990</th><th>Trasa</th></tr></thead>
+      <tbody>
+        <tr><td>Leninova</td><td>Dejvická</td><td>A</td></tr>
+        <tr><td>Dukelská</td><td>Nové Butovice</td><td>B</td></tr>
+        <tr><td>Švermova</td><td>Jinonice</td><td>B</td></tr>
+        <tr><td>Moskevská</td><td>Anděl</td><td>B</td></tr>
+        <tr><td>Sokolovská</td><td>Florenc</td><td>B, C</td></tr>
+        <tr><td>Fučíkova</td><td>Nádraží Holešovice</td><td>C</td></tr>
+        <tr><td>Gottwaldova</td><td>Vyšehrad</td><td>C</td></tr>
+        <tr><td>Mládežnická</td><td>Pankrác</td><td>C</td></tr>
+        <tr><td>Primátora Vacka</td><td>Roztyly</td><td>C</td></tr>
+        <tr><td>Budovatelů</td><td>Chodov</td><td>C</td></tr>
+        <tr><td>Družby</td><td>Opatov</td><td>C</td></tr>
+        <tr><td>Kosmonautů</td><td>Háje</td><td>C</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Povodně</h2>
+    <p>V srpnu 2002 Vltava zaplavila 19 stanic; části sítě zůstaly zavřené několik měsíců.
+      Velká voda zavřela stanice znovu v červnu 2013.</p>
+
+    <h2>Trasa D</h2>
+    <p>Trasa D je čtvrtá linka pražského metra, z centra do jižních čtvrtí: Pankrác, Ryšánka, Nádraží Krč,
+      Nemocnice Krč, Nové Dvory, Libuš, Písnice a Depo Písnice, později i s úsekem z Pankráce na sever
+      k Náměstí Míru. Stavba úseku Pankrác – Ryšánka začala 21. dubna 2022 a úseku Ryšánka – Nové Dvory
+      19. června 2026. Mapa kreslí jen tyto dva úseky; ostatní se zatím nestaví. DPP očekává otevření
+      úseku Pankrác – Nové Dvory ve druhé polovině roku 2032.</p>
+
+    <p class="src">Zdroje: historie a tiskové zprávy Dopravního podniku hl. m. Prahy (DPP); články Wikipedie
+      o pražském metru a jeho trasách. Data a opravy:
+      <a href="https://github.com/Chartres/metro">github.com/Chartres/metro</a>.</p>
+  </section>
 </article>
 
 <script>
@@ -493,11 +577,20 @@ const OPEN = {
      opatov:'1980-11-07',haje:'1980-11-07'}
 };
 const RENAME_DATE = '1990-02-22';
-const D_CONSTRUCTION_START = '2022-04-21';
-// Line D sections and when work on them began (DPP press release 19 Jun 2026);
-// a section with no date exists on paper only and draws dotted
-const D_SECTION_START = {pankrac:D_CONSTRUCTION_START, rysanka:'2026-06-19', nadrazi_krc:'2026-06-19',
-  nemocnice_krc:'2026-06-19'}; // keyed by the section's northern station
+// Line D sections with a construction start (checked 2026-10-30). Only these are drawn;
+// the rest of the line (Nové Dvory – Depo Písnice, Náměstí Míru – Pankrác) has no start
+// and the map draws nothing for it.
+const D_SECTIONS = [
+  {from:'pankrac', to:'rysanka', start:'2022-04-21',
+   sources:[{label:'ČTK report of DPP\'s ceremonial start, 21 Apr 2022',
+     url:'https://www.archiweb.cz/en/n/home/dopravni-podnik-zahaji-na-pankraci-stavbu-prvni-casti-linky-metra-d-do-pisnice'}]},
+  {from:'rysanka', to:'nove_dvory', start:'2026-06-19',
+   sources:[{label:'ČT24, 19 Jun 2026 (the ceremony that day)',
+     url:'https://ct24.ceskatelevize.cz/clanek/regiony/hlavni-mesto-praha/praha-zahajila-stavbu-druhe-casti-metra-d-z-olbrachtovy-na-nove-dvory-374736'},
+    {label:'DPP press release, 18 Sep 2026 ("three months since construction began")',
+     url:'https://www.dpp.cz/spolecnost/pro-media/tiskove-zpravy/detail/278_3458-v-praze-na-novych-dvorech-zacaly-razby-dalsiho-useku-metra-d'}]}
+];
+const D_CONSTRUCTION_START = D_SECTIONS[0].start;
 
 // Overall "first opened" date per station (earliest across its lines) — used for station dot + labels
 const FIRST_OPEN = {};
@@ -509,6 +602,9 @@ Object.keys(OPEN).forEach(line=>{
 
 // the viewer's local date: toISOString() alone is the UTC date, a day off near midnight
 const TODAY = new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+// the day this page was built (Prague date, stamped by vite.config.ts); the data can't change after it
+const BUILD_DATE_RAW = '__BUILD_DATE__';
+const BUILD_DATE = /^\d{4}-\d\d-\d\d$/.test(BUILD_DATE_RAW) ? BUILD_DATE_RAW : TODAY;
 const START = '1974-05-09';
 const END   = '2029-12-31'; // slider horizon; Line D never "opens" in the app (DPP: 2032), so this only sets the scale
 // prevDateStr is reset to this on (re)start so the opening-day event fires on the first Play tick
@@ -622,10 +718,17 @@ const segments = []; // {line, a, b, opened}
     segments.push({line,a,b,opened});
   }
 });
-const futureSegments = LINE_ORDER.D.slice(1).map((b,i)=>({line:'D',a:LINE_ORDER.D[i],b,
-  started:D_SECTION_START[LINE_ORDER.D[i]]}));
-// Phase II exists only on paper: Náměstí Míru – Pankrác (planned northern leg)
-const plannedSegments = [{line:'D',a:'namesti_miru',b:'pankrac',planned:true}];
+// Line D segments of the sections under construction, each carrying its section
+const futureSegments = D_SECTIONS.flatMap(sec=>{
+  const ids = LINE_ORDER.D.slice(LINE_ORDER.D.indexOf(sec.from), LINE_ORDER.D.indexOf(sec.to)+1);
+  return ids.slice(1).map((b,i)=>({line:'D',a:ids[i],b,started:sec.start,section:sec}));
+});
+// A Line D station appears when the first section through it starts (Pankrác is line C's)
+const D_STATION_START = {};
+futureSegments.forEach(seg=>[seg.a,seg.b].forEach(id=>{
+  if(S[id].lines[0]==='D' && !(D_STATION_START[id] <= seg.started)) D_STATION_START[id]=seg.started;
+}));
+const sectionName = sec => `${S[sec.from].name} – ${S[sec.to].name}`;
 
 function segLine(seg,attrs){
   const A=S[seg.a],B=S[seg.b];
@@ -633,7 +736,7 @@ function segLine(seg,attrs){
 }
 
 // Ghost (full network, always faint) — union of all segments, drawn once
-segments.concat(futureSegments,plannedSegments).forEach(seg=>{
+segments.concat(futureSegments).forEach(seg=>{
   ghostLayer.appendChild(segLine(seg,{class:'segment ghost'}));
 });
 
@@ -643,9 +746,9 @@ const segEls = segments.map(seg=>{
   liveLayer.appendChild(line);
   return {seg,line};
 });
-// Future (Line D) segment elements — under construction + paper-only planned
-const futureEls = futureSegments.concat(plannedSegments).map(seg=>{
-  const line=segLine(seg,{class:'segment future'+(seg.planned?' planned':'')});
+// Future (Line D) segment elements — under construction only
+const futureEls = futureSegments.map(seg=>{
+  const line=segLine(seg,{class:'segment future'});
   futureLayer.appendChild(line);
   return {seg,line};
 });
@@ -656,6 +759,7 @@ function isLineD(s){ return s.lines[0]==='D'; }
 // Station elements
 const stationEls = {};
 Object.values(S).forEach(s=>{
+  if(isLineD(s) && !D_STATION_START[s.id]) return; // no construction start: not drawn
   const g = el('g',{class:'station'+(s.lines.length>1?' interchange':''), 'data-id':s.id, opacity:0,
     role:'button', tabindex:'-1', 'aria-label':s.name});
   const isFuture = isLineD(s);
@@ -706,6 +810,9 @@ function sliderFromDate(dateStr){ const ms=Date.parse(dateStr); return Math.ceil
 function fmtDate(dateStr){
   return new Date(dateStr+'T12:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
 }
+function fmtDay(dateStr){
+  return new Date(dateStr+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+}
 
 // Tick marks for major events
 const ticksEl = document.getElementById('ticks');
@@ -735,17 +842,20 @@ const growthNow = document.getElementById('growthNow');
     `Stations open over time: ${stationsOpenOn(START)} in ${START.slice(0,4)}, ${stationsOpenOn(TODAY)} today`);
 })();
 
-/* Small multiples (Tufte): the same map at six dates; each tile jumps the main map there */
-const SNAPSHOTS = [START,'1980-12-31','1990-12-31','2000-12-31','2010-12-31',TODAY];
+/* Small multiples (Tufte): the same map at six dates; each tile jumps the main map there.
+   Opening day, the year-ends of 1980–2010, and "today" = the build date. */
+const SNAPSHOTS = [START,'1980-12-31','1990-12-31','2000-12-31','2010-12-31',BUILD_DATE];
 const multiplesEl = document.getElementById('multiples');
 const multipleEls = SNAPSHOTS.map(date=>{
-  const year = date===TODAY ? 'Today' : date.slice(0,4);
+  const isToday = date===BUILD_DATE;
+  const year = isToday ? 'Today' : date.slice(0,4);
   const n = stationsOpenOn(date);
   const tile = document.createElement('div');
   tile.className = 'multiple';
   tile.setAttribute('role','button');
   tile.setAttribute('tabindex','0');
-  tile.setAttribute('aria-label', `Jump to ${date===TODAY?'today':fmtDate(date)}: ${n} stations`);
+  tile.dataset.date = date;
+  tile.setAttribute('aria-label', `Jump to ${isToday?'today, '+fmtDay(date):fmtDay(date)}: ${n} stations`);
   const svg = el('svg',{viewBox:'-40 60 1180 880','aria-hidden':'true'});
   segments.forEach(seg=>{
     const on = date >= seg.opened;
@@ -760,7 +870,7 @@ const multipleEls = SNAPSHOTS.map(date=>{
     slider.value = Math.min(1000, sliderFromDate(date));
     onSliderInput(false, date);
     document.dispatchEvent(new CustomEvent('metro:action',
-      {detail:{action:'decade_jump',year:date.slice(0,4),today:date===TODAY}}));
+      {detail:{action:'decade_jump',year:date.slice(0,4),today:isToday,date}}));
   });
   multiplesEl.appendChild(tile);
   return {date,tile};
@@ -776,9 +886,10 @@ function render(dateStr){
   let openCount=0;
   Object.values(S).forEach(s=>{
     const g = stationEls[s.id];
-    // future (Line D) station: shown only as hollow marker once construction has started, never "opens"
+    if(!g) return;
+    // future (Line D) station: shown only as hollow marker once its section has started, never "opens"
     const isFuture = isLineD(s);
-    const shown = dateStr >= (isFuture ? D_CONSTRUCTION_START : FIRST_OPEN[s.id]);
+    const shown = dateStr >= (isFuture ? D_STATION_START[s.id] : FIRST_OPEN[s.id]);
     g.style.opacity = shown?1:0;
     g.style.pointerEvents = shown?'':'none';
     g.setAttribute('tabindex', shown?'0':'-1');
@@ -813,17 +924,15 @@ function render(dateStr){
     if(on) activeLines.add(seg.line);
   });
   statLinesEl.textContent = activeLines.size;
-  const dStarted = dateStr >= D_CONSTRUCTION_START;
-  futureEls.forEach(({seg,line})=>{
-    line.classList.toggle('on', dStarted);
-    line.classList.toggle('planned', !(seg.started && dateStr >= seg.started));
-  });
+  futureEls.forEach(({seg,line})=>line.classList.toggle('on', dateStr >= seg.started));
 
   const gx = Math.max(0, Math.min(1000, sliderFromDate(dateStr)));
   growthNow.setAttribute('x1', gx); growthNow.setAttribute('x2', gx);
   growthNow.setAttribute('y1', growthY(openCount));
   multipleEls.forEach(({date,tile})=>{
-    if(date===dateStr) tile.setAttribute('aria-current','true'); else tile.removeAttribute('aria-current');
+    // the landing view's local today shows the same network as the build-date tile
+    const cur = date===dateStr || (date===BUILD_DATE && dateStr===TODAY);
+    if(cur) tile.setAttribute('aria-current','true'); else tile.removeAttribute('aria-current');
   });
 
   currentDate = dateStr;
@@ -911,10 +1020,12 @@ function renderDetailPanel(dateStr){
   const lineTags = s.lines.map(l=>`<span class="tag ${l}">LINE ${l}</span>`).join(' ');
   let html = `<h3>${displayName(s, dateStr)}</h3><div>${lineTags}</div><div class="kv">`;
   if(isLineD(s)){
-    const started = futureSegments.find(seg=>seg.b===id).started;
-    html += started && dateStr >= started
-      ? `<div><b>Status:</b> under construction (Line D)</div><div><b>Construction start:</b> ${fmtDate(started)}</div>`
-      : `<div><b>Status:</b> planned (Line D), not yet under construction</div>`;
+    const secs = dSectionsAt(id).filter(sec=>dateStr >= sec.start);
+    html += secs.length
+      ? `<div><b>Status:</b> under construction (Line D)</div>` + secs.map(sec=>
+          `<div class="dsec"><b>${sectionName(sec)}:</b> construction began ${fmtDay(sec.start)}.
+            ${sec.sources.map(src=>`<a href="${src.url}" target="_blank" rel="noopener">Source: ${src.label}</a>`).join('')}</div>`).join('')
+      : `<div><b>Status:</b> Line D, not yet under construction on this date</div>`;
   } else {
     s.lines.forEach(l=>{
       html += `<div><b>Opened on Line ${l}:</b> ${OPEN[l][id]}</div>`;
@@ -926,10 +1037,16 @@ function renderDetailPanel(dateStr){
   html += `</div>`;
   detailPanel.innerHTML = html;
 }
+// Line D sections through a station, in line order
+function dSectionsAt(id){
+  return D_SECTIONS.filter(sec=>futureSegments.some(seg=>seg.section===sec&&(seg.a===id||seg.b===id)));
+}
 function showStation(id){
   selectTab('detail');
   selectedStation = id;
   renderDetailPanel(currentDate);
+  if(isLineD(S[id])) document.dispatchEvent(new CustomEvent('metro:action',{detail:{action:'line_d_detail',
+    station:id, sections:dSectionsAt(id).filter(sec=>currentDate>=sec.start).map(sectionName)}}));
 }
 const tooltip = document.getElementById('tooltip');
 const mapCol = document.getElementById('mapCol');
@@ -1000,6 +1117,21 @@ function tick(){
    --------------------------------------------------------------- */
 slider.value = TODAY_VAL;
 onSliderInput(false, TODAY);
+
+// Czech readers: report the Czech section coming into view, once per page load,
+// and whether they got there from the header link or by scrolling
+;(()=>{
+  const cs = document.getElementById('history-cs');
+  let via = 'scroll';
+  document.getElementById('csLink').addEventListener('click',()=>{ via = 'link'; });
+  if(!('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver(entries=>{
+    if(!entries.some(e=>e.isIntersecting)) return;
+    io.disconnect();
+    document.dispatchEvent(new CustomEvent('metro:action',{detail:{action:'czech_section_view',via}}));
+  });
+  io.observe(cs);
+})();
 </script>
 </body>
 </html>

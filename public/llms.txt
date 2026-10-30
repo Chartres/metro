@@ -3,19 +3,19 @@
 > An interactive, single-page map of how the Prague Metro grew: every line extension, station
 > rename and closure from opening day (9 May 1974) to today, plus Line D under construction.
 > Pick any date and see that day's network with that day's station names. Free, no account,
-> no ads, no cookies. English, with a short Czech summary.
+> no ads, no cookies. English, with a full Czech section on the same page.
 
 ## What it is
 - A history visualisation, not a journey planner. Scrub the timeline or press Play to watch
   the network grow; tap a station for its opening date and former name.
-- Six small maps (1974, 1980, 1990, 2000, 2010, today) show the whole history at a glance;
+- Six small maps (opening day 1974, the ends of 1980, 1990, 2000 and 2010, and today) show the whole history at a glance;
   each moves the main map to that date. The slider's track is a chart of stations open.
-- Lines A (green), B (yellow), C (red) as built; Line D in its official blue, dashed where
-  under construction, dotted where only planned.
+- Lines A (green), B (yellow), C (red) as built; Line D in its official blue, dashed, and only
+  the sections under construction (nothing is drawn for sections without a construction start).
 - Below the map: a table of every opening, the complete 1990 rename list, and Line D status,
   readable without JavaScript.
 
-## Facts (as shown in the app, checked 27 Oct 2026)
+## Facts (as shown in the app, checked 30 Oct 2026)
 - Opened 9 May 1974: line C, 9 stations, Florenc – Kačerov. Line A opened 12 Aug 1978, line B
   2 Nov 1985.
 - Today: 58 stations on lines A, B, C; interchanges Muzeum (A/C), Můstek (A/B), Florenc (B/C).
@@ -27,7 +27,7 @@
 - Floods: August 2002 (19 stations flooded, sections closed for months); June 2013.
 - Line D: Pankrác, Ryšánka, Nádraží Krč, Nemocnice Krč, Nové Dvory, Libuš, Písnice, Depo
   Písnice (plus a planned leg north to Náměstí Míru). Construction began 21 Apr 2022
-  (Pankrác – Ryšánka) and June 2026 (Ryšánka – Nové Dvory). DPP expects Pankrác – Nové
+  (Pankrác – Ryšánka) and 19 Jun 2026 (Ryšánka – Nové Dvory). DPP expects Pankrác – Nové
   Dvory to open in the second half of 2032.
 
 ## Data & provenance
