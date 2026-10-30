@@ -74,3 +74,5 @@ Pavol's picks of 30 October (decision log in `docs/SIGNATURE.md`).
   languages and has Czech FAQ answers; tests hold the Czech text to the data.
 - Analytics (`key_action` props): `decade_jump` adds `date`; new actions `line_d_detail` and
   `czech_section_view`.
+- Small phones: the history tables fit a 320 px screen without sideways scroll (main already
+  overflowed by 21 px there).

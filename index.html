@@ -198,9 +198,17 @@
   #history td{padding:8px 8px 8px 0;border-bottom:1px solid var(--border);vertical-align:top;}
   #openings td:first-child,#openings td:last-child,#openings-cs td:first-child,#openings-cs td:last-child{
     font-variant-numeric:tabular-nums;}
-  #openings td:first-child,#openings-cs td:first-child{font-size:13px;white-space:nowrap;}
+  #openings td:first-child,#openings-cs td:first-child{font-size:13px;}
   #history .src{font-size:13px;line-height:18px;color:var(--ink-dim);}
   #history a{color:var(--ink);}
+
+  /* small phones: the openings tables' longest station names must still fit without sideways scroll */
+  @media (max-width:420px){
+    #history{padding:48px 16px;}
+    #history th{letter-spacing:0;}
+    #history th,#history td{padding-right:6px;}
+    #openings td,#openings-cs td{overflow-wrap:anywhere;}
+  }
 
   ::-webkit-scrollbar{width:8px;}
   ::-webkit-scrollbar-thumb{background:#333a44;border-radius:4px;}
@@ -574,11 +582,13 @@ const RENAME_DATE = '1990-02-22';
 // and the map draws nothing for it.
 const D_SECTIONS = [
   {from:'pankrac', to:'rysanka', start:'2022-04-21',
-   source:'ČTK report of DPP\'s ceremonial start, 21 Apr 2022',
-   url:'https://www.archiweb.cz/en/n/home/dopravni-podnik-zahaji-na-pankraci-stavbu-prvni-casti-linky-metra-d-do-pisnice'},
+   sources:[{label:'ČTK report of DPP\'s ceremonial start, 21 Apr 2022',
+     url:'https://www.archiweb.cz/en/n/home/dopravni-podnik-zahaji-na-pankraci-stavbu-prvni-casti-linky-metra-d-do-pisnice'}]},
   {from:'rysanka', to:'nove_dvory', start:'2026-06-19',
-   source:'DPP press release, 18 Sep 2026 ("three months since construction began")',
-   url:'https://www.dpp.cz/spolecnost/pro-media/tiskove-zpravy/detail/278_3458-v-praze-na-novych-dvorech-zacaly-razby-dalsiho-useku-metra-d'}
+   sources:[{label:'ČT24, 19 Jun 2026 (the ceremony that day)',
+     url:'https://ct24.ceskatelevize.cz/clanek/regiony/hlavni-mesto-praha/praha-zahajila-stavbu-druhe-casti-metra-d-z-olbrachtovy-na-nove-dvory-374736'},
+    {label:'DPP press release, 18 Sep 2026 ("three months since construction began")',
+     url:'https://www.dpp.cz/spolecnost/pro-media/tiskove-zpravy/detail/278_3458-v-praze-na-novych-dvorech-zacaly-razby-dalsiho-useku-metra-d'}]}
 ];
 const D_CONSTRUCTION_START = D_SECTIONS[0].start;
 
@@ -1014,7 +1024,7 @@ function renderDetailPanel(dateStr){
     html += secs.length
       ? `<div><b>Status:</b> under construction (Line D)</div>` + secs.map(sec=>
           `<div class="dsec"><b>${sectionName(sec)}:</b> construction began ${fmtDay(sec.start)}.
-            <a href="${sec.url}" target="_blank" rel="noopener">Source: ${sec.source}</a></div>`).join('')
+            ${sec.sources.map(src=>`<a href="${src.url}" target="_blank" rel="noopener">Source: ${src.label}</a>`).join('')}</div>`).join('')
       : `<div><b>Status:</b> Line D, not yet under construction on this date</div>`;
   } else {
     s.lines.forEach(l=>{

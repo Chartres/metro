@@ -77,8 +77,10 @@ test('Tomáš (390px): Line D shows only the two sections being built, each with
   await expect(detail).toContainText('under construction')
   await expect(detail).toContainText('Pankrác – Ryšánka: construction began 21 April 2022')
   await expect(detail).toContainText('Ryšánka – Nové Dvory: construction began 19 June 2026')
-  await expect(detail.locator('a')).toHaveCount(2)
-  await expect(detail.locator('a').nth(1)).toHaveAttribute('href', /dpp\.cz/)
+  // one source per section that states its day, plus DPP's own confirmation for 2026
+  await expect(detail.locator('a')).toHaveCount(3)
+  await expect(detail.locator('a').nth(1)).toHaveAttribute('href', /ceskatelevize\.cz/)
+  await expect(detail.locator('a').nth(2)).toHaveAttribute('href', /dpp\.cz/)
   expect(await seen(page)).toEqual([
     { action: 'line_d_detail', station: 'rysanka', sections: ['Pankrác – Ryšánka', 'Ryšánka – Nové Dvory'] },
   ])
@@ -119,4 +121,10 @@ test('reading down to the Czech section counts as a scroll view, once', async ({
   await page.locator('#history-cs').scrollIntoViewIfNeeded()
   await page.locator('#history-cs table').first().scrollIntoViewIfNeeded()
   await expect.poll(() => seen(page)).toEqual([{ action: 'czech_section_view', via: 'scroll' }])
+})
+
+test('a 320px phone gets both history tables without sideways scroll', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 700 })
+  await page.goto('/')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
 })
