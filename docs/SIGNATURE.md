@@ -57,13 +57,14 @@ deep round of 27–29 October 2026 (flywheel `docs/program/2026-10-27-deep-round
   (Vignelli's 1972 New York diagram is often cited as the counter-example; Beck is the
   model).
 - **Claims we can't back.** Line D gets DPP's current estimate with its source, not a
-  hopeful date.
+  hopeful date. The map draws only the Line D sections with a construction start (1.4.0);
+  sections that exist only on paper are not drawn.
 
 ## Signature mechanics
 
 | Mechanic | What the user sees | From | Status | How we'll know |
 |---|---|---|---|---|
-| Small multiples | Six small maps of the network at 1974, 1980, 1990, 2000, 2010 and today, with station counts (9, 22, 38, 47, 54, 58); a tap moves the main map to that date | Tufte 1990 | shipped (1.3.0) | `key_action` with `action: decade_jump`; share of visitors with ≥ 1 jump. Target: ≥ 20 % of visitors over 28 days. At 6 visitors a month the number is anecdotal until traffic grows. |
+| Small multiples | Six small maps at the top of the Timeline panel: opening day (9 May 1974), 31 December of 1980, 1990, 2000 and 2010, and today (the build date), with station counts (9, 22, 38, 47, 54, 58); a tap moves the main map to that date | Tufte 1990 | shipped (1.3.0; dates fixed 1.4.0) | `key_action` with `action: decade_jump`; share of visitors with ≥ 1 jump. Target: ≥ 20 % of visitors over 28 days. At 6 visitors a month the number is anecdotal until traffic grows. |
 | Growth line | The slider track is a step chart of stations open; a marker rides the current date | Minard 1869, Tufte's sparklines | shipped (1.3.0) | No event of its own (it's read, not clicked). Indirect: the Play conversion share (`conversion` / visitors) holds or rises after release. |
 | Date links | `?date=1988-10-26&station=dejvicka` opens the map on that day with that station selected, so a teacher or a forum post can point at one moment | Beck's map as a shared object; *ad fontes* (cite a precise state) | proposed | `key_action` `link_opened`; links seen in referrers |
 | Correction log | A dated "corrections" list on the page: what we had wrong, what it is now, the source | *ad fontes* | proposed | Reader-filed issues per quarter; first external citation |
@@ -97,3 +98,34 @@ Pavol's constitution, cited by article number:
 
 **Differentiation that follows:** a small, exact, honest reference that shows any day of the
 network's history in one view, with sources, and doesn't try to keep you.
+
+## Decision log
+
+### 2026-10-30 — Pavol's picks (decision page of 30 Oct)
+
+1. **Small multiples: top of the Timeline panel.** They already were (1.3.0): first child of the
+   Timeline panel, above the events, on desktop and at 390 px. Kept there; a test now holds it.
+2. **The six dates: opening day, the year-ends of 1980/1990/2000/2010, today.** Opening day checked
+   against the data: 9 May 1974. Year-ends are 31 December. "Today" is now the build date (Prague
+   calendar date, stamped by `vite.config.ts`), not the viewer's clock. Each multiple keeps its station
+   count and stays a button that moves the main map to its date.
+3. **Line D: only sections with a construction start.** Pankrác – Ryšánka (21 April 2022) and Ryšánka –
+   Nové Dvory (19 June 2026) are drawn as under construction; nothing is drawn for Nové Dvory – Depo
+   Písnice or Náměstí Míru – Pankrác. Station detail gives each section's start date and a source.
+   Both dates checked on 2026-10-30: 21 April 2022 per ČTK's same-day report of DPP's ceremonial
+   start; 19 June 2026 per ČT24 (ceremony that Friday) and DPP's press release of 18 September 2026
+   ("almost exactly three months since construction began"). Neither needed changing.
+4. **Czech content: a Czech section on the same page.** A full Czech section (`lang="cs"`) inside the
+   history article carries the same facts as the English one (openings table, renames, floods,
+   Line D), with a "Česky" link in the header. Structured data lists both languages and carries four
+   Czech FAQ answers, each held by a test to the visible Czech text. One URL, so the sitemap keeps
+   one entry (lastmod bumped).
+5. **Not picked, left as they are.** The growth line stays live, waiting for his review. Date links
+   and the correction log stay proposed and are not built.
+
+Metrics, all in the existing taxonomy (`key_action` + props, no new event names):
+`decade_jump` gains a `date` prop; `line_d_detail` {station, sections} when a Line D station's detail
+opens; `czech_section_view` {via: link | scroll} once per page load.
+
+**Reuse across products.** Pavol decided that a move approved for one product may be reused by
+another, with this note: "Dont just blindly copy the pattern though."

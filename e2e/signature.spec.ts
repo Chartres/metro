@@ -46,10 +46,10 @@ test('small multiples report the jump as a key_action', async ({ page }) => {
     ;(tiles[5] as HTMLElement).click()
     return got
   })
-  const thisYear = String(new Date().getFullYear())
+  const built = (await page.evaluate('BUILD_DATE')) as string
   expect(seen).toEqual([
-    { action: 'decade_jump', year: '1980', today: false },
-    { action: 'decade_jump', year: thisYear, today: true },
+    { action: 'decade_jump', year: '1980', today: false, date: '1980-12-31' },
+    { action: 'decade_jump', year: built.slice(0, 4), today: true, date: built },
   ])
 })
 

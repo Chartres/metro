@@ -11,8 +11,9 @@ test('without JavaScript the page still answers the common questions', async ({ 
   expect(text).toContain('Leninova')
   expect(text).toContain('2032')
   await expect(page.locator('#history h2').first()).toBeVisible()
-  // the Czech summary is marked as Czech for search engines and screen readers
+  // the Czech section is marked as Czech for search engines and screen readers, and reads without JS
   await expect(page.locator('#history [lang="cs"]')).toContainText('Leninova')
+  await expect(page.locator('#openings-cs tbody tr')).toHaveCount(18)
   // FAQ structured data parses and carries real answers
   const blocks = await page.locator('script[type="application/ld+json"]').allTextContents()
   const faq = blocks.map((b) => JSON.parse(b)).find((b) => b['@type'] === 'FAQPage')
@@ -67,6 +68,61 @@ test.describe('with JavaScript', () => {
     const cs = (await page.locator('#history [lang="cs"]').textContent()) ?? ''
     for (const [former, name] of want) expect(cs).toContain(`${former} → ${name}`)
     await expect(page.locator('#history')).toContainText(`${want.length} stations`)
+  })
+
+  test('the Czech section carries the same openings and renames as the data', async ({ page }) => {
+    await page.goto('/')
+    const want = await page.evaluate(`EVENTS.filter((e) => ['A', 'B', 'C'].includes(e.tag) && e.stations)
+      .map((e) => { const [y, m, d] = e.date.split('-'); return [e.date, Number(d) + '. ' + Number(m) + '. ' + y,
+        e.line, String(Object.values(S).filter((s) => FIRST_OPEN[s.id] === e.date).length)] })`)
+    const got = await page.locator('#openings-cs tbody tr').evaluateAll((rows) =>
+      rows.map((r) => [r.getAttribute('data-date'), r.children[0].textContent!.trim(),
+        r.children[1].textContent!.trim(), r.children[3].textContent!.trim()]),
+    )
+    expect(got).toEqual(want)
+    // the section column matches the English table row for row
+    const en = await page.locator('#openings tbody tr td:nth-child(3)').allTextContents()
+    const csSec = await page.locator('#openings-cs tbody tr td:nth-child(3)').allTextContents()
+    expect(csSec.map((t) => t.replace(/ \(.*\)$/, ''))).toEqual(en.map((t) => t.replace(/ \(.*\)$/, '')))
+    const renames = (await page.evaluate(`Object.values(S).filter((s) => s.former).map((s) => [s.former, s.name])`)) as string[][]
+    const gotR = await page.locator('#renames-cs tbody tr').evaluateAll((rows) =>
+      rows.map((r) => [r.children[0].textContent!.trim(), r.children[1].textContent!.trim()]),
+    )
+    expect([...gotR].sort()).toEqual([...renames].sort())
+    const total = String(await page.evaluate('stationsOpenOn(TODAY)'))
+    await expect(page.locator('#history-cs')).toContainText(`${total} stanic`)
+    // Line D start dates, in Czech, from the data
+    const months = ['ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince']
+    for (const start of (await page.evaluate('D_SECTIONS.map((s) => s.start)')) as string[]) {
+      const [y, m, d] = start.split('-')
+      await expect(page.locator('#history-cs')).toContainText(`${Number(d)}. ${months[Number(m) - 1]} ${y}`)
+    }
+  })
+
+  test('structured data: both languages, and the Czech FAQ answers are on the page', async ({ page }) => {
+    await page.goto('/')
+    const blocks = (await page.locator('script[type="application/ld+json"]').allTextContents()).map((b) => JSON.parse(b))
+    const app = blocks.find((b) => b['@type'] === 'WebApplication')
+    expect(app.inLanguage).toEqual(['en', 'cs'])
+    const faq = blocks.find((b) => b['@type'] === 'FAQPage')
+    const csQs = faq.mainEntity.filter((q: { inLanguage?: string }) => q.inLanguage === 'cs')
+    expect(csQs.length).toBe(4)
+    const csText = ((await page.locator('#history-cs').textContent()) ?? '').replace(/\s+/g, ' ')
+    // every fact the Czech answers state is in the visible Czech section
+    const facts = ['9. května 1974', '58 stanic', '22. února 1990', '6. dubna 2015', '21. dubna 2022',
+      '19. června 2026', 've druhé polovině roku 2032']
+    const answers = csQs.map((q: { acceptedAnswer: { text: string } }) => q.acceptedAnswer.text).join(' ')
+    for (const f of facts) {
+      expect(answers).toContain(f)
+      expect(csText).toContain(f)
+    }
+    const pairs = (await page.evaluate(`Object.values(S).filter((s) => s.former).map((s) => s.former + ' → ' + s.name)`)) as string[]
+    for (const p of pairs) expect(answers).toContain(p)
+    // one page, one URL: the sitemap lists only the root, which carries both languages
+    const sitemap = await (await page.request.get('/sitemap.xml')).text()
+    expect(sitemap.match(/<loc>/g)?.length).toBe(1)
+    expect(sitemap).toContain('<loc>https://metro.dravec.org/</loc>')
+    await expect(page.locator('meta[property="og:locale:alternate"]')).toHaveAttribute('content', 'cs_CZ')
   })
 
   test('the history text sits below the map, not in front of it', async ({ page }) => {

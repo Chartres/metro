@@ -58,3 +58,19 @@ Deep round (signature, corrections, findability).
   Czech summary) and FAQ structured data, so the page has content without JavaScript.
   Tests hold the text to the map's data.
 - Play button is a 44 px touch target; the header emoji is gone.
+
+## 1.4.0 — 2026-10-30
+Pavol's picks of 30 October (decision log in `docs/SIGNATURE.md`).
+- Small multiples stay at the top of the Timeline panel. Their sixth date, "today", is now the build
+  date (Prague calendar date) instead of the viewer's clock; the other five are opening day
+  (9 May 1974) and 31 December of 1980, 1990, 2000 and 2010.
+- Line D: only the two sections with a construction start are drawn (Pankrác – Ryšánka from
+  21 April 2022, Ryšánka – Nové Dvory from 19 June 2026). The dotted "planned" legs (Nové Dvory –
+  Depo Písnice, Náměstí Míru – Pankrác), their stations and the legend row are gone. A Line D
+  station's detail lists each section through it with its start date and a source link. Both dates
+  were re-checked and stand.
+- Czech: the short Czech summary became a full Czech section on the same page (openings, renames,
+  floods, Line D), marked `lang="cs"`, with a "Česky" link in the header. Structured data lists both
+  languages and has Czech FAQ answers; tests hold the Czech text to the data.
+- Analytics (`key_action` props): `decade_jump` adds `date`; new actions `line_d_detail` and
+  `czech_section_view`.

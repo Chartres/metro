@@ -31,15 +31,14 @@ test('today view: full network, stats honest, Line D dashed as future', async ({
     new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
   )
   // Line D exists only as under-construction dashes, never as an open line —
-  // and it is BLUE (official DPP color), with the paper-only phase II
-  // (Náměstí Míru–Pankrác) as a lighter dotted leg
+  // and it is BLUE (official DPP color). Only sections with a construction start are drawn:
+  // Pankrác–Ryšánka (2022) + Ryšánka–Nové Dvory (2026, 3 segments); nothing for the rest
   const future = page.locator('.segment.future.on').first()
   await expect(future).toBeVisible()
   await expect(future).toHaveAttribute('class', /future/)
-  // under construction: Pankrác–Ryšánka (2022) + Ryšánka–Nové Dvory (2026, 3 segments);
-  // on paper only: Nové Dvory–Depo Písnice (3) + Náměstí Míru–Pankrác (1)
-  expect(await page.locator('.segment.future').count()).toBe(8)
-  expect(await page.locator('.segment.future.planned.on').count()).toBe(4)
+  expect(await page.locator('.segment.future').count()).toBe(4)
+  expect(await page.locator('.segment.future.on').count()).toBe(4)
+  expect(await page.locator('.segment.planned').count()).toBe(0)
   const dColor = await page.evaluate(() =>
     getComputedStyle(document.documentElement).getPropertyValue('--d-color').trim(),
   )
@@ -243,11 +242,23 @@ test('Line D follows the current DPP plan (Wikipedia, checked 2026-10-27)', asyn
   ])
   expect(await page.evaluate('S.rysanka.former')).toBe(null) // "Olbrachtova" was a working name, never in service
   expect(await page.evaluate('D_CONSTRUCTION_START')).toBe('2022-04-21')
-  // before June 2026 only Pankrác–Ryšánka is a building site; the rest of the line is dotted
+  // before June 2026 only Pankrác–Ryšánka is a building site, and nothing else of line D is drawn
+  await page.evaluate(`render('2022-04-20')`)
+  expect(await page.locator('.segment.future.on').count()).toBe(0)
   await page.evaluate(`render('2025-01-01')`)
-  expect(await page.locator('.segment.future.on:not(.planned)').count()).toBe(1)
-  await page.evaluate(`render('2026-07-01')`)
-  expect(await page.locator('.segment.future.on:not(.planned)').count()).toBe(4)
+  expect(await page.locator('.segment.future.on').count()).toBe(1)
+  await expect(page.locator('.station[data-id="rysanka"]')).toHaveAttribute('aria-hidden', 'false')
+  await expect(page.locator('.station[data-id="nove_dvory"]')).toHaveAttribute('aria-hidden', 'true')
+  await page.evaluate(`render('2026-06-19')`)
+  expect(await page.locator('.segment.future.on').count()).toBe(4)
+  await expect(page.locator('.station[data-id="nove_dvory"]')).toHaveAttribute('aria-hidden', 'false')
+  // stations of sections with no construction start are not drawn at all
+  for (const id of ['libus', 'pisnice', 'depo_pisnice'])
+    await expect(page.locator(`.station[data-id="${id}"]`)).toHaveCount(0)
+  // the two start dates, checked 2026-10-30 against ČTK (DPP's ceremony) and DPP's 18 Sep 2026 release
+  expect(await page.evaluate('D_SECTIONS.map((s) => [s.from, s.to, s.start])')).toEqual([
+    ['pankrac', 'rysanka', '2022-04-21'], ['rysanka', 'nove_dvory', '2026-06-19'],
+  ])
   // the opening estimate is DPP's 2032, not "late this decade"
   expect(await page.locator('#eventsList').textContent()).toContain('2032')
   expect(await page.locator('#eventsList').textContent()).not.toContain('late this decade')
