@@ -1,0 +1,91 @@
+{
+  "headline": "Metro 1.4.0 is live: multiples dated opening day / year-ends / build date, Line D drawn only where construction has started (both dates verified, unchanged), and a full Czech section on the same page.",
+  "shipped": [
+    {
+      "title": "Metro 1.4.0: Pavol's picks of 30 Oct (multiples dates, Line D started sections only, Czech section)",
+      "pr": "https://github.com/Chartres/metro/pull/13",
+      "merged": "2026-10-30 (squash 9e0e86b)",
+      "live_checked": "2026-10-30 at 390 px on https://metro.dravec.org: multiples first in the Timeline panel with dates 1974-05-09, 1980/1990/2000/2010-12-31, 2026-10-30 and counts 9/22/38/47/54/58; 4 Line D segments, no Libuš/Písnice/Depo Písnice, no 'planned' legend row; Ryšánka detail lists both sections with dates and sources; #history-cs is lang=cs; scrollWidth 390; sitemap lastmod 2026-10-30."
+    }
+  ],
+  "decisions": [
+    {
+      "question": "Small multiples: where are they now?",
+      "options": ["Move them", "Leave them; already at the top of the Timeline panel"],
+      "default_taken": "Left in place (they were already the first child of the Timeline panel since 1.3.0); a 390 px test now holds them above the first event.",
+      "why": "The pick was already met; moving nothing is the smallest change."
+    },
+    {
+      "question": "What exactly is 'the build date'?",
+      "options": ["UTC date at build", "Europe/Prague calendar date at build", "Viewer's local date (old behaviour)"],
+      "default_taken": "Europe/Prague calendar date, stamped into index.html by a Vite transformIndexHtml plugin; an unbuilt file falls back to the viewer's date.",
+      "why": "Prague product; a Cloudflare build just after midnight UTC would otherwise be a day early. One line in vite.config.ts to change."
+    },
+    {
+      "question": "The landing view uses the viewer's local date; should the Today tile count as current there?",
+      "options": ["Only when the shown date equals the build date", "Also on landing (viewer's today)"],
+      "default_taken": "Also on landing.",
+      "why": "Data can't change after the build, so the network is identical; the landing view's local-date behaviour (1.2.1) is untouched."
+    },
+    {
+      "question": "Line D start dates: are 21 Apr 2022 and June 2026 right, and which day in June?",
+      "options": ["Keep 2022-04-21 and 2026-06-19", "Change to the source's date"],
+      "default_taken": "Kept both. 21 Apr 2022: ČTK's same-day report of DPP's ceremonial start (DPP's Metro D page gives no date). 19 Jun 2026: ČT24 article of that day (ceremony that Friday), confirmed by DPP's 18 Sep 2026 press release ('almost exactly three months since construction began').",
+      "why": "Both dates match the sources; nothing needed correcting. No DPP page states either exact day, so each section cites a source that does, plus DPP for 2026."
+    },
+    {
+      "question": "What does 'draw nothing' cover for sections without a construction start?",
+      "options": ["Remove dotted lines only", "Remove dotted lines, their station markers and their faint 'not yet built' ghost lines"],
+      "default_taken": "All three removed; the station list stays in the data (the text still names the planned route).",
+      "why": "Literal reading of 'draw nothing'; data kept so restoring is a one-line change."
+    },
+    {
+      "question": "How to keep the Czech section consistent with structured data and the sitemap?",
+      "options": ["Separate /cs/ URL with hreflang (not picked)", "Same URL: inLanguage [en, cs], Czech FAQ entries, og:locale:alternate, sitemap unchanged but lastmod"],
+      "default_taken": "Same URL; four Czech FAQ answers with inLanguage cs, each fact tested against the visible Czech text; no hreflang (one URL).",
+      "why": "Matches the pick (same page); tests stop the Czech text, FAQ and data drifting apart."
+    },
+    {
+      "question": "How do Czech readers find the section?",
+      "options": ["Scroll only", "Small 'Česky' link in the header"],
+      "default_taken": "Header link (lang=cs, 44 px tap height) jumping to #history-cs.",
+      "why": "Without it a Czech reader has to scroll past the whole English text; easy to remove."
+    },
+    {
+      "question": "Metrics for each change (existing taxonomy only)",
+      "options": ["key_action props as below", "New event names (not allowed)"],
+      "default_taken": "decade_jump gains date; line_d_detail {station, sections}; czech_section_view {via: link|scroll}, once per page load.",
+      "why": "All ride key_action; no new event names."
+    },
+    {
+      "question": "Independent review findings",
+      "options": ["Merge as is", "Fix the minor findings first"],
+      "default_taken": "Fixed two before merge: 19 Jun 2026 now cites a source that states the day; history tables fit a 320 px phone (main already overflowed by 21 px). Left one: a viewer west of Prague, just after a build near Prague midnight, sees the Today tile one day ahead of their local today (no visible effect).",
+      "why": "Reviewer (fresh subagent, diff + goal only) found nothing blocking."
+    }
+  ],
+  "proposals": [
+    {
+      "name": "Portfolio record refresh",
+      "options": ["Update flywheel/data/products/metro.json to 1.4.0 from the hub", "Leave until the next sweep"],
+      "recommendation": "Update it from the hub session; this session's GitHub scope is Chartres/metro only, so I didn't touch it."
+    },
+    {
+      "name": "Line D sources in the static text",
+      "options": ["Add the two source links under the Line D paragraph (EN + CS)", "Keep them only in the station detail"],
+      "recommendation": "Add them: crawlers and no-JS readers then see the same sources as the map's detail panel."
+    }
+  ],
+  "next": [
+    "Pavol: review the growth line (still live, unreviewed).",
+    "Hub: update the portfolio record for metro 1.4.0.",
+    "Hub: IndexNow submit for https://metro.dravec.org/ (content changed; I did not submit).",
+    "Watch key_action czech_section_view and line_d_detail over 28 days; at current traffic the numbers are anecdotal."
+  ],
+  "screenshots": [
+    "e2e/shots/picks-multiples-390.png",
+    "e2e/shots/picks-line-d-390.png",
+    "e2e/shots/picks-line-d-detail-390.png",
+    "e2e/shots/picks-czech-390.png"
+  ]
+}
