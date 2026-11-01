@@ -76,3 +76,16 @@ Pavol's picks of 30 October (decision log in `docs/SIGNATURE.md`).
   `czech_section_view`.
 - Small phones: the history tables fit a 320 px screen without sideways scroll (main already
   overflowed by 21 px there).
+
+## 1.5.0 — 2026-11-01
+Pavol's picks of 1 November (decision log in `docs/SIGNATURE.md`).
+- Date links: `?date=YYYY-MM-DD&station=<id>` opens the map on that day with that station
+  selected. A date that isn't a real day between 9 May 1974 and today, or a station the map
+  doesn't draw, is ignored and the map opens on today. The station detail has a "Copy link to
+  this day" button (it shows the link to copy by hand where the browser has no clipboard).
+  Logged as `key_action` `link_opened` {date, station, fallback}.
+- Correction log: a dated "Corrections" list below the Line D text, and "Opravy" in the Czech
+  section: what the map had wrong, what it says now, and the source. Oldest first; the first
+  entry is the Line D start date (1 March 2022 → 21 April 2022).
+- The Line D paragraph now cites its two start dates in the text (ČTK for 21 April 2022, ČT24 for
+  19 June 2026), in English and Czech, from the same links as the station detail.

@@ -66,8 +66,8 @@ deep round of 27–29 October 2026 (flywheel `docs/program/2026-10-27-deep-round
 |---|---|---|---|---|
 | Small multiples | Six small maps at the top of the Timeline panel: opening day (9 May 1974), 31 December of 1980, 1990, 2000 and 2010, and today (the build date), with station counts (9, 22, 38, 47, 54, 58); a tap moves the main map to that date | Tufte 1990 | shipped (1.3.0; dates fixed 1.4.0) | `key_action` with `action: decade_jump`; share of visitors with ≥ 1 jump. Target: ≥ 20 % of visitors over 28 days. At 6 visitors a month the number is anecdotal until traffic grows. |
 | Growth line | The slider track is a step chart of stations open; a marker rides the current date | Minard 1869, Tufte's sparklines | shipped (1.3.0) | No event of its own (it's read, not clicked). Indirect: the Play conversion share (`conversion` / visitors) holds or rises after release. |
-| Date links | `?date=1988-10-26&station=dejvicka` opens the map on that day with that station selected, so a teacher or a forum post can point at one moment | Beck's map as a shared object; *ad fontes* (cite a precise state) | proposed | `key_action` `link_opened`; links seen in referrers |
-| Correction log | A dated "corrections" list on the page: what we had wrong, what it is now, the source | *ad fontes* | proposed | Reader-filed issues per quarter; first external citation |
+| Date links | `?date=1988-10-26&station=dejvicka` opens the map on that day with that station selected, so a teacher or a forum post can point at one moment; the station detail copies a link to the current day and station | Beck's map as a shared object; *ad fontes* (cite a precise state) | shipped (1.5.0) | `key_action` `link_opened` {date, station, fallback}; links seen in referrers |
+| Correction log | A dated "Corrections" list on the page (and "Opravy" in the Czech section): what we had wrong, what it is now, the source | *ad fontes* | shipped (1.5.0) | Reader-filed issues per quarter; first external citation |
 
 ## Visual signature
 
@@ -129,3 +129,24 @@ opens; `czech_section_view` {via: link | scroll} once per page load.
 
 **Reuse across products.** Pavol decided that a move approved for one product may be reused by
 another, with this note: "Dont just blindly copy the pattern though."
+
+### 2026-11-01 — Pavol's picks (decision page of 1 Nov)
+
+1. **Date links: build it.** `?date=YYYY-MM-DD&station=<id>` opens the map on that day with that
+   station selected; the station detail has "Copy link to this day" (current date and station). A
+   date that isn't a real calendar day between opening day (9 May 1974) and the viewer's today, or a
+   station the map doesn't draw (unknown id, or a Line D station with no construction start), is
+   ignored quietly: today, and no station selected. A valid station with a bad date opens on today
+   with the station. A station not yet open on the linked date is still selected (its detail gives the
+   opening date). The URL bar is not rewritten as the map moves. Metric: `key_action` `link_opened`
+   {date (shown), station (or null), fallback (true if any given value was ignored)}, fired once
+   per load, only when the URL has `date` or `station`.
+2. **Correction log: build it.** On the same page (the smaller change than a /corrections/ route):
+   "Corrections" after the Line D text, "Opravy" in the Czech section, the same entries in both,
+   oldest first, each with its date, what we had, what it is, and a source link. The first entry is
+   founder case 2's date error (Line D start 1 March 2022 → 21 April 2022). The log starts with the
+   27 October round; the 17 October fixes are pointed to in the changelog, not re-listed.
+3. **Line D sources: add them.** A source line under the Line D paragraph in English and Czech: ČTK
+   (via archiweb.cz) for 21 April 2022, ČT24 for 19 June 2026, the same links as `D_SECTIONS` (a
+   test holds them equal).
+4. **Growth line: keep as it is.** Unchanged.
