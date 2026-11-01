@@ -27,9 +27,11 @@ test('today view: full network, stats honest, Line D dashed as future', async ({
   await expect(page.locator('#statStations')).toHaveText('58')
   await expect(page.locator('#statTotal')).toHaveText('58')
   await expect(page.locator('#statLines')).toHaveText('3')
-  await expect(page.locator('#dateLabel')).toHaveText(
+  // ponytail: evaluate inside browser so the date is the same one the page rendered with
+  const todayLabel = await page.evaluate(() =>
     new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
   )
+  await expect(page.locator('#dateLabel')).toHaveText(todayLabel)
   // Line D exists only as under-construction dashes, never as an open line —
   // and it is BLUE (official DPP color). Only sections with a construction start are drawn:
   // Pankrác–Ryšánka (2022) + Ryšánka–Nové Dvory (2026, 3 segments); nothing for the rest
