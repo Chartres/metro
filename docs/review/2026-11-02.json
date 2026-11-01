@@ -1,0 +1,89 @@
+{
+  "headline": "Metro 1.6.0 is live. The correction log now lists the 17 Oct fixes as dated, sourced entries in English and Czech, newest first, with the 27–28 Oct entries still on top. Each press of Copy link sends key_action link_copied {date, station}.",
+  "shipped": [
+    {
+      "title": "Metro 1.6.0: correction log backfilled with the 17 Oct fixes (newest first), link_copied",
+      "pr": "https://github.com/Chartres/metro/pull/17",
+      "merged": "2026-11-01 (squash 9a04827)",
+      "live_checked": "2026-11-01 at 390 px on https://metro.dravec.org: Corrections and Opravy each have 7 entries in the same order (28 Oct Line A 1978; 27 Oct Line D start, Line D stations, Line D opening; 17 Oct line B order, Strašnická/Skalka dates, 1985 line B opening). The intro says 'Newest first'. scrollWidth is 390. On ?date=1988-10-26&station=dejvicka, Copy link shows 'Copied', puts https://metro.dravec.org/?date=1988-10-26&station=dejvicka on the clipboard, and sends link_opened and then exactly one link_copied {date: 1988-10-26, station: dejvicka}."
+    }
+  ],
+  "decisions": [
+    {
+      "question": "Newest first, but 'the 27 Oct entries stay on top': where does the 28 Oct Line A entry go?",
+      "options": [
+        "Strict newest first: 28 Oct, then 27 Oct (Line D start first), then 17 Oct",
+        "27 Oct entries first, then 28 Oct, then 17 Oct"
+      ],
+      "default_taken": "Strict newest first. Entries from the same day keep their earlier order, so the Line D start still leads the 27 Oct group. The pick was read as 'the late-October round stays above 17 Oct'.",
+      "why": "A log that says 'newest first' must actually be newest first. The founder-case-2 entry is still the first of its round. A test holds the order."
+    },
+    {
+      "question": "How many entries for the 17 Oct fixes?",
+      "options": [
+        "Three: line B order; Strašnická and Skalka dates together; the 1985 line B event",
+        "Four (Strašnická and Skalka separate)"
+      ],
+      "default_taken": "Three, matching the pick's wording 'Strašnická/Skalka dates'.",
+      "why": "Same fix, same source (Wikipedia, Line A), one commit."
+    },
+    {
+      "question": "Where does 'what we had' come from, and which sources?",
+      "options": [
+        "The diff of the 17 Oct sweep (#6, 3e18dec); Wikipedia Line A and Line B, re-checked 1 Nov",
+        "From memory or the changelog"
+      ],
+      "default_taken": "The diff of #6 for the old values. Wikipedia re-checked on 1 Nov: Line B order Nové Butovice, Jinonice, Radlická, Smíchovské nádraží, Anděl; Strašnická 11 Jul 1987; Skalka 4 Jul 1990; the 1985 section had 7 stations from Florenc to Smíchovské nádraží.",
+      "why": "The diff is the exact record of what the map had. Tests hold each 'it is now' to LINE_ORDER.B, OPEN.A and the 1985 event."
+    },
+    {
+      "question": "How should the 1985 entry describe the old error?",
+      "options": [
+        "'The opening event highlighted 4 stations', and name the interchanges (5 new; Florenc and Můstek became interchanges)",
+        "'We marked 4 stations as opening'"
+      ],
+      "default_taken": "The first. The reviewer pointed out that the old error was only in the event's highlight (the station data already had all 7 open), and that the entry should agree with the 1978 'new vs interchange' entry right above it.",
+      "why": "It is accurate, and it keeps the log consistent with itself and with the openings table (5 new)."
+    },
+    {
+      "question": "What replaces the old note pointing to the changelog for the 17 Oct fixes?",
+      "options": ["A plain link: 'Every release is in the changelog'", "Remove the changelog link"],
+      "default_taken": "A plain link, in EN and CS.",
+      "why": "The fixes are listed now, so the note no longer applies. The changelog still has the full history."
+    },
+    {
+      "question": "link_copied when the browser has no clipboard?",
+      "options": ["Send it on every press, including the no-clipboard fallback box", "Only when the clipboard write succeeds"],
+      "default_taken": "Every press, sent once, before the clipboard call.",
+      "why": "The reader asked for a link and got it either way. It also counts the old browsers we would otherwise miss. No new event name."
+    },
+    {
+      "question": "Version",
+      "options": ["1.6.0", "1.5.1"],
+      "default_taken": "1.6.0",
+      "why": "New content and a new metric. This matches the minor bump used for earlier pick rounds."
+    },
+    {
+      "question": "Independent review findings",
+      "options": ["Merge as is", "Fix them first"],
+      "default_taken": "A fresh subagent, given only the diff and the goal, found nothing blocking. Before merging I fixed: the 1985 EN/CS mismatch and the missing interchange note (minor), the 'between Nové Butovice and Anděl' wording, Czech wording ('byla otevřena', 'Od nejnovějších'), a test check that could not fail, and a negative-only check that is now positive. I left as they were: the spec filename date (2026-11-02, the hand-back date) and the pinned list of 7 entries (a new entry should update that test on purpose).",
+      "why": "Each fix was small and is covered by the e2e tests: 59 of 59 pass locally, and CI is green on the merged head."
+    }
+  ],
+  "proposals": [
+    {
+      "name": "Portfolio record refresh",
+      "options": ["Update flywheel/data/products/metro.json to 1.6.0 from the hub", "Leave until the next sweep"],
+      "recommendation": "Update it from the hub. This session's GitHub scope is Chartres/metro only."
+    }
+  ],
+  "next": [
+    "Hub: update the portfolio record for metro 1.6.0.",
+    "Hub: IndexNow submit for https://metro.dravec.org/ (the page text changed; I did not submit).",
+    "Watch key_action link_copied next to link_opened over 28 days. At current traffic the numbers are anecdotal."
+  ],
+  "screenshots": [
+    "e2e/shots/picks-corrections-backfilled-390.png",
+    "e2e/shots/picks-corrections-390.png"
+  ]
+}
