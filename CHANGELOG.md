@@ -93,9 +93,9 @@ Pavol's picks of 1 November (decision log in `docs/SIGNATURE.md`).
 ## 1.6.0 — 2026-11-01
 Pavol's second set of picks of 1 November (decision log in `docs/SIGNATURE.md`).
 - Correction log: the fixes of 17 October are now dated entries, in English and Czech, each with
-  its Wikipedia source (re-checked 1 November): line B station order between Nové Butovice and
+  its Wikipedia source (re-checked 1 November): line B station order from Nové Butovice to
   Anděl, the Strašnická and Skalka opening dates (11 July 1987, 4 July 1990), and the 1985 line B
-  opening (7 stations, not 4). The log now runs newest first, so the 27–28 October entries stay
+  opening (all 7 stations of the section highlighted, not 4). The log now runs newest first, so the 27–28 October entries stay
   on top; the note pointing to this changelog for the 17 October fixes is gone.
 - Copied links are counted: each press of "Copy link to this day" sends `key_action`
   `link_copied` {date, station}, also when the browser has no clipboard and the link is shown

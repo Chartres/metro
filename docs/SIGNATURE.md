@@ -155,7 +155,7 @@ another, with this note: "Dont just blindly copy the pattern though."
 
 1. **Backfill the correction log with the 17 Oct fixes.** Three dated entries (17 October 2026), in
    English and Czech, each with its Wikipedia source, re-checked 1 Nov: line B station order
-   between Nové Butovice and Anděl (Wikipedia, Line B); Strašnická 11 Nov 1987 → 11 Jul 1987 and
+   from Nové Butovice to Anděl (Wikipedia, Line B); Strašnická 11 Nov 1987 → 11 Jul 1987 and
    Skalka 4 Nov 1990 → 4 Jul 1990 (Wikipedia, Line A); the 1985 line B opening marked 4 stations,
    the section had 7 (Wikipedia, Line B). "What we had" comes from the diff of the 17 Oct sweep
    (#6). The log is now newest first, which changes item 2 of the set above: the 28 Oct Line A

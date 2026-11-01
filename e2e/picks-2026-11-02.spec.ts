@@ -64,7 +64,7 @@ test('Jana (390px): the 17 Oct fixes are in the log, dated, sourced, under the 2
   await expect(en('line-a-1987-1990')).toContainText(
     `Strašnická opened on ${await page.evaluate(`fmtDay(OPEN.A.strasnicka)`)} and Skalka on ${await page.evaluate(`fmtDay(OPEN.A.skalka)`)}`,
   )
-  await expect(cs('line-a-1987-1990')).toContainText('Strašnická se otevřela 11. července 1987 a Skalka 4. července 1990')
+  await expect(cs('line-a-1987-1990')).toContainText('Strašnická byla otevřena 11. července 1987 a Skalka 4. července 1990')
 
   const ev = (await page.evaluate(`EVENTS.find((e) => e.date === '1985-11-02' && e.line === 'B').stations`)) as string[]
   expect(ev).toHaveLength(7)
@@ -77,10 +77,17 @@ test('Jana (390px): the 17 Oct fixes are in the log, dated, sourced, under the 2
     ),
   )
   await expect(en('line-b-1985')).toContainText(evNames.join(', '))
+  // Florenc and Můstek were already open on lines C and A: 5 new, as the openings table says
+  expect(await page.evaluate(`OPEN.C.florenc < '1985-11-02' && OPEN.A.mustek < '1985-11-02'`)).toBe(true)
+  await expect(page.locator('tr[data-date="1985-11-02"]').first().locator('td').last()).toHaveText('5')
+  await expect(en('line-b-1985')).toContainText('Five were new')
+  await expect(cs('line-b-1985')).toContainText('Nových bylo pět')
   await expect(cs('line-b-1985')).toContainText(evNames.join(', '))
 
   // the old pointer to the changelog for the 17 Oct fixes is gone: they are listed now
-  await expect(page.locator('#corrections ~ p.src').first()).not.toContainText('before this log started')
+  await expect(page.locator('#fixes + p.src')).toContainText('Every release is in the changelog.')
+  await expect(page.locator('#fixes-cs + p.src')).toContainText('Všechna vydání jsou v changelogu.')
+  await expect(page.locator('#history')).not.toContainText('before this log started')
   await expect(page.locator('#history-cs')).not.toContainText('z doby před tímto přehledem')
 
   // the shot: the last 27 Oct entry, then the three backfilled 17 Oct entries

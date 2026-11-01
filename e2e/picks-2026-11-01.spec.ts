@@ -147,9 +147,10 @@ test('Martin (390px): the correction log lists what was wrong, what is right, an
   const fixesCs = page.locator('#fixes-cs > li')
   expect(await fixes.count()).toBeGreaterThanOrEqual(1)
   // founder case 2's date error: the Line D start, wrong 1 Mar 2022, right as in the data
-  // (first entry until 2 Nov; since the log runs newest first, the first of the 27 Oct entries)
+  // (the first entry in 1.5.0; since 1.6.0 the log runs newest first and it leads the 27 Oct entries)
   const first = page.locator('#fixes > li[data-fact="line-d-start"]')
-  await expect(first).toHaveAttribute('data-fact', 'line-d-start')
+  await expect(first).toHaveAttribute('data-date', '2026-10-27')
+  await expect(page.locator('#fixes > li[data-date="2026-10-27"]').first()).toHaveAttribute('data-fact', 'line-d-start')
   await expect(first).toContainText('1 March 2022')
   const dStart = (await page.evaluate('D_SECTIONS[0].start')) as string
   expect(dStart).toBe('2022-04-21')
