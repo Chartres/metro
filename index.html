@@ -187,6 +187,12 @@
   #detailPanel .kv b{color:var(--ink);}
   #detailPanel .dsec{margin-top:6px;}
   #detailPanel .dsec a{display:block;color:var(--ink-dim);}
+  #detailPanel .share{margin-top:12px;}
+  #detailPanel .copylink{min-height:44px;padding:0 14px;background:none;color:var(--ink);font:inherit;
+    border:1px solid var(--border);border-radius:6px;cursor:pointer;}
+  #detailPanel .copied{margin-left:8px;}
+  #detailPanel .linkout{display:block;width:100%;margin-top:6px;font:inherit;color:var(--ink);
+    background:none;border:1px solid var(--border);padding:6px;box-sizing:border-box;}
 
   #history{max-width:760px;margin:0 auto;padding:48px 20px;font-size:17px;line-height:26px;color:var(--ink);}
   #history h2{font-size:20px;line-height:26px;margin:48px 0 8px;}
@@ -201,6 +207,9 @@
   #openings td:first-child,#openings-cs td:first-child{font-size:13px;}
   #history .src{font-size:13px;line-height:18px;color:var(--ink-dim);}
   #history a{color:var(--ink);}
+  #history .fixes{margin:0 0 24px;padding:0;list-style:none;}
+  #history .fixes li{padding:8px 0;border-bottom:1px solid var(--border);overflow-wrap:anywhere;}
+  #history .fixes time{display:block;font-size:13px;line-height:18px;color:var(--ink-dim);font-variant-numeric:tabular-nums;}
 
   /* small phones: the openings tables' longest station names must still fit without sideways scroll */
   @media (max-width:420px){
@@ -373,7 +382,34 @@
     Nádraží Krč, Nemocnice Krč, Nové Dvory, Libuš, Písnice and Depo Písnice, with a later leg north from
     Pankrác to Náměstí Míru. Work on Pankrác – Ryšánka began on 21 April 2022 and on Ryšánka – Nové
     Dvory on 19 June 2026. The map draws only these two sections; the rest is not under construction yet. DPP expects Pankrác – Nové Dvory to open in the second half of 2032.</p>
+  <p class="src" id="line-d-sources">Sources for the start dates:
+    Pankrác – Ryšánka, 21 April 2022:
+    <a href="https://www.archiweb.cz/en/n/home/dopravni-podnik-zahaji-na-pankraci-stavbu-prvni-casti-linky-metra-d-do-pisnice">ČTK report of DPP's ceremonial start (archiweb.cz)</a>.
+    Ryšánka – Nové Dvory, 19 June 2026:
+    <a href="https://ct24.ceskatelevize.cz/clanek/regiony/hlavni-mesto-praha/praha-zahajila-stavbu-druhe-casti-metra-d-z-olbrachtovy-na-nove-dvory-374736">ČT24 report of the ceremony</a>.</p>
 
+  <h2 id="corrections">Corrections</h2>
+  <p>What this map had wrong, what it says now, and where the right answer comes from. Oldest first.</p>
+  <ol class="fixes" id="fixes">
+    <li data-date="2026-10-27" data-fact="line-d-start"><time datetime="2026-10-27">27 October 2026</time>
+      <b>Line D construction start.</b> We had 1 March 2022. It is 21 April 2022 (Pankrác – Ryšánka).
+      Source: <a href="https://www.archiweb.cz/en/n/home/dopravni-podnik-zahaji-na-pankraci-stavbu-prvni-casti-linky-metra-d-do-pisnice">ČTK report of DPP's ceremonial start</a>.</li>
+    <li data-date="2026-10-27" data-fact="line-d-stations"><time datetime="2026-10-27">27 October 2026</time>
+      <b>Line D stations.</b> We had 5 stations south of Pankrác, in the wrong order. The line is Pankrác,
+      Ryšánka, Nádraží Krč, Nemocnice Krč, Nové Dvory, Libuš, Písnice, Depo Písnice.
+      Source: <a href="https://en.wikipedia.org/wiki/Line_D_(Prague_Metro)">Wikipedia, Line D (Prague Metro)</a>.</li>
+    <li data-date="2026-10-27" data-fact="line-d-opening"><time datetime="2026-10-27">27 October 2026</time>
+      <b>Line D opening.</b> We said late this decade. DPP expects Pankrác – Nové Dvory in the second half of 2032.
+      Source: <a href="https://en.wikipedia.org/wiki/Line_D_(Prague_Metro)">Wikipedia, Line D (Prague Metro)</a>.</li>
+    <li data-date="2026-10-28" data-fact="line-a-1978"><time datetime="2026-10-28">28 October 2026</time>
+      <b>Line A opening, 12 August 1978.</b> We said 7 new stations, with Můstek planned. It was 7 stations,
+      6 of them new (Muzeum had been open on line C since 1974); Můstek became an interchange when line B
+      arrived in 1985. Source: <a href="https://en.wikipedia.org/wiki/Line_A_(Prague_Metro)">Wikipedia, Line A (Prague Metro)</a>.</li>
+  </ol>
+  <p class="src">Fixes made before this log started (17 October 2026: line B station order, the Strašnická and
+    Skalka opening dates) are in the <a href="https://github.com/Chartres/metro/blob/main/CHANGELOG.md">changelog</a>.
+    Found something wrong? Open an issue at
+    <a href="https://github.com/Chartres/metro/issues">github.com/Chartres/metro/issues</a>.</p>
 
   <p class="src">Sources: Dopravní podnik hl. m. Prahy (DPP) history and press releases; Wikipedia articles
     on the Prague Metro and its lines. Data and corrections:
@@ -443,6 +479,36 @@
       k Náměstí Míru. Stavba úseku Pankrác – Ryšánka začala 21. dubna 2022 a úseku Ryšánka – Nové Dvory
       19. června 2026. Mapa kreslí jen tyto dva úseky; ostatní se zatím nestaví. DPP očekává otevření
       úseku Pankrác – Nové Dvory ve druhé polovině roku 2032.</p>
+    <p class="src" id="line-d-sources-cs">Zdroje dat zahájení stavby:
+      Pankrác – Ryšánka, 21. dubna 2022:
+      <a href="https://www.archiweb.cz/en/n/home/dopravni-podnik-zahaji-na-pankraci-stavbu-prvni-casti-linky-metra-d-do-pisnice">zpráva ČTK o slavnostním zahájení stavby (archiweb.cz)</a>.
+      Ryšánka – Nové Dvory, 19. června 2026:
+      <a href="https://ct24.ceskatelevize.cz/clanek/regiony/hlavni-mesto-praha/praha-zahajila-stavbu-druhe-casti-metra-d-z-olbrachtovy-na-nove-dvory-374736">zpráva ČT24 o zahájení stavby</a>.</p>
+
+    <h2 id="corrections-cs">Opravy</h2>
+    <p>Co jsme na mapě měli špatně, co tam je teď a odkud správná odpověď pochází. Od nejstarší.</p>
+    <ol class="fixes" id="fixes-cs">
+      <li data-date="2026-10-27" data-fact="line-d-start"><time datetime="2026-10-27">27. října 2026</time>
+        <b>Zahájení stavby trasy D.</b> Uváděli jsme 1. března 2022. Správně je 21. dubna 2022 (Pankrác – Ryšánka).
+        Zdroj: <a href="https://www.archiweb.cz/en/n/home/dopravni-podnik-zahaji-na-pankraci-stavbu-prvni-casti-linky-metra-d-do-pisnice">zpráva ČTK o slavnostním zahájení stavby</a>.</li>
+      <li data-date="2026-10-27" data-fact="line-d-stations"><time datetime="2026-10-27">27. října 2026</time>
+        <b>Stanice trasy D.</b> Měli jsme 5 stanic jižně od Pankráce, ve špatném pořadí. Trasa vede Pankrác,
+        Ryšánka, Nádraží Krč, Nemocnice Krč, Nové Dvory, Libuš, Písnice, Depo Písnice.
+        Zdroj: <a href="https://en.wikipedia.org/wiki/Line_D_(Prague_Metro)">Wikipedie (anglicky), Line D (Prague Metro)</a>.</li>
+      <li data-date="2026-10-27" data-fact="line-d-opening"><time datetime="2026-10-27">27. října 2026</time>
+        <b>Otevření trasy D.</b> Psali jsme „koncem tohoto desetiletí“. DPP očekává úsek Pankrác – Nové Dvory
+        ve druhé polovině roku 2032.
+        Zdroj: <a href="https://en.wikipedia.org/wiki/Line_D_(Prague_Metro)">Wikipedie (anglicky), Line D (Prague Metro)</a>.</li>
+      <li data-date="2026-10-28" data-fact="line-a-1978"><time datetime="2026-10-28">28. října 2026</time>
+        <b>Otevření trasy A, 12. srpna 1978.</b> Psali jsme 7 nových stanic a Můstek jako plánovaný. Stanic bylo 7,
+        z toho 6 nových (Muzeum fungovalo na trase C od roku 1974); přestupní stanicí se Můstek stal
+        s příchodem trasy B v roce 1985.
+        Zdroj: <a href="https://en.wikipedia.org/wiki/Line_A_(Prague_Metro)">Wikipedie (anglicky), Line A (Prague Metro)</a>.</li>
+    </ol>
+    <p class="src">Opravy z doby před tímto přehledem (17. října 2026: pořadí stanic trasy B, data otevření
+      Strašnické a Skalky) jsou v <a href="https://github.com/Chartres/metro/blob/main/CHANGELOG.md">changelogu</a>.
+      Našli jste chybu? Založte issue na
+      <a href="https://github.com/Chartres/metro/issues">github.com/Chartres/metro/issues</a>.</p>
 
     <p class="src">Zdroje: historie a tiskové zprávy Dopravního podniku hl. m. Prahy (DPP); články Wikipedie
       o pražském metru a jeho trasách. Data a opravy:
@@ -1034,9 +1100,32 @@ function renderDetailPanel(dateStr){
       html += `<div><b>Former name:</b> <span class="former">${s.former}</span> (until ${fmtDate(RENAME_DATE)})</div>`;
     }
   }
-  html += `</div>`;
+  html += `</div><div class="share"><button type="button" class="copylink">Copy link to this day</button>`
+    + `<span class="copied" role="status"></span></div>`;
   detailPanel.innerHTML = html;
 }
+// A date link: this day and this station, e.g. ?date=1988-10-26&station=dejvicka
+function dateLink(dateStr, id){
+  return `${location.origin}${location.pathname}?date=${dateStr}&station=${encodeURIComponent(id)}`;
+}
+// delegated: the panel is re-rendered on every slider step
+detailPanel.addEventListener('click',async e=>{
+  const btn = e.target.closest('.copylink');
+  if(!btn || !selectedStation) return;
+  const url = dateLink(currentDate, selectedStation);
+  const status = detailPanel.querySelector('.copied');
+  try {
+    await navigator.clipboard.writeText(url);
+    status.textContent = 'Copied';
+  } catch {
+    // no clipboard (old browser, insecure context): show the link to copy by hand
+    const out = document.createElement('input');
+    out.className = 'linkout'; out.readOnly = true; out.value = url;
+    out.setAttribute('aria-label','Link to this day');
+    btn.parentNode.appendChild(out);
+    out.select();
+  }
+});
 // Line D sections through a station, in line order
 function dSectionsAt(id){
   return D_SECTIONS.filter(sec=>futureSegments.some(seg=>seg.section===sec&&(seg.a===id||seg.b===id)));
@@ -1117,6 +1206,30 @@ function tick(){
    --------------------------------------------------------------- */
 slider.value = TODAY_VAL;
 onSliderInput(false, TODAY);
+
+// Date links: ?date=YYYY-MM-DD&station=<id> open the map on that day with that station selected.
+// A date that isn't a real day between opening day and today, or an unknown station, is
+// ignored quietly: the map stays on today / no station is selected.
+function validLinkDate(d){
+  if(!/^\d{4}-\d\d-\d\d$/.test(d||'')) return null;
+  const t = Date.parse(d);
+  if(isNaN(t) || new Date(t).toISOString().slice(0,10)!==d) return null; // e.g. 2026-02-30
+  return d>=START && d<=TODAY ? d : null;
+}
+;(()=>{
+  const q = new URLSearchParams(location.search);
+  if(!q.has('date') && !q.has('station')) return;
+  const date = validLinkDate(q.get('date'));
+  const id = q.get('station');
+  const station = id && Object.hasOwn(stationEls, id) ? id : null;
+  if(date){ slider.value = Math.min(1000, sliderFromDate(date)); onSliderInput(false, date); }
+  if(station) showStation(station);
+  const detail = {action:'link_opened', date: date||TODAY, station,
+    fallback: (q.has('date') && !date) || (q.has('station') && !station)};
+  // the analytics module runs after this inline script; it listens by DOMContentLoaded
+  document.addEventListener('DOMContentLoaded',()=>
+    document.dispatchEvent(new CustomEvent('metro:action',{detail})));
+})();
 
 // Czech readers: report the Czech section coming into view, once per page load,
 // and whether they got there from the header link or by scrolling

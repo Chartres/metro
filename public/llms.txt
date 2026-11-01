@@ -13,7 +13,11 @@
 - Lines A (green), B (yellow), C (red) as built; Line D in its official blue, dashed, and only
   the sections under construction (nothing is drawn for sections without a construction start).
 - Below the map: a table of every opening, the complete 1990 rename list, and Line D status,
-  readable without JavaScript.
+  readable without JavaScript, with the sources for the Line D start dates and a dated
+  correction log (what the map had wrong, what changed, and the source).
+- Date links: https://metro.dravec.org/?date=1988-10-26&station=dejvicka opens the map on
+  that day with that station selected (former name Leninova shown). Invalid or out-of-range
+  values fall back to today. Station ids are lower-case names without diacritics.
 
 ## Facts (as shown in the app, checked 30 Oct 2026)
 - Opened 9 May 1974: line C, 9 stations, Florenc – Kačerov. Line A opened 12 Aug 1978, line B
