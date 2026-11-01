@@ -79,6 +79,13 @@ describe('analytics init (DOM side-effects)', () => {
     await import('./analytics')
     listeners['metro:action']?.({ detail: { action: 'decade_jump', year: '1990', today: false } })
     expect(calls).toContainEqual(['key_action', { action: 'decade_jump', year: '1990', today: false }])
+    // a copied date link goes out as the same event name, once per copy, props unchanged
+    listeners['metro:action']?.({ detail: { action: 'link_copied', date: '1988-10-26', station: 'dejvicka' } })
+    listeners['metro:action']?.({ detail: { action: 'link_copied', date: '1995-03-01', station: 'dejvicka' } })
+    expect(calls.filter(([e, p]) => e === 'key_action' && (p as { action: string }).action === 'link_copied')).toEqual([
+      ['key_action', { action: 'link_copied', date: '1988-10-26', station: 'dejvicka' }],
+      ['key_action', { action: 'link_copied', date: '1995-03-01', station: 'dejvicka' }],
+    ])
   })
 
   it('conversion fires only once even when playBtn is clicked twice', async () => {
