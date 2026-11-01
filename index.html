@@ -1102,6 +1102,9 @@ function renderDetailPanel(dateStr){
   }
   html += `</div><div class="share"><button type="button" class="copylink">Copy link to this day</button>`
     + `<span class="copied" role="status"></span></div>`;
+  // Play re-renders every tick: keep the panel (and a "Copied" note) unless its content changed
+  if(detailPanel._html===html) return;
+  detailPanel._html = html;
   detailPanel.innerHTML = html;
 }
 // A date link: this day and this station, e.g. ?date=1988-10-26&station=dejvicka
@@ -1113,16 +1116,22 @@ detailPanel.addEventListener('click',async e=>{
   const btn = e.target.closest('.copylink');
   if(!btn || !selectedStation) return;
   const url = dateLink(currentDate, selectedStation);
-  const status = detailPanel.querySelector('.copied');
   try {
     await navigator.clipboard.writeText(url);
-    status.textContent = 'Copied';
+    const status = detailPanel.querySelector('.copied');
+    if(status) status.textContent = 'Copied';
   } catch {
     // no clipboard (old browser, insecure context): show the link to copy by hand
-    const out = document.createElement('input');
-    out.className = 'linkout'; out.readOnly = true; out.value = url;
-    out.setAttribute('aria-label','Link to this day');
-    btn.parentNode.appendChild(out);
+    const share = detailPanel.querySelector('.share');
+    if(!share) return;
+    let out = share.querySelector('.linkout');
+    if(!out){
+      out = document.createElement('input');
+      out.className = 'linkout'; out.readOnly = true;
+      out.setAttribute('aria-label','Link to this day');
+      share.appendChild(out);
+    }
+    out.value = url;
     out.select();
   }
 });
@@ -1214,21 +1223,25 @@ function validLinkDate(d){
   if(!/^\d{4}-\d\d-\d\d$/.test(d||'')) return null;
   const t = Date.parse(d);
   if(isNaN(t) || new Date(t).toISOString().slice(0,10)!==d) return null; // e.g. 2026-02-30
-  return d>=START && d<=TODAY ? d : null;
+  // a link copied in Prague just after midnight can be a day ahead of a viewer west of it
+  const last = BUILD_DATE > TODAY ? BUILD_DATE : TODAY;
+  return d>=START && d<=last ? d : null;
 }
 ;(()=>{
   const q = new URLSearchParams(location.search);
   if(!q.has('date') && !q.has('station')) return;
   const date = validLinkDate(q.get('date'));
   const id = q.get('station');
-  const station = id && Object.hasOwn(stationEls, id) ? id : null;
+  const station = id && Object.prototype.hasOwnProperty.call(stationEls, id) ? id : null;
   if(date){ slider.value = Math.min(1000, sliderFromDate(date)); onSliderInput(false, date); }
-  if(station) showStation(station);
   const detail = {action:'link_opened', date: date||TODAY, station,
     fallback: (q.has('date') && !date) || (q.has('station') && !station)};
-  // the analytics module runs after this inline script; it listens by DOMContentLoaded
-  document.addEventListener('DOMContentLoaded',()=>
-    document.dispatchEvent(new CustomEvent('metro:action',{detail})));
+  // the analytics module runs after this inline script and listens by DOMContentLoaded, so the
+  // station (whose detail may report line_d_detail) is selected then too
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.dispatchEvent(new CustomEvent('metro:action',{detail}));
+    if(station) showStation(station);
+  });
 })();
 
 // Czech readers: report the Czech section coming into view, once per page load,

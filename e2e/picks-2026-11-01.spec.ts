@@ -78,6 +78,10 @@ test('without a clipboard the link is shown to copy by hand', async ({ page }) =
   await page.getByRole('button', { name: 'Copy link to this day' }).click()
   const out = page.locator('#detailPanel .linkout')
   await expect(out).toHaveValue(/\?date=2015-04-06&station=nemocnice_motol$/)
+  // tapping again reuses the box instead of stacking another
+  await page.getByRole('button', { name: 'Copy link to this day' }).click()
+  await page.getByRole('button', { name: 'Copy link to this day' }).click()
+  await expect(out).toHaveCount(1)
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
 })
 
@@ -107,6 +111,25 @@ for (const [query, station, why] of [
     expect(errors).toEqual([])
   })
 }
+
+test('a link to a Line D station reports link_opened, then line_d_detail', async ({ page }) => {
+  await actionsFromBoot(page)
+  await page.goto('/?date=2026-07-01&station=rysanka')
+  await expect(page.locator('#detailPanel')).toContainText('Ryšánka – Nové Dvory: construction began 19 June 2026')
+  await expect.poll(() => seen(page)).toEqual([
+    { action: 'link_opened', date: '2026-07-01', station: 'rysanka', fallback: false },
+    { action: 'line_d_detail', station: 'rysanka', sections: ['Pankrác – Ryšánka', 'Ryšánka – Nové Dvory'] },
+  ])
+})
+
+test('a "Copied" note survives Play re-rendering the panel', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.goto('/?date=1974-05-09&station=muzeum')
+  await page.getByRole('button', { name: 'Copy link to this day' }).click()
+  await expect(page.locator('#detailPanel .copied')).toHaveText('Copied')
+  await page.evaluate(`onSliderInput(false, '1975-01-01')`) // same station, same text: panel kept
+  await expect(page.locator('#detailPanel .copied')).toHaveText('Copied')
+})
 
 test('a plain visit reports no link_opened', async ({ page }) => {
   await actionsFromBoot(page)
