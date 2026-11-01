@@ -146,16 +146,18 @@ test('Martin (390px): the correction log lists what was wrong, what is right, an
   const fixes = page.locator('#fixes > li')
   const fixesCs = page.locator('#fixes-cs > li')
   expect(await fixes.count()).toBeGreaterThanOrEqual(1)
-  // the first entry is founder case 2's date error: the Line D start, wrong 1 Mar 2022, right as in the data
-  const first = fixes.first()
+  // founder case 2's date error: the Line D start, wrong 1 Mar 2022, right as in the data
+  // (first entry until 2 Nov; since the log runs newest first, the first of the 27 Oct entries)
+  const first = page.locator('#fixes > li[data-fact="line-d-start"]')
   await expect(first).toHaveAttribute('data-fact', 'line-d-start')
   await expect(first).toContainText('1 March 2022')
   const dStart = (await page.evaluate('D_SECTIONS[0].start')) as string
   expect(dStart).toBe('2022-04-21')
   await expect(first).toContainText(await page.evaluate(`fmtDay(D_SECTIONS[0].start)`))
-  await expect(fixesCs.first()).toContainText('1. března 2022')
-  await expect(fixesCs.first()).toContainText('21. dubna 2022')
-  // every entry: a date, a source link; dated oldest first; the same entries in both languages
+  const firstCs = page.locator('#fixes-cs > li[data-fact="line-d-start"]')
+  await expect(firstCs).toContainText('1. března 2022')
+  await expect(firstCs).toContainText('21. dubna 2022')
+  // every entry: a date, a source link; dated newest first; the same entries in both languages
   const rows = (loc: typeof fixes) =>
     loc.evaluateAll((els) =>
       els.map((li) => ({
@@ -174,7 +176,7 @@ test('Martin (390px): the correction log lists what was wrong, what is right, an
     for (const s of r.sources) expect(s).toMatch(/^https:\/\//)
   }
   const dates = en.map((r) => r.date!)
-  expect(dates).toEqual([...dates].sort())
+  expect(dates).toEqual([...dates].sort().reverse())
   await expect(page.locator('#history-cs')).toContainText('Opravy')
 
   const heading = page.locator('#corrections')

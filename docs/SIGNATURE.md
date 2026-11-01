@@ -66,8 +66,8 @@ deep round of 27–29 October 2026 (flywheel `docs/program/2026-10-27-deep-round
 |---|---|---|---|---|
 | Small multiples | Six small maps at the top of the Timeline panel: opening day (9 May 1974), 31 December of 1980, 1990, 2000 and 2010, and today (the build date), with station counts (9, 22, 38, 47, 54, 58); a tap moves the main map to that date | Tufte 1990 | shipped (1.3.0; dates fixed 1.4.0) | `key_action` with `action: decade_jump`; share of visitors with ≥ 1 jump. Target: ≥ 20 % of visitors over 28 days. At 6 visitors a month the number is anecdotal until traffic grows. |
 | Growth line | The slider track is a step chart of stations open; a marker rides the current date | Minard 1869, Tufte's sparklines | shipped (1.3.0) | No event of its own (it's read, not clicked). Indirect: the Play conversion share (`conversion` / visitors) holds or rises after release. |
-| Date links | `?date=1988-10-26&station=dejvicka` opens the map on that day with that station selected, so a teacher or a forum post can point at one moment; the station detail copies a link to the current day and station | Beck's map as a shared object; *ad fontes* (cite a precise state) | shipped (1.5.0) | `key_action` `link_opened` {date, station, fallback}; links seen in referrers |
-| Correction log | A dated "Corrections" list on the page (and "Opravy" in the Czech section): what we had wrong, what it is now, the source | *ad fontes* | shipped (1.5.0) | Reader-filed issues per quarter; first external citation |
+| Date links | `?date=1988-10-26&station=dejvicka` opens the map on that day with that station selected, so a teacher or a forum post can point at one moment; the station detail copies a link to the current day and station | Beck's map as a shared object; *ad fontes* (cite a precise state) | shipped (1.5.0) | `key_action` `link_opened` {date, station, fallback}; `link_copied` {date, station} per copy (1.6.0); links seen in referrers |
+| Correction log | A dated "Corrections" list on the page (and "Opravy" in the Czech section): what we had wrong, what it is now, the source | *ad fontes* | shipped (1.5.0; 17 Oct fixes backfilled, newest first, 1.6.0) | Reader-filed issues per quarter; first external citation |
 
 ## Visual signature
 
@@ -150,3 +150,18 @@ another, with this note: "Dont just blindly copy the pattern though."
    (via archiweb.cz) for 21 April 2022, ČT24 for 19 June 2026, the same links as `D_SECTIONS` (a
    test holds them equal).
 4. **Growth line: keep as it is.** Unchanged.
+
+### 2026-11-01 — Pavol's picks, second set (proposals of the 1 Nov hand-back)
+
+1. **Backfill the correction log with the 17 Oct fixes.** Three dated entries (17 October 2026), in
+   English and Czech, each with its Wikipedia source, re-checked 1 Nov: line B station order
+   between Nové Butovice and Anděl (Wikipedia, Line B); Strašnická 11 Nov 1987 → 11 Jul 1987 and
+   Skalka 4 Nov 1990 → 4 Jul 1990 (Wikipedia, Line A); the 1985 line B opening marked 4 stations,
+   the section had 7 (Wikipedia, Line B). "What we had" comes from the diff of the 17 Oct sweep
+   (#6). The log is now newest first, which changes item 2 of the set above: the 28 Oct Line A
+   entry leads, then the three 27 Oct entries (Line D start first), then 17 Oct. Within one day
+   the entries keep their order. The changelog note for the 17 Oct fixes is replaced by a plain
+   link to the changelog. Tests hold each "it is now" to the map's data.
+2. **Count copied links.** `key_action` `link_copied` {date, station}, sent once per press of
+   "Copy link to this day", including the no-clipboard case where the link is shown to copy by
+   hand (the reader asked for the link either way). No new event name.
