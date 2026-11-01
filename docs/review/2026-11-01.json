@@ -1,0 +1,95 @@
+{
+  "headline": "Metro 1.5.0 is live: date links (?date=…&station=…) with a copy-link button, a dated correction log in English and Czech led by the Line D start-date error, and the two Line D source links under the Line D text. The growth line is unchanged.",
+  "shipped": [
+    {
+      "title": "Metro 1.5.0: Pavol's picks of 1 Nov (date links, correction log, Line D sources)",
+      "pr": "https://github.com/Chartres/metro/pull/15",
+      "merged": "2026-11-01 (squash f8e2764)",
+      "live_checked": "2026-11-01 at 390 px on https://metro.dravec.org: ?date=1988-10-26&station=dejvicka shows October 1988, 33 stations, 3 lines, detail 'Leninova'; Copy link put https://metro.dravec.org/?date=1988-10-26&station=dejvicka on the clipboard; ?date=2026-02-30&station=nope opens on November 2026 with no station; Corrections and Opravy each have 4 entries, the first being the Line D start (1 March 2022 → 21 April 2022); Line D source links (archiweb.cz ČTK, ČT24) present in EN and CS; scrollWidth 390; sitemap lastmod 2026-11-01; BUILD_DATE 2026-11-01."
+    }
+  ],
+  "decisions": [
+    {
+      "question": "Correction log: same page or a /corrections/ section?",
+      "options": ["Same page, after the Line D text (EN) and in the Czech section", "Separate /corrections/ route"],
+      "default_taken": "Same page: 'Corrections' (#corrections) and 'Opravy' (#corrections-cs), the same entries in both, held equal by a test.",
+      "why": "The smaller change: no new route, sitemap entry or build config."
+    },
+    {
+      "question": "Which entries, and in what order, so the case-2 date error comes first?",
+      "options": ["Oldest first, starting with the 27 Oct round", "Newest first (the 28 Oct Line A fix would lead)", "Oldest first including the 17 Oct fixes (those would lead)"],
+      "default_taken": "Oldest first from 27 Oct: Line D start (1 Mar → 21 Apr 2022), Line D stations and order, Line D opening (late this decade → second half of 2032), Line A 1978 text (7 new → 6 new; Můstek an interchange from 1985). A note under the list points to the changelog for the 17 Oct fixes (line B order, Strašnická and Skalka dates).",
+      "why": "Puts the case-2 error first as picked, and still discloses the earlier fixes. Backfilling the 17 Oct entries is a few lines if wanted."
+    },
+    {
+      "question": "Sources for the correction entries",
+      "options": ["Wikipedia line articles (re-checked 1 Nov)", "DPP pages only"],
+      "default_taken": "Line D start: the ČTK report (same link as the map). Line D stations and 2032: Wikipedia, Line D (Prague Metro). Line A 1978: Wikipedia, Line A (Prague Metro). All re-checked today.",
+      "why": "The DPP 18 Sep 2026 release does not state 2032, and no DPP page states the station list in one place; Wikipedia does and agrees with the data."
+    },
+    {
+      "question": "What counts as an invalid or out-of-range date link?",
+      "options": ["Real calendar day from 9 May 1974 to the later of the viewer's today and the build date", "Up to the viewer's today only", "Up to the slider's end (2029)"],
+      "default_taken": "First option. Bad days such as 2026-02-30, malformed values and dates outside the range open on today, with no error and nothing shown to the reader.",
+      "why": "A link copied in Prague just after midnight can be dated a day ahead of a viewer west of UTC; the build date covers that. Future dates have nothing new to show."
+    },
+    {
+      "question": "Which station values are valid, and what about mixed cases?",
+      "options": ["Only stations the map draws; a valid station with a bad date opens today with the station", "Drop both when either is bad"],
+      "default_taken": "Only drawn stations (unknown ids and Line D stations without a construction start are ignored). A valid station with a bad date opens on today with that station. A station not yet open on the linked date is still selected; its detail gives the opening date.",
+      "why": "Keeps as much of the reader's intent as is valid, quietly."
+    },
+    {
+      "question": "Should the URL bar follow the map as you move?",
+      "options": ["No; links come from the Copy link button", "Rewrite the URL on every move (replaceState)"],
+      "default_taken": "No.",
+      "why": "Not in the pick; Copy link covers sharing. Easy to add later."
+    },
+    {
+      "question": "Copy link when the browser has no clipboard",
+      "options": ["Show the link in a selectable text box", "Fail silently"],
+      "default_taken": "Selectable text box (one, reused on further taps); 'Copied' otherwise.",
+      "why": "The reader still gets the link."
+    },
+    {
+      "question": "link_opened: when does it fire, with what props?",
+      "options": ["Once per load, only when the URL has date or station: {date shown, station or null, fallback}", "Only for fully valid links"],
+      "default_taken": "First option, dispatched at DOMContentLoaded so the analytics module is listening; the station is selected at the same moment so its line_d_detail is not lost.",
+      "why": "fallback=true shows how many shared links are broken; no new event names."
+    },
+    {
+      "question": "Independent review findings",
+      "options": ["Merge as is", "Fix them first"],
+      "default_taken": "Fresh subagent (diff + goal only) found nothing blocking. Fixed all five minor findings before merge: changelog order, stacked fallback boxes, 'Copied' wiped during Play, line_d_detail lost on Line D links, build-day links west of Prague. Also fixed its notes on Object.hasOwn (older Safari) and the llms.txt station-id wording.",
+      "why": "Each was small and covered by a new test."
+    }
+  ],
+  "proposals": [
+    {
+      "name": "Backfill the correction log with the 17 Oct fixes",
+      "options": ["Add line B order, Strašnická/Skalka dates and the 1985 Line B event as dated entries (Wikipedia Line A/B, re-checked 1 Nov)", "Keep the changelog pointer"],
+      "recommendation": "Backfill, at the end, dated 17 Oct, with the log reordered newest first so the 27 Oct entries stay on top. That needs Pavol's OK because it changes 'first entry'."
+    },
+    {
+      "name": "Count copied links",
+      "options": ["key_action link_copied {date, station}", "Rely on link_opened and referrers only"],
+      "recommendation": "Add it: it shows whether anyone shares, separate from whether links get opened. One line, existing taxonomy."
+    },
+    {
+      "name": "Portfolio record refresh",
+      "options": ["Update flywheel/data/products/metro.json to 1.5.0 from the hub", "Leave until the next sweep"],
+      "recommendation": "Update it from the hub; this session's GitHub scope is Chartres/metro only."
+    }
+  ],
+  "next": [
+    "Hub: update the portfolio record for metro 1.5.0.",
+    "Hub: IndexNow submit for https://metro.dravec.org/ (content changed; I did not submit).",
+    "Pavol: decide the two proposals (backfill the correction log; count copied links).",
+    "Watch key_action link_opened (and its fallback share) over 28 days; at current traffic the numbers are anecdotal."
+  ],
+  "screenshots": [
+    "e2e/shots/picks-date-link-390.png",
+    "e2e/shots/picks-corrections-390.png",
+    "e2e/shots/picks-line-d-sources-390.png"
+  ]
+}
