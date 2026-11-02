@@ -320,6 +320,16 @@ test.describe('west of UTC (America/Los_Angeles)', () => {
     })()`)
     expect(wrong).toEqual([])
   })
+  test('date link equal to BUILD_DATE is accepted when local date lags a day behind', async ({ page }) => {
+    // Clock fixed so TODAY in LA (PDT) = 2026-10-31, while BUILD_DATE (Prague) >= 2026-11-01.
+    // This exercises the BUILD_DATE > TODAY branch of validLinkDate, where last = BUILD_DATE.
+    await page.clock.setFixedTime(new Date('2026-11-01T05:00:00Z')) // 2026-10-31 22:00 PDT
+    await page.goto('/')
+    const buildDate = await page.evaluate<string>('BUILD_DATE')
+    await page.goto(`/?date=${buildDate}`)
+    const expected = new Date(buildDate + 'T12:00').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+    await expect(page.locator('#dateLabel')).toHaveText(expected)
+  })
 })
 
 test('Play from the landing view replays from 1974, flashing only opening day', async ({ page }) => {
