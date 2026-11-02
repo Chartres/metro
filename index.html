@@ -642,7 +642,8 @@ const LINE_ORDER = {
     const dxs=xs.slice(1).map((x,i)=>x-xs[i]);
     const allUp=dxs.every(d=>d>=0), allDown=dxs.every(d=>d<=0);
     if(!allUp&&!allDown){
-      const bad=order.filter((_,i)=>i>0&&(allUp?dxs[i-1]<0:dxs[i-1]>0));
+      const goesUp=xs[xs.length-1]>=xs[0];
+      const bad=order.filter((_,i)=>i>0&&(goesUp?dxs[i-1]<0:dxs[i-1]>0));
       console.error('Line '+line+' x not monotone near: '+bad.join(', '));
     }
   });
