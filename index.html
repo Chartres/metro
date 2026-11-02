@@ -1055,9 +1055,7 @@ EVENTS.forEach((ev,idx)=>{
   div.className = 'ev'+(ev.isFuture?' future':'');
   div.setAttribute('role','button');
   div.setAttribute('tabindex','0');
-  let tagLabel = 'LINE '+ev.line;
-  if(ev.tag==='rename') tagLabel = 'RENAME';
-  else if(ev.tag==='flood') tagLabel = 'FLOOD';
+  const tagLabel = ev.tag==='rename' ? 'RENAME' : ev.tag==='flood' ? 'FLOOD' : 'LINE '+ev.line;
   div.innerHTML = `<div class="evdate">${new Date(ev.date+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
     <div class="evtitle"><span class="tag ${ev.tag}">${tagLabel}</span>${ev.title}</div>
     <div class="evdesc">${ev.desc||''}</div>`;
