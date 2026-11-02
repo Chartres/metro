@@ -917,7 +917,8 @@ EVENTS.forEach(ev=>{
 });
 
 // Open (non-D) stations on a date — the one count behind the stats, the growth line and the multiples
-const OPEN_STATIONS = Object.values(S).filter(s=>!isLineD(s));
+const ALL_STATIONS = Object.values(S);
+const OPEN_STATIONS = ALL_STATIONS.filter(s=>!isLineD(s));
 function stationsOpenOn(dateStr){ return OPEN_STATIONS.filter(s=>FIRST_OPEN[s.id]<=dateStr).length; }
 
 /* Growth line: the slider track draws stations open over time, on the slider's own x-scale */
@@ -975,7 +976,7 @@ function render(dateStr){
   slider.setAttribute('aria-valuetext', fmtDay(dateStr));
 
   let openCount=0;
-  Object.values(S).forEach(s=>{
+  ALL_STATIONS.forEach(s=>{
     const g = stationEls[s.id];
     if(!g) return;
     // future (Line D) station: shown only as hollow marker once its section has started, never "opens"
