@@ -972,7 +972,7 @@ let currentDate = START; // last rendered date — tooltip picks former vs curre
 function displayName(s, dateStr){ return s.former && dateStr < RENAME_DATE ? s.former : s.name; }
 function render(dateStr){
   dateLabel.textContent = fmtDate(dateStr);
-  slider.setAttribute('aria-valuetext', dateStr);
+  slider.setAttribute('aria-valuetext', fmtDay(dateStr));
 
   let openCount=0;
   Object.values(S).forEach(s=>{
