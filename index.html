@@ -996,8 +996,9 @@ function render(dateStr){
     if(g._ring){
       const activeLinesHere = s.lines.filter(l=>OPEN[l]&&dateStr>=OPEN[l][s.id]);
       const isInterchangeNow = activeLinesHere.length>1;
-      g._ring.style.display=isInterchangeNow?'':'none';
-      g._core.style.display=isInterchangeNow?'':'none';
+      const d=isInterchangeNow?'':'none';
+      g._ring.style.display=d;
+      g._core.style.display=d;
       g._dot.style.display=isInterchangeNow?'none':'';
       if(!isInterchangeNow&&activeLinesHere.length===1)
         g._dot.setAttribute('stroke',LINE_COLOR_HEX[activeLinesHere[0]]);
