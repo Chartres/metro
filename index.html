@@ -685,8 +685,8 @@ const D_CONSTRUCTION_START = D_SECTIONS[0].start;
 
 // Overall "first opened" date per station (earliest across its lines) — used for station dot + labels
 const FIRST_OPEN = {};
-Object.keys(OPEN).forEach(line=>{
-  Object.entries(OPEN[line]).forEach(([id,d])=>{
+Object.values(OPEN).forEach(lineMap=>{
+  Object.entries(lineMap).forEach(([id,d])=>{
     if(!FIRST_OPEN[id] || d < FIRST_OPEN[id]) FIRST_OPEN[id]=d;
   });
 });
