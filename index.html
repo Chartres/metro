@@ -1090,7 +1090,7 @@ function flashEvent(ev){
   });
 }
 function checkCrossedEvents(prevStr,curStr){
-  const [lo,hi]=curStr>=prevStr?[prevStr,curStr]:[curStr,prevStr];
+  const [lo,hi]=[prevStr,curStr].sort();
   EVENTS.forEach(ev=>{ if(ev.date>lo&&ev.date<=hi) flashEvent(ev); });
 }
 
