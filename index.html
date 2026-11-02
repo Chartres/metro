@@ -945,7 +945,7 @@ const multipleEls = SNAPSHOTS.map(date=>{
   tile.setAttribute('role','button');
   tile.setAttribute('tabindex','0');
   tile.dataset.date = date;
-  tile.setAttribute('aria-label', `Jump to ${isToday?'today, '+fmtDay(date):fmtDay(date)}: ${n} stations`);
+  tile.setAttribute('aria-label', `Jump to ${isToday?'today, ':''}${fmtDay(date)}: ${n} stations`);
   const svg = el('svg',{viewBox:'-40 60 1180 880','aria-hidden':'true'});
   segments.forEach(seg=>{
     const on = date >= seg.opened;
