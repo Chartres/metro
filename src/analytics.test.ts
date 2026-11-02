@@ -88,6 +88,17 @@ describe('analytics init (DOM side-effects)', () => {
     ])
   })
 
+  it('conversion fires with payload { action: "played_timeline" }', async () => {
+    const payloads: unknown[] = []
+    vi.doMock('./platform/flywheel-client', () => ({
+      createFlywheelClient: () => ({ track: () => {}, conversion: (p: unknown) => payloads.push(p) }),
+    }))
+    stubSessionStorage()
+    const [click] = await boot()
+    click?.()
+    expect(payloads).toEqual([{ action: 'played_timeline' }])
+  })
+
   it('conversion fires only once even when playBtn is clicked twice', async () => {
     const conversions: number[] = []
     mockClient(() => {}, () => conversions.push(1))
