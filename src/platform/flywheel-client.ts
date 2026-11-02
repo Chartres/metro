@@ -7,7 +7,7 @@
 // Privacy: cookieless, first-party. visitor_id is an anon localStorage UUID;
 // flywheel_uid is the cross-product identity, set only after sign-in.
 
-export const TAXONOMY = [
+const TAXONOMY = [ // ponytail: not exported — only used to derive TaxonomyEvent
   'page_view',
   'signup_started',
   'signup_completed',
