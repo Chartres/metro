@@ -27,9 +27,11 @@ test('today view: full network, stats honest, Line D dashed as future', async ({
   await expect(page.locator('#statStations')).toHaveText('58')
   await expect(page.locator('#statTotal')).toHaveText('58')
   await expect(page.locator('#statLines')).toHaveText('3')
-  await expect(page.locator('#dateLabel')).toHaveText(
+  // ponytail: evaluate inside browser so the date is the same one the page rendered with
+  const todayLabel = await page.evaluate(() =>
     new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
   )
+  await expect(page.locator('#dateLabel')).toHaveText(todayLabel)
   // Line D exists only as under-construction dashes, never as an open line —
   // and it is BLUE (official DPP color). Only sections with a construction start are drawn:
   // Pankrác–Ryšánka (2022) + Ryšánka–Nové Dvory (2026, 3 segments); nothing for the rest
@@ -318,6 +320,16 @@ test.describe('west of UTC (America/Los_Angeles)', () => {
     })()`)
     expect(wrong).toEqual([])
   })
+  test('date link equal to BUILD_DATE is accepted when local date lags a day behind', async ({ page }) => {
+    // Clock fixed so TODAY in LA (PDT) = 2026-10-31, while BUILD_DATE (Prague) >= 2026-11-01.
+    // This exercises the BUILD_DATE > TODAY branch of validLinkDate, where last = BUILD_DATE.
+    await page.clock.setFixedTime(new Date('2026-11-01T05:00:00Z')) // 2026-10-31 22:00 PDT
+    await page.goto('/')
+    const buildDate = await page.evaluate<string>('BUILD_DATE')
+    await page.goto(`/?date=${buildDate}`)
+    const expected = new Date(buildDate + 'T12:00').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+    await expect(page.locator('#dateLabel')).toHaveText(expected)
+  })
 })
 
 test('Play from the landing view replays from 1974, flashing only opening day', async ({ page }) => {
@@ -399,11 +411,16 @@ test('discoverability kit: robots, sitemap, llms.txt, security.txt, 1200×630 sh
   expect(llms.headers()['content-type']).toMatch(/^text\/plain/)
   expect((await llms.text()).startsWith('# Prague Metro')).toBe(true)
 
-  // IndexNow key file (one POST after deploy reaches Bing, Seznam, Yandex): served as the bare key
+  // IndexNow key files (one POST after deploy reaches Bing, Seznam, Yandex): served as the bare key
   const key = '7d9b591952b995ae3add3c5ac63db35e'
   const keyFile = await request.get(`/${key}.txt`)
   expect(keyFile.headers()['content-type']).toMatch(/^text\/plain/)
   expect(await keyFile.text()).toBe(key)
+
+  const key2 = '9cc2dcb0952bc859471bd181b22e3dcb'
+  const keyFile2 = await request.get(`/${key2}.txt`)
+  expect(keyFile2.headers()['content-type']).toMatch(/^text\/plain/)
+  expect(await keyFile2.text()).toBe(key2)
 
   const sec = await request.get('/.well-known/security.txt')
   expect(await sec.text()).toMatch(/^Contact: https:\/\//m)
