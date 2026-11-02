@@ -1241,7 +1241,6 @@ const eventsListEl = document.getElementById('eventsList');
 EVENTS.forEach((ev,idx)=>{
   const div = document.createElement('div');
   div.className = 'ev'+(ev.isFuture?' future':'');
-  div.dataset.idx = idx;
   div.setAttribute('role','button');
   div.setAttribute('tabindex','0');
   const tagLabel = ev.tag==='rename' ? 'RENAME' : ev.tag==='flood' ? 'FLOOD' : 'LINE '+ev.line;
