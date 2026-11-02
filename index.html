@@ -889,11 +889,14 @@ Object.values(S).forEach(s=>{
 /* ---------------------------------------------------------------
    TIME CONTROL
    --------------------------------------------------------------- */
+// Open (non-D) stations on a date — the one count behind the stats, the growth line and the multiples
+const ALL_STATIONS = Object.values(S);
+const OPEN_STATIONS = ALL_STATIONS.filter(s=>!isLineD(s));
 const startMs = Date.parse(START), endMs = Date.parse(END);
 const slider = document.getElementById('slider');
 const dateLabel = document.getElementById('dateLabel');
 const statStationsEl = document.getElementById('statStations');
-document.getElementById('statTotal').textContent = Object.values(S).filter(s=>!isLineD(s)).length;
+document.getElementById('statTotal').textContent = OPEN_STATIONS.length;
 const statLinesEl = document.getElementById('statLines');
 
 function sliderFromDate(dateStr){ const ms=Date.parse(dateStr); return Math.ceil((ms-startMs)/(endMs-startMs)*1000); }
@@ -916,9 +919,6 @@ EVENTS.forEach(ev=>{
   ticksEl.appendChild(t);
 });
 
-// Open (non-D) stations on a date — the one count behind the stats, the growth line and the multiples
-const ALL_STATIONS = Object.values(S);
-const OPEN_STATIONS = ALL_STATIONS.filter(s=>!isLineD(s));
 function stationsOpenOn(dateStr){ return OPEN_STATIONS.filter(s=>FIRST_OPEN[s.id]<=dateStr).length; }
 
 /* Growth line: the slider track draws stations open over time, on the slider's own x-scale */
