@@ -1088,11 +1088,8 @@ function flashEvent(ev){
   });
 }
 function checkCrossedEvents(prevStr,curStr){
-  const forward = curStr>=prevStr;
-  EVENTS.forEach(ev=>{
-    const crossed = forward ? (ev.date>prevStr && ev.date<=curStr) : (ev.date>curStr && ev.date<=prevStr);
-    if(crossed) flashEvent(ev);
-  });
+  const [lo,hi]=curStr>=prevStr?[prevStr,curStr]:[curStr,prevStr];
+  EVENTS.forEach(ev=>{ if(ev.date>lo&&ev.date<=hi) flashEvent(ev); });
 }
 
 /* ---------------------------------------------------------------
