@@ -34,13 +34,10 @@ const fw = createFlywheelClient({
   supabase: url && key ? restShim(url, key) : null,
 })
 
-export const track = fw.track
-export const conversion = fw.conversion
-
 // Boot: page_view on load; the aha moment is pressing Play (watching the
 // network grow) — fire `conversion` once per session on the first press.
 if (typeof document !== 'undefined') {
-  track('page_view')
+  fw.track('page_view')
   const SESSION_KEY = 'metro_conversion_fired'
   let fired = false // fallback when site storage is blocked: once per page load
   document.getElementById('playBtn')?.addEventListener('click', () => {
@@ -51,11 +48,11 @@ if (typeof document !== 'undefined') {
       if (fired) return
       fired = true
     }
-    conversion({ action: 'played_timeline' })
+    fw.conversion({ action: 'played_timeline' })
   })
   // the inline map script can't import this module; it reports what people do
   // (a decade small-multiple jump, …) as DOM events instead
   document.addEventListener('metro:action', (e) => {
-    track('key_action', (e as CustomEvent<Record<string, unknown>>).detail)
+    fw.track('key_action', (e as CustomEvent<Record<string, unknown>>).detail)
   })
 }
