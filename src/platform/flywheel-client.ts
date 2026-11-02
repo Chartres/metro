@@ -125,12 +125,7 @@ export function createFlywheelClient(config: FlywheelClientConfig): FlywheelClie
     try {
       const res = supabase.from(table).insert(row)
       // supabase-js returns a thenable; swallow both outcomes (fire-and-forget)
-      if (res && typeof (res as { then?: unknown }).then === 'function') {
-        ;(res as Promise<unknown>).then(
-          () => {},
-          () => {},
-        )
-      }
+      Promise.resolve(res).then(() => {}, () => {})
     } catch {
       // analytics must never throw into the app
     }
