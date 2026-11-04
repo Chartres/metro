@@ -19,11 +19,12 @@ test.use({ viewport: { width: 390, height: 844 } })
 
 // Jana remembers Skalka opening in November 1990 from an old version of the map and wants to see
 // that the date was wrong, when it was fixed, and where the right one comes from.
-test('Jana (390px): the 17 Oct fixes are in the log, dated, sourced, under the 27–28 Oct entries', async ({ page }) => {
+test('Jana (390px): the 17 Oct fixes are in the log, dated, sourced, under the later entries', async ({ page }) => {
   await page.goto('/')
   const facts = (id: string) =>
     page.locator(`#${id} > li`).evaluateAll((els) => els.map((li) => (li as HTMLElement).dataset.fact))
   const want = [
+    'ip-pavlova-name', // 4 Nov
     'line-a-1978',
     'line-d-start',
     'line-d-stations',

@@ -83,8 +83,10 @@ test('station detail: Muzeum shows both lines and its opening dates', async ({ p
   const detail = page.locator('#detailPanel')
   await expect(detail).toBeVisible()
   await expect(detail.locator('h3')).toHaveText('Muzeum')
-  await expect(detail).toContainText('Opened on Line A: 1978-08-12')
-  await expect(detail).toContainText('Opened on Line C: 1974-05-09')
+  // dates read the way the rest of the page writes them, not as ISO strings
+  await expect(detail).toContainText('Opened on Line A: 12 August 1978')
+  await expect(detail).toContainText('Opened on Line C: 9 May 1974')
+  await expect(detail).not.toContainText('1978-08-12')
   await shot(page, 'station-detail')
 })
 
@@ -190,9 +192,14 @@ test('station detail follows the timeline: former name before 1990, current afte
   await page.locator('.ev', { hasText: 'Nové Butovice' }).click()
   await page.locator('.station[data-id="dejvicka"]').dispatchEvent('click')
   await expect(page.locator('#detailPanel h3')).toHaveText('Leninova')
+  // before the rename the heading already is the old name: say what it became, don't repeat it
+  await expect(page.locator('#detailPanel')).toContainText('Renamed Dejvická on 22 February 1990')
+  await expect(page.locator('#detailPanel')).not.toContainText('Former name')
   // scrubbing past the rename re-renders the open panel
   await page.evaluate(`render('1990-03-01')`)
   await expect(page.locator('#detailPanel h3')).toHaveText('Dejvická')
+  await expect(page.locator('#detailPanel')).toContainText('Former name: Leninova (until 22 February 1990)')
+  await expect(page.locator('#detailPanel')).not.toContainText('Renamed')
 })
 
 test('not-yet-open stations are hidden from screen readers', async ({ page }) => {

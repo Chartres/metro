@@ -12,15 +12,16 @@
   each moves the main map to that date. The slider's track is a chart of stations open.
 - Lines A (green), B (yellow), C (red) as built; Line D in its official blue, dashed, and only
   the sections under construction (nothing is drawn for sections without a construction start).
-- Below the map: a table of every opening, the complete 1990 rename list, and Line D status,
-  readable without JavaScript, with the sources for the Line D start dates and a dated
-  correction log (what the map had wrong, what changed, and the source).
+- Below the map, readable without JavaScript: a table of every opening with its sources line
+  by line, a list of all 58 stations (line, opening date, name until 1990), the complete 1990
+  rename list, Line D status with the sources for its start dates, and a dated correction log
+  (what the map had wrong, what changed, and the source).
 - Date links: https://metro.dravec.org/?date=1988-10-26&station=dejvicka opens the map on
   that day with that station selected (former name Leninova shown). Invalid or out-of-range
   values fall back to today. Station ids are lower-case names without diacritics, with underscores for spaces
   (nemocnice_motol, hlavni_nadrazi).
 
-## Facts (as shown in the app, checked 30 Oct 2026)
+## Facts (as shown in the app, checked 4 Nov 2026)
 - Opened 9 May 1974: line C, 9 stations, Florenc – Kačerov. Line A opened 12 Aug 1978, line B
   2 Nov 1985.
 - Today: 58 stations on lines A, B, C; interchanges Muzeum (A/C), Můstek (A/B), Florenc (B/C).
@@ -37,7 +38,9 @@
 
 ## Data & provenance
 - Dates come from Dopravní podnik hl. m. Prahy (DPP) history pages and press releases and
-  Wikipedia's line and station articles. The dataset is embedded in the page and versioned
+  Wikipedia's line and station articles. Where sources disagree the page says so: Kačerov –
+  Háje opened on 7 Nov 1980 (Czech Wikipedia, and English Wikipedia's Háje article); the
+  table in English Wikipedia's Line C article gives 11 Nov 1980. The dataset is embedded in the page and versioned
   in the repository; tests hold the page's text to the map's data. Line D dates are DPP's
   current plan and can slip.
 
