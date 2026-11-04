@@ -165,3 +165,29 @@ another, with this note: "Dont just blindly copy the pattern though."
 2. **Count copied links.** `key_action` `link_copied` {date, station}, sent once per press of
    "Copy link to this day", including the no-clipboard case where the link is shown to copy by
    hand (the reader asked for the link either way). No new event name.
+
+### 2026-11-04 — Iterate round (Pavol: "go", on the orchestrator's package of 3–4 Nov)
+
+Items that don't need Pavol, most valuable to a reader first:
+
+1. **Sources for every opening date.** A source line under each openings table, one source per
+   line (A, B: English Wikipedia; C: Czech Wikipedia), checked 4 Nov. The check found one
+   disagreement: the table in English Wikipedia's Line C article gives Kačerov – Háje 11 Nov 1980;
+   the Czech article and English Wikipedia's Háje article give 7 Nov 1980. The map keeps 7 Nov,
+   and the page names both dates. *ad fontes*.
+2. **Every station, without JavaScript.** "All 58 stations, A–Z" (EN) and "Všech 58 stanic od A do Z"
+   (CS): line, opening date per line, name until 1990. They sit in a `<details>`, so the page
+   stays short for readers, while crawlers and AI search get all of it. This answers Lynch's
+   "when did my station open, and what was it called then?" for a reader who never runs the map.
+   Held to `S`/`OPEN` by tests.
+3. **Correction: I. P. Pavlova.** The data had "I.P.Pavlova". Fixed and logged (4 Nov, both languages).
+4. **390 px pass.** Station detail dates written out (not ISO). Before 1990 the detail says
+   "Renamed Dejvická on 22 February 1990" instead of repeating the heading. Opening dates no
+   longer wrap in the openings table. Station-list dates never split.
+
+**§6c remains, confirmed: none.** Metro has no data nobody else has cleaned (Wikipedia and DPP
+hold the same dates), no guarantee, method, rank or name. The date links and the no-JS text are
+a surface that an assistant *cites*, not something that remains once the assistant can answer.
+What's left is taste and craft: a careful diagram, the small multiples, and the checking (it
+reconciles sources and keeps a public correction log). That matches the 8 Sep lens ("taste, not
+curve").

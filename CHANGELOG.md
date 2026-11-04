@@ -100,3 +100,20 @@ Pavol's second set of picks of 1 November (decision log in `docs/SIGNATURE.md`).
 - Copied links are counted: each press of "Copy link to this day" sends `key_action`
   `link_copied` {date, station}, also when the browser has no clipboard and the link is shown
   to copy by hand.
+
+## 1.7.0 — 2026-11-04
+Iterate round of 4 November (decision log in `docs/SIGNATURE.md`).
+- The openings tables (English and Czech) name their sources line by line, checked 4 November,
+  and say where the sources disagree: for Kačerov – Háje, the table in English Wikipedia's Line C
+  article gives 11 November 1980, while the Czech article and English Wikipedia's Háje article
+  give 7 November 1980, which the map uses.
+- A list of all 58 stations, A–Z, with line, opening date (each line's date for an interchange)
+  and name until 1990, in English and Czech, readable without JavaScript. It opens from a
+  44 px summary; tests hold it to the map's data.
+- Correction: the station is I. P. Pavlova (with spaces), not "I.P.Pavlova". Logged in
+  Corrections and Opravy.
+- Station detail: opening dates read "12 August 1978", not "1978-08-12". Before February 1990 it
+  says what the station was renamed to ("Renamed Dejvická on 22 February 1990") instead of
+  repeating the name shown in the heading.
+- At 390 px an opening date no longer splits across two lines in the openings table.
+- llms.txt describes the station list and the sources; sitemap lastmod 2026-11-04.
