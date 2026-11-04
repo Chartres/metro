@@ -1,0 +1,86 @@
+{
+  "headline": "Metro 1.7.0 is live. The openings tables cite a source for each line and name the three places where sources disagree. All 58 stations are listed A–Z, with line, opening date and name until 1990, in English and Czech, and readable without JavaScript. I.P.Pavlova is corrected to I. P. Pavlova and logged, and the station detail reads better at 390 px. On §6c, 'nothing remains' is confirmed: the honest answer is taste and craft.",
+  "remains": "Confirmed: none (kinds: []). The dates Metro shows are on Wikipedia and DPP, so it has no data nobody else has cleaned, and no guarantee, method, rank or name. The date links, llms.txt and the no-JS text are a surface an assistant cites; they are not something that remains once the assistant can answer. What Metro has is taste and craft: a careful diagram, the small multiples, and checking that reconciles sources (three disagreements named on the page on 4 Nov) and keeps a public correction log.",
+  "shipped": [
+    {
+      "title": "Metro 1.7.0: sources per line, all 58 stations without JS, I. P. Pavlova, 390 px detail fixes",
+      "pr": "https://github.com/Chartres/metro/pull/20",
+      "merged": "2026-11-04 (squash c915e06)",
+      "live_checked": "2026-11-04 at 390 px on https://metro.dravec.org: #stations and #stations-cs each have 58 rows, with JS and without it. The openings sources line is present and names Kačerov – Háje 7 vs 11 Nov 1980 plus the Czech article's 1984/2004 table-vs-text differences. The newest correction (EN and CS) is ip-pavlova-name. scrollWidth is 390 with the list open. ?date=1988-10-26&station=dejvicka shows 'Opened on Line A: 12 August 1978' and 'Renamed Dejvická on 22 February 1990'. Muzeum shows both lines' dates written out. llms.txt is updated, and sitemap lastmod is 2026-11-04."
+    }
+  ],
+  "decisions": [
+    {
+      "question": "Which items from the hand-back next lists are ours (no Pavol needed), and in what order?",
+      "options": [
+        "Accuracy of dated facts with sources, then the no-JS text for AI search, then a 390 px pass",
+        "390 px pass first"
+      ],
+      "default_taken": "In that order. The earlier next items (portfolio record, IndexNow) are the hub's, and the metric watches need no build.",
+      "why": "A wrong or unsourced date costs a reader most. The package listed the same three candidates."
+    },
+    {
+      "question": "A source per row in the openings table, or one per line?",
+      "options": ["One source line under each table, per line A/B/C", "A fifth 'Source' column"],
+      "default_taken": "Per line, under each table, in EN and CS.",
+      "why": "At 390 px a fifth column squeezes the section names. Each line's dates come from one article, so a per-line source is just as exact."
+    },
+    {
+      "question": "Sources disagree on three dates. Which do we use?",
+      "options": ["The majority, with the disagreement named on the page", "Silently pick one"],
+      "default_taken": "The majority, named on the page. Kačerov – Háje: 7 Nov 1980 (Czech line C article, Czech and English Háje articles), against the English Line C table's 11 Nov. Florenc – Nádraží Holešovice: 3 Nov 1984, and Nádraží Holešovice – Ládví: 26 June 2004 (Czech article text and English article), against the Czech article's own table (7 Nov 1984, 25 June 2004). The map's data was already right; nothing changed in it.",
+      "why": "Ad fontes: show the reader the disagreement instead of hiding it."
+    },
+    {
+      "question": "How should the station list appear?",
+      "options": ["Collapsed <details> with a 44 px summary, A–Z in Czech collation", "An always-open table"],
+      "default_taken": "Collapsed, with station names as row headers (th scope=row). Each date stays on one line and no word breaks mid-word; both are held by tests.",
+      "why": "Crawlers and AI search read it either way. Readers who don't want 58 rows don't scroll past them."
+    },
+    {
+      "question": "Is 'I.P.Pavlova' a correction for the log?",
+      "options": ["Yes, a dated entry in EN and CS", "A silent fix"],
+      "default_taken": "Logged on 4 Nov with Czech Wikipedia as the source. It is now the first entry.",
+      "why": "The map had it wrong. The log's job is to say so."
+    },
+    {
+      "question": "Station detail wording found in the 390 px pass",
+      "options": ["Write dates out; before 1990 say what the station became", "Leave the ISO dates and the repeated name"],
+      "default_taken": "'Opened on Line A: 12 August 1978'. Before 22 Feb 1990: 'Renamed Dejvická on 22 February 1990'. After: 'Former name: Leninova (until 22 February 1990)'.",
+      "why": "It matches the rest of the page, and the old version repeated the heading ('Leninova … Former name: Leninova')."
+    },
+    {
+      "question": "Independent review findings",
+      "options": ["Merge as is", "Fix them first"],
+      "default_taken": "A fresh subagent given only the diff and the goal found nothing blocking. I fixed all six points before merging: the third disagreement (the Czech article's table vs its text), Czech wording, a no-mid-word-break test, a fixed month table in the test, the CHANGELOG detail, and row headers for screen readers.",
+      "why": "Each was small and is covered by a test. e2e passed 63/63 locally, and CI was green on the merged head."
+    },
+    {
+      "question": "Standing rule (Pavol, 4 Nov, in this session)",
+      "options": ["Act on the orchestrator's packages unless something is risky", "Wait for Pavol's 'go' each time"],
+      "default_taken": "From now on I act on the orchestrator's packages, and stop only for risky asks: anything outward, spending money, deleting user data, secrets.",
+      "why": "His words: 'next time obey the orchestrator unless it asks for something risky'."
+    }
+  ],
+  "proposals": [
+    {
+      "name": "Visual signature: type closer to the Rathouský station signage (SIGNATURE.md, 'Visual signature')",
+      "options": [
+        "Set station names and the date in a grotesque closer to the metro signage, and bring the sidebar's 10.5–12.8 px sizes down to taste.md's four steps",
+        "Leave the type as it is"
+      ],
+      "recommendation": "Do it in a later round. It changes how the product looks, so it is Pavol's call. It costs nothing to run and can be undone in one PR."
+    }
+  ],
+  "next": [
+    "Hub: set flywheel/data/products/metro.json `remains` to the confirmed text above (kinds: [], none: true), reviewed_on 2026-11-04, and bump to 1.7.0. This session has read-only access to the hub.",
+    "Hub: IndexNow submit for https://metro.dravec.org/ (the page text changed; I did not submit).",
+    "Pavol: the visual-signature call above.",
+    "Watch link_opened and link_copied over 28 days; at current traffic the numbers are anecdotal."
+  ],
+  "screenshots": [
+    "e2e/shots/live-stations-390.png",
+    "e2e/shots/iterate-stations-390.png",
+    "e2e/shots/iterate-openings-sources-390.png"
+  ]
+}
