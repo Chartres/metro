@@ -171,10 +171,12 @@ another, with this note: "Dont just blindly copy the pattern though."
 Items that don't need Pavol, most valuable to a reader first:
 
 1. **Sources for every opening date.** A source line under each openings table, one source per
-   line (A, B: English Wikipedia; C: Czech Wikipedia), checked 4 Nov. The check found one
-   disagreement: the table in English Wikipedia's Line C article gives Kačerov – Háje 11 Nov 1980;
-   the Czech article and English Wikipedia's Háje article give 7 Nov 1980. The map keeps 7 Nov,
-   and the page names both dates. *ad fontes*.
+   line (A, B: English Wikipedia; C: Czech Wikipedia), checked 4 Nov. The check found three
+   disagreements, and the page names each. The table in English Wikipedia's Line C article gives
+   Kačerov – Háje 11 Nov 1980, while the Czech article and English Wikipedia's Háje article give
+   7 Nov 1980. The Czech Line C article's own table gives 7 Nov 1984 and 25 June 2004, while its
+   text (and the English article) gives 3 Nov 1984 and 26 June 2004. The map keeps the majority
+   dates (7 Nov 1980, 3 Nov 1984, 26 June 2004). *ad fontes*.
 2. **Every station, without JavaScript.** "All 58 stations, A–Z" (EN) and "Všech 58 stanic od A do Z"
    (CS): line, opening date per line, name until 1990. They sit in a `<details>`, so the page
    stays short for readers, while crawlers and AI search get all of it. This answers Lynch's

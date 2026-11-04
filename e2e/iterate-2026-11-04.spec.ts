@@ -19,8 +19,10 @@ const rowsOf = (page: Page, id: string) =>
 // in Czech alphabetical order; an interchange gives each line's date, oldest first.
 const expected = (page: Page, lang: 'en' | 'cs') =>
   page.evaluate(`(() => {
+    // a fixed month table: ICU versions differ on September ("Sep" vs "Sept")
+    const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
     const day = (d) => ${JSON.stringify(lang)} === 'en'
-      ? new Date(d + 'T12:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+      ? (+d.slice(8)) + ' ' + MON[+d.slice(5, 7) - 1] + ' ' + d.slice(0, 4)
       : (+d.slice(8)) + '. ' + (+d.slice(5, 7)) + '. ' + d.slice(0, 4)
     return Object.values(S)
       .filter((s) => !isLineD(s))
@@ -79,6 +81,12 @@ test('Hana (390px): the openings tables cite a source per line and name the 1980
   await expect(page.locator('#openings-sources')).toContainText('11 November 1980')
   await expect(page.locator('#openings-sources-cs')).toContainText('7. listopadu 1980')
   await expect(page.locator('#openings-sources-cs')).toContainText('11. listopadu 1980')
+  // the cited Czech line C article disagrees with itself twice (table vs text); the page says so
+  for (const d of ['7 November 1984', '3 November 1984', '25 June 2004', '26 June 2004'])
+    await expect(page.locator('#openings-sources')).toContainText(d)
+  for (const d of ['7. listopadu 1984', '3. listopadu 1984', '25. června 2004', '26. června 2004'])
+    await expect(page.locator('#openings-sources-cs')).toContainText(d)
+  expect(await page.evaluate(`[OPEN.C.vltavska, OPEN.C.ladvi]`)).toEqual(['1984-11-03', '2004-06-26'])
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
 })
 
@@ -99,6 +107,29 @@ test('Ondřej (390px): the station list opens from a summary, fits the screen, a
   const heights = await page.locator('#stations .d').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height))
   expect(heights.length).toBeGreaterThanOrEqual(58)
   for (const h of heights) expect(h).toBeLessThan(30)
+  // no word is broken across lines: each word of a name or former name sits on one line box
+  const broken = await page.locator('#stations tbody').evaluate((tb) => {
+    const out: string[] = []
+    for (const cell of tb.querySelectorAll('th, td:nth-child(4)')) {
+      const node = cell.firstChild
+      if (!node || node.nodeType !== Node.TEXT_NODE) continue
+      const text = node.textContent!
+      let i = 0
+      for (const word of text.split(' ')) {
+        const r = document.createRange()
+        r.setStart(node, i)
+        r.setEnd(node, i + word.length)
+        const tops = new Set([...r.getClientRects()].map((q) => Math.round(q.top)))
+        if (tops.size > 1) out.push(word)
+        i += word.length + 1
+      }
+    }
+    return out
+  })
+  expect(broken).toEqual([])
+  // each station name is its row's header, for screen readers moving along the row
+  expect(await page.locator('#stations tbody th[scope="row"]').count()).toBe(58)
+  expect(await page.locator('#stations-cs tbody th[scope="row"]').count()).toBe(58)
   const row = page.locator('#stations tbody tr', { hasText: 'Hůrka' })
   await expect(row).toContainText('11 Nov 1994')
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)

@@ -202,6 +202,9 @@
   #history th{font-size:13px;line-height:18px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-dim);
     text-align:left;font-weight:600;padding:8px 8px 8px 0;border-bottom:1px solid var(--border);}
   #history td{padding:8px 8px 8px 0;border-bottom:1px solid var(--border);vertical-align:top;}
+  /* row headers (station names) read like the other cells, not like the column headings */
+  #history tbody th{font-size:17px;line-height:26px;text-transform:none;letter-spacing:0;color:var(--ink);
+    font-weight:400;vertical-align:top;}
   #openings td:first-child,#openings td:last-child,#openings-cs td:first-child,#openings-cs td:last-child{
     font-variant-numeric:tabular-nums;}
   #openings td:first-child,#openings-cs td:first-child{font-size:13px;}
@@ -369,7 +372,9 @@
     <a href="https://cs.wikipedia.org/wiki/C_(linka_metra_v_Praze)">Czech Wikipedia, C (linka metra v Praze)</a>.
     Where they disagree: for Kačerov – Háje the table in the English Line C article gives 11 November 1980;
     the Czech article and the English <a href="https://en.wikipedia.org/wiki/H%C3%A1je_(Prague_Metro)">Háje station article</a> give 7 November 1980,
-    which the map uses.</p>
+    which the map uses. The Czech article's own table also gives 7 November 1984 for Florenc – Nádraží
+    Holešovice and 25 June 2004 for Nádraží Holešovice – Ládví; its text and the English article give
+    3 November 1984 and 26 June 2004, which the map uses.</p>
 
   <details class="stations" id="stations-list">
     <summary>All 58 stations, A–Z</summary>
@@ -377,64 +382,64 @@
       <caption>Each station, its line, its opening date and name until 1990</caption>
       <thead><tr><th>Station</th><th>Line</th><th>Opened</th><th>Until 1990</th></tr></thead>
       <tbody>
-        <tr data-id="andel"><td>Anděl</td><td>B</td><td><span class="d">2 Nov 1985</span></td><td>Moskevská</td></tr>
-        <tr data-id="borislavka"><td>Bořislavka</td><td>A</td><td><span class="d">6 Apr 2015</span></td><td></td></tr>
-        <tr data-id="budejovicka"><td>Budějovická</td><td>C</td><td><span class="d">9 May 1974</span></td><td></td></tr>
-        <tr data-id="cerny_most"><td>Černý Most</td><td>B</td><td><span class="d">8 Nov 1998</span></td><td></td></tr>
-        <tr data-id="ceskomoravska"><td>Českomoravská</td><td>B</td><td><span class="d">22 Nov 1990</span></td><td></td></tr>
-        <tr data-id="dejvicka"><td>Dejvická</td><td>A</td><td><span class="d">12 Aug 1978</span></td><td>Leninova</td></tr>
-        <tr data-id="depo_hostivar"><td>Depo Hostivař</td><td>A</td><td><span class="d">26 May 2006</span></td><td></td></tr>
-        <tr data-id="flora"><td>Flora</td><td>A</td><td><span class="d">19 Dec 1980</span></td><td></td></tr>
-        <tr data-id="florenc"><td>Florenc</td><td>C, B</td><td><span class="d">C: 9 May 1974</span>; <span class="d">B: 2 Nov 1985</span></td><td>Sokolovská</td></tr>
-        <tr data-id="haje"><td>Háje</td><td>C</td><td><span class="d">7 Nov 1980</span></td><td>Kosmonautů</td></tr>
-        <tr data-id="hlavni_nadrazi"><td>Hlavní nádraží</td><td>C</td><td><span class="d">9 May 1974</span></td><td></td></tr>
-        <tr data-id="hloubetin"><td>Hloubětín</td><td>B</td><td><span class="d">8 Jun 1999</span></td><td></td></tr>
-        <tr data-id="hradcanska"><td>Hradčanská</td><td>A</td><td><span class="d">12 Aug 1978</span></td><td></td></tr>
-        <tr data-id="hurka"><td>Hůrka</td><td>B</td><td><span class="d">11 Nov 1994</span></td><td></td></tr>
-        <tr data-id="chodov"><td>Chodov</td><td>C</td><td><span class="d">7 Nov 1980</span></td><td>Budovatelů</td></tr>
-        <tr data-id="ip_pavlova"><td>I. P. Pavlova</td><td>C</td><td><span class="d">9 May 1974</span></td><td></td></tr>
-        <tr data-id="invalidovna"><td>Invalidovna</td><td>B</td><td><span class="d">22 Nov 1990</span></td><td></td></tr>
-        <tr data-id="jinonice"><td>Jinonice</td><td>B</td><td><span class="d">26 Oct 1988</span></td><td>Švermova</td></tr>
-        <tr data-id="jz_podebrad"><td>Jiřího z Poděbrad</td><td>A</td><td><span class="d">19 Dec 1980</span></td><td></td></tr>
-        <tr data-id="kacerov"><td>Kačerov</td><td>C</td><td><span class="d">9 May 1974</span></td><td></td></tr>
-        <tr data-id="karlovo_namesti"><td>Karlovo náměstí</td><td>B</td><td><span class="d">2 Nov 1985</span></td><td></td></tr>
-        <tr data-id="kobylisy"><td>Kobylisy</td><td>C</td><td><span class="d">26 Jun 2004</span></td><td></td></tr>
-        <tr data-id="kolbenova"><td>Kolbenova</td><td>B</td><td><span class="d">26 Jun 2001</span></td><td></td></tr>
-        <tr data-id="krizikova"><td>Křižíkova</td><td>B</td><td><span class="d">22 Nov 1990</span></td><td></td></tr>
-        <tr data-id="ladvi"><td>Ládví</td><td>C</td><td><span class="d">26 Jun 2004</span></td><td></td></tr>
-        <tr data-id="letnany"><td>Letňany</td><td>C</td><td><span class="d">8 May 2008</span></td><td></td></tr>
-        <tr data-id="luka"><td>Luka</td><td>B</td><td><span class="d">11 Nov 1994</span></td><td></td></tr>
-        <tr data-id="luziny"><td>Lužiny</td><td>B</td><td><span class="d">11 Nov 1994</span></td><td></td></tr>
-        <tr data-id="malostranska"><td>Malostranská</td><td>A</td><td><span class="d">12 Aug 1978</span></td><td></td></tr>
-        <tr data-id="mustek"><td>Můstek</td><td>A, B</td><td><span class="d">A: 12 Aug 1978</span>; <span class="d">B: 2 Nov 1985</span></td><td></td></tr>
-        <tr data-id="muzeum"><td>Muzeum</td><td>C, A</td><td><span class="d">C: 9 May 1974</span>; <span class="d">A: 12 Aug 1978</span></td><td></td></tr>
-        <tr data-id="nadrazi_holesovice"><td>Nádraží Holešovice</td><td>C</td><td><span class="d">3 Nov 1984</span></td><td>Fučíkova</td></tr>
-        <tr data-id="nadrazi_veleslavin"><td>Nádraží Veleslavín</td><td>A</td><td><span class="d">6 Apr 2015</span></td><td></td></tr>
-        <tr data-id="namesti_miru"><td>Náměstí Míru</td><td>A</td><td><span class="d">12 Aug 1978</span></td><td></td></tr>
-        <tr data-id="namesti_republiky"><td>Náměstí Republiky</td><td>B</td><td><span class="d">2 Nov 1985</span></td><td></td></tr>
-        <tr data-id="narodni_trida"><td>Národní třída</td><td>B</td><td><span class="d">2 Nov 1985</span></td><td></td></tr>
-        <tr data-id="nemocnice_motol"><td>Nemocnice Motol</td><td>A</td><td><span class="d">6 Apr 2015</span></td><td></td></tr>
-        <tr data-id="nove_butovice"><td>Nové Butovice</td><td>B</td><td><span class="d">26 Oct 1988</span></td><td>Dukelská</td></tr>
-        <tr data-id="opatov"><td>Opatov</td><td>C</td><td><span class="d">7 Nov 1980</span></td><td>Družby</td></tr>
-        <tr data-id="palmovka"><td>Palmovka</td><td>B</td><td><span class="d">22 Nov 1990</span></td><td></td></tr>
-        <tr data-id="pankrac"><td>Pankrác</td><td>C</td><td><span class="d">9 May 1974</span></td><td>Mládežnická</td></tr>
-        <tr data-id="petriny"><td>Petřiny</td><td>A</td><td><span class="d">6 Apr 2015</span></td><td></td></tr>
-        <tr data-id="prazskeho_povstani"><td>Pražského povstání</td><td>C</td><td><span class="d">9 May 1974</span></td><td></td></tr>
-        <tr data-id="prosek"><td>Prosek</td><td>C</td><td><span class="d">8 May 2008</span></td><td></td></tr>
-        <tr data-id="radlicka"><td>Radlická</td><td>B</td><td><span class="d">26 Oct 1988</span></td><td></td></tr>
-        <tr data-id="rajska_zahrada"><td>Rajská zahrada</td><td>B</td><td><span class="d">8 Nov 1998</span></td><td></td></tr>
-        <tr data-id="roztyly"><td>Roztyly</td><td>C</td><td><span class="d">7 Nov 1980</span></td><td>Primátora Vacka</td></tr>
-        <tr data-id="skalka"><td>Skalka</td><td>A</td><td><span class="d">4 Jul 1990</span></td><td></td></tr>
-        <tr data-id="smichovske_nadrazi"><td>Smíchovské nádraží</td><td>B</td><td><span class="d">2 Nov 1985</span></td><td></td></tr>
-        <tr data-id="staromestska"><td>Staroměstská</td><td>A</td><td><span class="d">12 Aug 1978</span></td><td></td></tr>
-        <tr data-id="stodulky"><td>Stodůlky</td><td>B</td><td><span class="d">11 Nov 1994</span></td><td></td></tr>
-        <tr data-id="strasnicka"><td>Strašnická</td><td>A</td><td><span class="d">11 Jul 1987</span></td><td></td></tr>
-        <tr data-id="strizkov"><td>Střížkov</td><td>C</td><td><span class="d">8 May 2008</span></td><td></td></tr>
-        <tr data-id="vltavska"><td>Vltavská</td><td>C</td><td><span class="d">3 Nov 1984</span></td><td></td></tr>
-        <tr data-id="vysocanska"><td>Vysočanská</td><td>B</td><td><span class="d">8 Nov 1998</span></td><td></td></tr>
-        <tr data-id="vysehrad"><td>Vyšehrad</td><td>C</td><td><span class="d">9 May 1974</span></td><td>Gottwaldova</td></tr>
-        <tr data-id="zlicin"><td>Zličín</td><td>B</td><td><span class="d">11 Nov 1994</span></td><td></td></tr>
-        <tr data-id="zelivskeho"><td>Želivského</td><td>A</td><td><span class="d">19 Dec 1980</span></td><td></td></tr>
+        <tr data-id="andel"><th scope="row">Anděl</th><td>B</td><td><span class="d">2 Nov 1985</span></td><td>Moskevská</td></tr>
+        <tr data-id="borislavka"><th scope="row">Bořislavka</th><td>A</td><td><span class="d">6 Apr 2015</span></td><td></td></tr>
+        <tr data-id="budejovicka"><th scope="row">Budějovická</th><td>C</td><td><span class="d">9 May 1974</span></td><td></td></tr>
+        <tr data-id="cerny_most"><th scope="row">Černý Most</th><td>B</td><td><span class="d">8 Nov 1998</span></td><td></td></tr>
+        <tr data-id="ceskomoravska"><th scope="row">Českomoravská</th><td>B</td><td><span class="d">22 Nov 1990</span></td><td></td></tr>
+        <tr data-id="dejvicka"><th scope="row">Dejvická</th><td>A</td><td><span class="d">12 Aug 1978</span></td><td>Leninova</td></tr>
+        <tr data-id="depo_hostivar"><th scope="row">Depo Hostivař</th><td>A</td><td><span class="d">26 May 2006</span></td><td></td></tr>
+        <tr data-id="flora"><th scope="row">Flora</th><td>A</td><td><span class="d">19 Dec 1980</span></td><td></td></tr>
+        <tr data-id="florenc"><th scope="row">Florenc</th><td>C, B</td><td><span class="d">C: 9 May 1974</span>; <span class="d">B: 2 Nov 1985</span></td><td>Sokolovská</td></tr>
+        <tr data-id="haje"><th scope="row">Háje</th><td>C</td><td><span class="d">7 Nov 1980</span></td><td>Kosmonautů</td></tr>
+        <tr data-id="hlavni_nadrazi"><th scope="row">Hlavní nádraží</th><td>C</td><td><span class="d">9 May 1974</span></td><td></td></tr>
+        <tr data-id="hloubetin"><th scope="row">Hloubětín</th><td>B</td><td><span class="d">8 Jun 1999</span></td><td></td></tr>
+        <tr data-id="hradcanska"><th scope="row">Hradčanská</th><td>A</td><td><span class="d">12 Aug 1978</span></td><td></td></tr>
+        <tr data-id="hurka"><th scope="row">Hůrka</th><td>B</td><td><span class="d">11 Nov 1994</span></td><td></td></tr>
+        <tr data-id="chodov"><th scope="row">Chodov</th><td>C</td><td><span class="d">7 Nov 1980</span></td><td>Budovatelů</td></tr>
+        <tr data-id="ip_pavlova"><th scope="row">I. P. Pavlova</th><td>C</td><td><span class="d">9 May 1974</span></td><td></td></tr>
+        <tr data-id="invalidovna"><th scope="row">Invalidovna</th><td>B</td><td><span class="d">22 Nov 1990</span></td><td></td></tr>
+        <tr data-id="jinonice"><th scope="row">Jinonice</th><td>B</td><td><span class="d">26 Oct 1988</span></td><td>Švermova</td></tr>
+        <tr data-id="jz_podebrad"><th scope="row">Jiřího z Poděbrad</th><td>A</td><td><span class="d">19 Dec 1980</span></td><td></td></tr>
+        <tr data-id="kacerov"><th scope="row">Kačerov</th><td>C</td><td><span class="d">9 May 1974</span></td><td></td></tr>
+        <tr data-id="karlovo_namesti"><th scope="row">Karlovo náměstí</th><td>B</td><td><span class="d">2 Nov 1985</span></td><td></td></tr>
+        <tr data-id="kobylisy"><th scope="row">Kobylisy</th><td>C</td><td><span class="d">26 Jun 2004</span></td><td></td></tr>
+        <tr data-id="kolbenova"><th scope="row">Kolbenova</th><td>B</td><td><span class="d">26 Jun 2001</span></td><td></td></tr>
+        <tr data-id="krizikova"><th scope="row">Křižíkova</th><td>B</td><td><span class="d">22 Nov 1990</span></td><td></td></tr>
+        <tr data-id="ladvi"><th scope="row">Ládví</th><td>C</td><td><span class="d">26 Jun 2004</span></td><td></td></tr>
+        <tr data-id="letnany"><th scope="row">Letňany</th><td>C</td><td><span class="d">8 May 2008</span></td><td></td></tr>
+        <tr data-id="luka"><th scope="row">Luka</th><td>B</td><td><span class="d">11 Nov 1994</span></td><td></td></tr>
+        <tr data-id="luziny"><th scope="row">Lužiny</th><td>B</td><td><span class="d">11 Nov 1994</span></td><td></td></tr>
+        <tr data-id="malostranska"><th scope="row">Malostranská</th><td>A</td><td><span class="d">12 Aug 1978</span></td><td></td></tr>
+        <tr data-id="mustek"><th scope="row">Můstek</th><td>A, B</td><td><span class="d">A: 12 Aug 1978</span>; <span class="d">B: 2 Nov 1985</span></td><td></td></tr>
+        <tr data-id="muzeum"><th scope="row">Muzeum</th><td>C, A</td><td><span class="d">C: 9 May 1974</span>; <span class="d">A: 12 Aug 1978</span></td><td></td></tr>
+        <tr data-id="nadrazi_holesovice"><th scope="row">Nádraží Holešovice</th><td>C</td><td><span class="d">3 Nov 1984</span></td><td>Fučíkova</td></tr>
+        <tr data-id="nadrazi_veleslavin"><th scope="row">Nádraží Veleslavín</th><td>A</td><td><span class="d">6 Apr 2015</span></td><td></td></tr>
+        <tr data-id="namesti_miru"><th scope="row">Náměstí Míru</th><td>A</td><td><span class="d">12 Aug 1978</span></td><td></td></tr>
+        <tr data-id="namesti_republiky"><th scope="row">Náměstí Republiky</th><td>B</td><td><span class="d">2 Nov 1985</span></td><td></td></tr>
+        <tr data-id="narodni_trida"><th scope="row">Národní třída</th><td>B</td><td><span class="d">2 Nov 1985</span></td><td></td></tr>
+        <tr data-id="nemocnice_motol"><th scope="row">Nemocnice Motol</th><td>A</td><td><span class="d">6 Apr 2015</span></td><td></td></tr>
+        <tr data-id="nove_butovice"><th scope="row">Nové Butovice</th><td>B</td><td><span class="d">26 Oct 1988</span></td><td>Dukelská</td></tr>
+        <tr data-id="opatov"><th scope="row">Opatov</th><td>C</td><td><span class="d">7 Nov 1980</span></td><td>Družby</td></tr>
+        <tr data-id="palmovka"><th scope="row">Palmovka</th><td>B</td><td><span class="d">22 Nov 1990</span></td><td></td></tr>
+        <tr data-id="pankrac"><th scope="row">Pankrác</th><td>C</td><td><span class="d">9 May 1974</span></td><td>Mládežnická</td></tr>
+        <tr data-id="petriny"><th scope="row">Petřiny</th><td>A</td><td><span class="d">6 Apr 2015</span></td><td></td></tr>
+        <tr data-id="prazskeho_povstani"><th scope="row">Pražského povstání</th><td>C</td><td><span class="d">9 May 1974</span></td><td></td></tr>
+        <tr data-id="prosek"><th scope="row">Prosek</th><td>C</td><td><span class="d">8 May 2008</span></td><td></td></tr>
+        <tr data-id="radlicka"><th scope="row">Radlická</th><td>B</td><td><span class="d">26 Oct 1988</span></td><td></td></tr>
+        <tr data-id="rajska_zahrada"><th scope="row">Rajská zahrada</th><td>B</td><td><span class="d">8 Nov 1998</span></td><td></td></tr>
+        <tr data-id="roztyly"><th scope="row">Roztyly</th><td>C</td><td><span class="d">7 Nov 1980</span></td><td>Primátora Vacka</td></tr>
+        <tr data-id="skalka"><th scope="row">Skalka</th><td>A</td><td><span class="d">4 Jul 1990</span></td><td></td></tr>
+        <tr data-id="smichovske_nadrazi"><th scope="row">Smíchovské nádraží</th><td>B</td><td><span class="d">2 Nov 1985</span></td><td></td></tr>
+        <tr data-id="staromestska"><th scope="row">Staroměstská</th><td>A</td><td><span class="d">12 Aug 1978</span></td><td></td></tr>
+        <tr data-id="stodulky"><th scope="row">Stodůlky</th><td>B</td><td><span class="d">11 Nov 1994</span></td><td></td></tr>
+        <tr data-id="strasnicka"><th scope="row">Strašnická</th><td>A</td><td><span class="d">11 Jul 1987</span></td><td></td></tr>
+        <tr data-id="strizkov"><th scope="row">Střížkov</th><td>C</td><td><span class="d">8 May 2008</span></td><td></td></tr>
+        <tr data-id="vltavska"><th scope="row">Vltavská</th><td>C</td><td><span class="d">3 Nov 1984</span></td><td></td></tr>
+        <tr data-id="vysocanska"><th scope="row">Vysočanská</th><td>B</td><td><span class="d">8 Nov 1998</span></td><td></td></tr>
+        <tr data-id="vysehrad"><th scope="row">Vyšehrad</th><td>C</td><td><span class="d">9 May 1974</span></td><td>Gottwaldova</td></tr>
+        <tr data-id="zlicin"><th scope="row">Zličín</th><td>B</td><td><span class="d">11 Nov 1994</span></td><td></td></tr>
+        <tr data-id="zelivskeho"><th scope="row">Želivského</th><td>A</td><td><span class="d">19 Dec 1980</span></td><td></td></tr>
       </tbody>
     </table>
   </details>
@@ -554,7 +559,9 @@
       <a href="https://cs.wikipedia.org/wiki/C_(linka_metra_v_Praze)">Wikipedie, C (linka metra v Praze)</a>.
       Kde se liší: u úseku Kačerov – Háje uvádí tabulka v anglickém článku o trase C 11. listopadu 1980;
       český článek i anglický <a href="https://en.wikipedia.org/wiki/H%C3%A1je_(Prague_Metro)">článek o stanici Háje</a> uvádějí 7. listopadu 1980
-      a to datum používá i mapa.</p>
+      a toto datum používá i mapa. Tabulka v českém článku navíc uvádí 7. listopadu 1984 u úseku Florenc –
+      Nádraží Holešovice a 25. června 2004 u úseku Nádraží Holešovice – Ládví; jeho text i anglický článek
+      uvádějí 3. listopadu 1984 a 26. června 2004 a ta data používá i mapa.</p>
 
     <details class="stations" id="stations-list-cs">
       <summary>Všech 58 stanic od A do Z</summary>
@@ -562,64 +569,64 @@
         <caption>Každá stanice, její trasa, datum otevření a název do roku 1990</caption>
         <thead><tr><th>Stanice</th><th>Trasa</th><th>Otevřeno</th><th>Do roku 1990</th></tr></thead>
         <tbody>
-          <tr data-id="andel"><td>Anděl</td><td>B</td><td><span class="d">2. 11. 1985</span></td><td>Moskevská</td></tr>
-          <tr data-id="borislavka"><td>Bořislavka</td><td>A</td><td><span class="d">6. 4. 2015</span></td><td></td></tr>
-          <tr data-id="budejovicka"><td>Budějovická</td><td>C</td><td><span class="d">9. 5. 1974</span></td><td></td></tr>
-          <tr data-id="cerny_most"><td>Černý Most</td><td>B</td><td><span class="d">8. 11. 1998</span></td><td></td></tr>
-          <tr data-id="ceskomoravska"><td>Českomoravská</td><td>B</td><td><span class="d">22. 11. 1990</span></td><td></td></tr>
-          <tr data-id="dejvicka"><td>Dejvická</td><td>A</td><td><span class="d">12. 8. 1978</span></td><td>Leninova</td></tr>
-          <tr data-id="depo_hostivar"><td>Depo Hostivař</td><td>A</td><td><span class="d">26. 5. 2006</span></td><td></td></tr>
-          <tr data-id="flora"><td>Flora</td><td>A</td><td><span class="d">19. 12. 1980</span></td><td></td></tr>
-          <tr data-id="florenc"><td>Florenc</td><td>C, B</td><td><span class="d">C: 9. 5. 1974</span>; <span class="d">B: 2. 11. 1985</span></td><td>Sokolovská</td></tr>
-          <tr data-id="haje"><td>Háje</td><td>C</td><td><span class="d">7. 11. 1980</span></td><td>Kosmonautů</td></tr>
-          <tr data-id="hlavni_nadrazi"><td>Hlavní nádraží</td><td>C</td><td><span class="d">9. 5. 1974</span></td><td></td></tr>
-          <tr data-id="hloubetin"><td>Hloubětín</td><td>B</td><td><span class="d">8. 6. 1999</span></td><td></td></tr>
-          <tr data-id="hradcanska"><td>Hradčanská</td><td>A</td><td><span class="d">12. 8. 1978</span></td><td></td></tr>
-          <tr data-id="hurka"><td>Hůrka</td><td>B</td><td><span class="d">11. 11. 1994</span></td><td></td></tr>
-          <tr data-id="chodov"><td>Chodov</td><td>C</td><td><span class="d">7. 11. 1980</span></td><td>Budovatelů</td></tr>
-          <tr data-id="ip_pavlova"><td>I. P. Pavlova</td><td>C</td><td><span class="d">9. 5. 1974</span></td><td></td></tr>
-          <tr data-id="invalidovna"><td>Invalidovna</td><td>B</td><td><span class="d">22. 11. 1990</span></td><td></td></tr>
-          <tr data-id="jinonice"><td>Jinonice</td><td>B</td><td><span class="d">26. 10. 1988</span></td><td>Švermova</td></tr>
-          <tr data-id="jz_podebrad"><td>Jiřího z Poděbrad</td><td>A</td><td><span class="d">19. 12. 1980</span></td><td></td></tr>
-          <tr data-id="kacerov"><td>Kačerov</td><td>C</td><td><span class="d">9. 5. 1974</span></td><td></td></tr>
-          <tr data-id="karlovo_namesti"><td>Karlovo náměstí</td><td>B</td><td><span class="d">2. 11. 1985</span></td><td></td></tr>
-          <tr data-id="kobylisy"><td>Kobylisy</td><td>C</td><td><span class="d">26. 6. 2004</span></td><td></td></tr>
-          <tr data-id="kolbenova"><td>Kolbenova</td><td>B</td><td><span class="d">26. 6. 2001</span></td><td></td></tr>
-          <tr data-id="krizikova"><td>Křižíkova</td><td>B</td><td><span class="d">22. 11. 1990</span></td><td></td></tr>
-          <tr data-id="ladvi"><td>Ládví</td><td>C</td><td><span class="d">26. 6. 2004</span></td><td></td></tr>
-          <tr data-id="letnany"><td>Letňany</td><td>C</td><td><span class="d">8. 5. 2008</span></td><td></td></tr>
-          <tr data-id="luka"><td>Luka</td><td>B</td><td><span class="d">11. 11. 1994</span></td><td></td></tr>
-          <tr data-id="luziny"><td>Lužiny</td><td>B</td><td><span class="d">11. 11. 1994</span></td><td></td></tr>
-          <tr data-id="malostranska"><td>Malostranská</td><td>A</td><td><span class="d">12. 8. 1978</span></td><td></td></tr>
-          <tr data-id="mustek"><td>Můstek</td><td>A, B</td><td><span class="d">A: 12. 8. 1978</span>; <span class="d">B: 2. 11. 1985</span></td><td></td></tr>
-          <tr data-id="muzeum"><td>Muzeum</td><td>C, A</td><td><span class="d">C: 9. 5. 1974</span>; <span class="d">A: 12. 8. 1978</span></td><td></td></tr>
-          <tr data-id="nadrazi_holesovice"><td>Nádraží Holešovice</td><td>C</td><td><span class="d">3. 11. 1984</span></td><td>Fučíkova</td></tr>
-          <tr data-id="nadrazi_veleslavin"><td>Nádraží Veleslavín</td><td>A</td><td><span class="d">6. 4. 2015</span></td><td></td></tr>
-          <tr data-id="namesti_miru"><td>Náměstí Míru</td><td>A</td><td><span class="d">12. 8. 1978</span></td><td></td></tr>
-          <tr data-id="namesti_republiky"><td>Náměstí Republiky</td><td>B</td><td><span class="d">2. 11. 1985</span></td><td></td></tr>
-          <tr data-id="narodni_trida"><td>Národní třída</td><td>B</td><td><span class="d">2. 11. 1985</span></td><td></td></tr>
-          <tr data-id="nemocnice_motol"><td>Nemocnice Motol</td><td>A</td><td><span class="d">6. 4. 2015</span></td><td></td></tr>
-          <tr data-id="nove_butovice"><td>Nové Butovice</td><td>B</td><td><span class="d">26. 10. 1988</span></td><td>Dukelská</td></tr>
-          <tr data-id="opatov"><td>Opatov</td><td>C</td><td><span class="d">7. 11. 1980</span></td><td>Družby</td></tr>
-          <tr data-id="palmovka"><td>Palmovka</td><td>B</td><td><span class="d">22. 11. 1990</span></td><td></td></tr>
-          <tr data-id="pankrac"><td>Pankrác</td><td>C</td><td><span class="d">9. 5. 1974</span></td><td>Mládežnická</td></tr>
-          <tr data-id="petriny"><td>Petřiny</td><td>A</td><td><span class="d">6. 4. 2015</span></td><td></td></tr>
-          <tr data-id="prazskeho_povstani"><td>Pražského povstání</td><td>C</td><td><span class="d">9. 5. 1974</span></td><td></td></tr>
-          <tr data-id="prosek"><td>Prosek</td><td>C</td><td><span class="d">8. 5. 2008</span></td><td></td></tr>
-          <tr data-id="radlicka"><td>Radlická</td><td>B</td><td><span class="d">26. 10. 1988</span></td><td></td></tr>
-          <tr data-id="rajska_zahrada"><td>Rajská zahrada</td><td>B</td><td><span class="d">8. 11. 1998</span></td><td></td></tr>
-          <tr data-id="roztyly"><td>Roztyly</td><td>C</td><td><span class="d">7. 11. 1980</span></td><td>Primátora Vacka</td></tr>
-          <tr data-id="skalka"><td>Skalka</td><td>A</td><td><span class="d">4. 7. 1990</span></td><td></td></tr>
-          <tr data-id="smichovske_nadrazi"><td>Smíchovské nádraží</td><td>B</td><td><span class="d">2. 11. 1985</span></td><td></td></tr>
-          <tr data-id="staromestska"><td>Staroměstská</td><td>A</td><td><span class="d">12. 8. 1978</span></td><td></td></tr>
-          <tr data-id="stodulky"><td>Stodůlky</td><td>B</td><td><span class="d">11. 11. 1994</span></td><td></td></tr>
-          <tr data-id="strasnicka"><td>Strašnická</td><td>A</td><td><span class="d">11. 7. 1987</span></td><td></td></tr>
-          <tr data-id="strizkov"><td>Střížkov</td><td>C</td><td><span class="d">8. 5. 2008</span></td><td></td></tr>
-          <tr data-id="vltavska"><td>Vltavská</td><td>C</td><td><span class="d">3. 11. 1984</span></td><td></td></tr>
-          <tr data-id="vysocanska"><td>Vysočanská</td><td>B</td><td><span class="d">8. 11. 1998</span></td><td></td></tr>
-          <tr data-id="vysehrad"><td>Vyšehrad</td><td>C</td><td><span class="d">9. 5. 1974</span></td><td>Gottwaldova</td></tr>
-          <tr data-id="zlicin"><td>Zličín</td><td>B</td><td><span class="d">11. 11. 1994</span></td><td></td></tr>
-          <tr data-id="zelivskeho"><td>Želivského</td><td>A</td><td><span class="d">19. 12. 1980</span></td><td></td></tr>
+          <tr data-id="andel"><th scope="row">Anděl</th><td>B</td><td><span class="d">2. 11. 1985</span></td><td>Moskevská</td></tr>
+          <tr data-id="borislavka"><th scope="row">Bořislavka</th><td>A</td><td><span class="d">6. 4. 2015</span></td><td></td></tr>
+          <tr data-id="budejovicka"><th scope="row">Budějovická</th><td>C</td><td><span class="d">9. 5. 1974</span></td><td></td></tr>
+          <tr data-id="cerny_most"><th scope="row">Černý Most</th><td>B</td><td><span class="d">8. 11. 1998</span></td><td></td></tr>
+          <tr data-id="ceskomoravska"><th scope="row">Českomoravská</th><td>B</td><td><span class="d">22. 11. 1990</span></td><td></td></tr>
+          <tr data-id="dejvicka"><th scope="row">Dejvická</th><td>A</td><td><span class="d">12. 8. 1978</span></td><td>Leninova</td></tr>
+          <tr data-id="depo_hostivar"><th scope="row">Depo Hostivař</th><td>A</td><td><span class="d">26. 5. 2006</span></td><td></td></tr>
+          <tr data-id="flora"><th scope="row">Flora</th><td>A</td><td><span class="d">19. 12. 1980</span></td><td></td></tr>
+          <tr data-id="florenc"><th scope="row">Florenc</th><td>C, B</td><td><span class="d">C: 9. 5. 1974</span>; <span class="d">B: 2. 11. 1985</span></td><td>Sokolovská</td></tr>
+          <tr data-id="haje"><th scope="row">Háje</th><td>C</td><td><span class="d">7. 11. 1980</span></td><td>Kosmonautů</td></tr>
+          <tr data-id="hlavni_nadrazi"><th scope="row">Hlavní nádraží</th><td>C</td><td><span class="d">9. 5. 1974</span></td><td></td></tr>
+          <tr data-id="hloubetin"><th scope="row">Hloubětín</th><td>B</td><td><span class="d">8. 6. 1999</span></td><td></td></tr>
+          <tr data-id="hradcanska"><th scope="row">Hradčanská</th><td>A</td><td><span class="d">12. 8. 1978</span></td><td></td></tr>
+          <tr data-id="hurka"><th scope="row">Hůrka</th><td>B</td><td><span class="d">11. 11. 1994</span></td><td></td></tr>
+          <tr data-id="chodov"><th scope="row">Chodov</th><td>C</td><td><span class="d">7. 11. 1980</span></td><td>Budovatelů</td></tr>
+          <tr data-id="ip_pavlova"><th scope="row">I. P. Pavlova</th><td>C</td><td><span class="d">9. 5. 1974</span></td><td></td></tr>
+          <tr data-id="invalidovna"><th scope="row">Invalidovna</th><td>B</td><td><span class="d">22. 11. 1990</span></td><td></td></tr>
+          <tr data-id="jinonice"><th scope="row">Jinonice</th><td>B</td><td><span class="d">26. 10. 1988</span></td><td>Švermova</td></tr>
+          <tr data-id="jz_podebrad"><th scope="row">Jiřího z Poděbrad</th><td>A</td><td><span class="d">19. 12. 1980</span></td><td></td></tr>
+          <tr data-id="kacerov"><th scope="row">Kačerov</th><td>C</td><td><span class="d">9. 5. 1974</span></td><td></td></tr>
+          <tr data-id="karlovo_namesti"><th scope="row">Karlovo náměstí</th><td>B</td><td><span class="d">2. 11. 1985</span></td><td></td></tr>
+          <tr data-id="kobylisy"><th scope="row">Kobylisy</th><td>C</td><td><span class="d">26. 6. 2004</span></td><td></td></tr>
+          <tr data-id="kolbenova"><th scope="row">Kolbenova</th><td>B</td><td><span class="d">26. 6. 2001</span></td><td></td></tr>
+          <tr data-id="krizikova"><th scope="row">Křižíkova</th><td>B</td><td><span class="d">22. 11. 1990</span></td><td></td></tr>
+          <tr data-id="ladvi"><th scope="row">Ládví</th><td>C</td><td><span class="d">26. 6. 2004</span></td><td></td></tr>
+          <tr data-id="letnany"><th scope="row">Letňany</th><td>C</td><td><span class="d">8. 5. 2008</span></td><td></td></tr>
+          <tr data-id="luka"><th scope="row">Luka</th><td>B</td><td><span class="d">11. 11. 1994</span></td><td></td></tr>
+          <tr data-id="luziny"><th scope="row">Lužiny</th><td>B</td><td><span class="d">11. 11. 1994</span></td><td></td></tr>
+          <tr data-id="malostranska"><th scope="row">Malostranská</th><td>A</td><td><span class="d">12. 8. 1978</span></td><td></td></tr>
+          <tr data-id="mustek"><th scope="row">Můstek</th><td>A, B</td><td><span class="d">A: 12. 8. 1978</span>; <span class="d">B: 2. 11. 1985</span></td><td></td></tr>
+          <tr data-id="muzeum"><th scope="row">Muzeum</th><td>C, A</td><td><span class="d">C: 9. 5. 1974</span>; <span class="d">A: 12. 8. 1978</span></td><td></td></tr>
+          <tr data-id="nadrazi_holesovice"><th scope="row">Nádraží Holešovice</th><td>C</td><td><span class="d">3. 11. 1984</span></td><td>Fučíkova</td></tr>
+          <tr data-id="nadrazi_veleslavin"><th scope="row">Nádraží Veleslavín</th><td>A</td><td><span class="d">6. 4. 2015</span></td><td></td></tr>
+          <tr data-id="namesti_miru"><th scope="row">Náměstí Míru</th><td>A</td><td><span class="d">12. 8. 1978</span></td><td></td></tr>
+          <tr data-id="namesti_republiky"><th scope="row">Náměstí Republiky</th><td>B</td><td><span class="d">2. 11. 1985</span></td><td></td></tr>
+          <tr data-id="narodni_trida"><th scope="row">Národní třída</th><td>B</td><td><span class="d">2. 11. 1985</span></td><td></td></tr>
+          <tr data-id="nemocnice_motol"><th scope="row">Nemocnice Motol</th><td>A</td><td><span class="d">6. 4. 2015</span></td><td></td></tr>
+          <tr data-id="nove_butovice"><th scope="row">Nové Butovice</th><td>B</td><td><span class="d">26. 10. 1988</span></td><td>Dukelská</td></tr>
+          <tr data-id="opatov"><th scope="row">Opatov</th><td>C</td><td><span class="d">7. 11. 1980</span></td><td>Družby</td></tr>
+          <tr data-id="palmovka"><th scope="row">Palmovka</th><td>B</td><td><span class="d">22. 11. 1990</span></td><td></td></tr>
+          <tr data-id="pankrac"><th scope="row">Pankrác</th><td>C</td><td><span class="d">9. 5. 1974</span></td><td>Mládežnická</td></tr>
+          <tr data-id="petriny"><th scope="row">Petřiny</th><td>A</td><td><span class="d">6. 4. 2015</span></td><td></td></tr>
+          <tr data-id="prazskeho_povstani"><th scope="row">Pražského povstání</th><td>C</td><td><span class="d">9. 5. 1974</span></td><td></td></tr>
+          <tr data-id="prosek"><th scope="row">Prosek</th><td>C</td><td><span class="d">8. 5. 2008</span></td><td></td></tr>
+          <tr data-id="radlicka"><th scope="row">Radlická</th><td>B</td><td><span class="d">26. 10. 1988</span></td><td></td></tr>
+          <tr data-id="rajska_zahrada"><th scope="row">Rajská zahrada</th><td>B</td><td><span class="d">8. 11. 1998</span></td><td></td></tr>
+          <tr data-id="roztyly"><th scope="row">Roztyly</th><td>C</td><td><span class="d">7. 11. 1980</span></td><td>Primátora Vacka</td></tr>
+          <tr data-id="skalka"><th scope="row">Skalka</th><td>A</td><td><span class="d">4. 7. 1990</span></td><td></td></tr>
+          <tr data-id="smichovske_nadrazi"><th scope="row">Smíchovské nádraží</th><td>B</td><td><span class="d">2. 11. 1985</span></td><td></td></tr>
+          <tr data-id="staromestska"><th scope="row">Staroměstská</th><td>A</td><td><span class="d">12. 8. 1978</span></td><td></td></tr>
+          <tr data-id="stodulky"><th scope="row">Stodůlky</th><td>B</td><td><span class="d">11. 11. 1994</span></td><td></td></tr>
+          <tr data-id="strasnicka"><th scope="row">Strašnická</th><td>A</td><td><span class="d">11. 7. 1987</span></td><td></td></tr>
+          <tr data-id="strizkov"><th scope="row">Střížkov</th><td>C</td><td><span class="d">8. 5. 2008</span></td><td></td></tr>
+          <tr data-id="vltavska"><th scope="row">Vltavská</th><td>C</td><td><span class="d">3. 11. 1984</span></td><td></td></tr>
+          <tr data-id="vysocanska"><th scope="row">Vysočanská</th><td>B</td><td><span class="d">8. 11. 1998</span></td><td></td></tr>
+          <tr data-id="vysehrad"><th scope="row">Vyšehrad</th><td>C</td><td><span class="d">9. 5. 1974</span></td><td>Gottwaldova</td></tr>
+          <tr data-id="zlicin"><th scope="row">Zličín</th><td>B</td><td><span class="d">11. 11. 1994</span></td><td></td></tr>
+          <tr data-id="zelivskeho"><th scope="row">Želivského</th><td>A</td><td><span class="d">19. 12. 1980</span></td><td></td></tr>
         </tbody>
       </table>
     </details>

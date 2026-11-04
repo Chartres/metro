@@ -106,7 +106,10 @@ Iterate round of 4 November (decision log in `docs/SIGNATURE.md`).
 - The openings tables (English and Czech) name their sources line by line, checked 4 November,
   and say where the sources disagree: for Kačerov – Háje, the table in English Wikipedia's Line C
   article gives 11 November 1980, while the Czech article and English Wikipedia's Háje article
-  give 7 November 1980, which the map uses.
+  give 7 November 1980, which the map uses. The Czech Line C article's own table also differs from
+  its text for 1984 and 2004 (7 Nov vs 3 Nov 1984, 25 vs 26 June 2004); the page names both, and
+  the map uses the text's dates, which the English article shares.
+- Station names in the list are row headers (`<th scope="row">`) for screen readers.
 - A list of all 58 stations, A–Z, with line, opening date (each line's date for an interchange)
   and name until 1990, in English and Czech, readable without JavaScript. It opens from a
   44 px summary; tests hold it to the map's data.
@@ -114,6 +117,7 @@ Iterate round of 4 November (decision log in `docs/SIGNATURE.md`).
   Corrections and Opravy.
 - Station detail: opening dates read "12 August 1978", not "1978-08-12". Before February 1990 it
   says what the station was renamed to ("Renamed Dejvická on 22 February 1990") instead of
-  repeating the name shown in the heading.
+  repeating the name shown in the heading. After the rename, "Former name: Leninova (until
+  22 February 1990)" gives the day, where it gave only the month.
 - At 390 px an opening date no longer splits across two lines in the openings table.
 - llms.txt describes the station list and the sources; sitemap lastmod 2026-11-04.
