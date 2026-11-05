@@ -1,0 +1,79 @@
+{
+  "headline": "Metro 1.8.0 is live. Station names and dates are set in Metro Sign Sans: Encode Sans (SIL OFL 1.1) at width 112.5, the closest free face to Jiří Rathouský's Metron, self-hosted as one 28 KB woff2. Every HTML text size is now on taste.md's steps (13/17/20), with nothing under 13 px. Pavol approved the move on 2026-11-05.",
+  "shipped": [
+    {
+      "title": "Metro 1.8.0: station names and dates in Metro Sign Sans (closest free face to Rathouský's Metron), four type steps",
+      "pr": "https://github.com/Chartres/metro/pull/22",
+      "merged": "2026-11-05 (squash 75ef26f)",
+      "live_checked": "2026-11-05 at 390 px on https://metro.dravec.org/?date=1988-10-26&station=dejvicka. The only font request is same-origin (/fonts/metro-sign-sans.woff2: 200, font/woff2, 28,208 bytes). document.fonts reports 'Metro Sign Sans' loaded. The date label and detail heading are in the face, and the heading is 20 px. /fonts/OFL.txt is served. The speed select is 44 px tall, and scrollWidth is 390."
+    }
+  ],
+  "font": {
+    "name": "Metro Sign Sans (a modified Encode Sans)",
+    "source": "Encode Sans by The Encode Project Authors (Impallari, Torresi, Le Bailly), google/fonts ofl/encodesans, EncodeSans[wdth,wght].ttf, sha256 7735320a…beb43f",
+    "licence": "SIL Open Font License 1.1. The OFL reserves the name 'Encode Sans', so the subset is renamed. The copyright, trademark and licence notices are kept, and public/fonts/OFL.txt ships with it.",
+    "why_closest": "Metron (Rathouský, DPP commission 1970, Metroprojekt manual 1973, lines A and C) is a commercial Storm Type family. I set eight free faces beside its specimen. Encode Sans at width 112.5 matched on squarish rounded bowls, straight-cut terminals, open apertures, a splayed M and a similar width. Titillium Web and Barlow are too condensed. Saira and Exo 2 are too technical. Fira Sans, Ubuntu and Signika are too calligraphic.",
+    "weight": "28,208 bytes: one variable woff2, weights 400–700, Latin and Latin Extended-A (all Czech letters). The test budget is ≤ 60 KB.",
+    "rebuild": "scripts/build-font.py (fontTools; checks the source's sha256)"
+  },
+  "decisions": [
+    {
+      "question": "Which elements get the signage face?",
+      "options": ["Station names and dates only, with prose in the system face", "The whole UI"],
+      "default_taken": "Names and dates: the map labels, tooltip and detail headings, the date label, the small-multiple years, event dates, and in the history tables the dates, the sections' station names, the station list's names and its names until 1990.",
+      "why": "That is the brief, and it is how signage works: names and times are set in the sign face, and the explanatory text is not."
+    },
+    {
+      "question": "Apply the four steps to the sidebar only, or to the whole page?",
+      "options": ["Whole page outside the map's SVG", "Sidebar only"],
+      "default_taken": "Whole page: the header, controls, legend, tooltip and banner too. The map's SVG labels scale with the map, are hidden at 820 px and below, and are left out of the check.",
+      "why": "Same rule, and the same sub-13 px sizes were in the header and controls. A test checks it at 390 px and on desktop."
+    },
+    {
+      "question": "Secondary event text: Label step in capitals, or 13/18 in sentence case?",
+      "options": ["13/18 sentence case", "13/18 uppercase tracked"],
+      "default_taken": "13/18 sentence case. The tabs and line tags use the uppercase tracked Label.",
+      "why": "A sentence set in capitals reads worse. The size stays on the scale."
+    },
+    {
+      "question": "The wider date face made the date label change width between months, which moved the slider during Play. What to do?",
+      "options": ["min-width 172 px (fits 'September 2026')", "Keep a smaller date"],
+      "default_taken": "min-width 172 px. A test checks that the label width and the slider position are the same in May as in September.",
+      "why": "The full e2e suite caught the movement. A fixed width fixes it without shrinking the date."
+    },
+    {
+      "question": "'Light and dark': add a light theme?",
+      "options": ["No; the page stays dark under both colour-scheme preferences", "Add a light theme"],
+      "default_taken": "No light theme. Before and after screenshots were taken under both preferences, and a test loads both and checks the ground and the 390 px width.",
+      "why": "White on dark is the signage, and SIGNATURE.md says 'keep the dark ground'. A light theme would change what the product looks like."
+    },
+    {
+      "question": "Font budget",
+      "options": ["≤ 60 KB, held by a test", "No limit"],
+      "default_taken": "≤ 60 KB. The font is 28 KB.",
+      "why": "No budget was written down anywhere, so I set one and recorded it here."
+    },
+    {
+      "question": "Independent review findings",
+      "options": ["Merge as is", "Fix them first"],
+      "default_taken": "A fresh subagent found nothing blocking. Before merge I fixed:\n- the leftover nameID 17 ('Condensed Thin') in the font;\n- the source pinned by sha256;\n- a Czech-glyph test that could pass falsely (now compared against each fallback alone, with a probe that must catch a missing glyph);\n- the speed select is now a 44 px touch target;\n- 13/18 leading on the 13 px cells and banner;\n- the signage face on the remaining station-name columns;\n- doc claims that went beyond the code.",
+      "why": "Each fix is small and tested. Locally: e2e 70/70, vitest 16/16, typecheck and build pass. CI was green on the merged head."
+    }
+  ],
+  "proposals": [],
+  "next": [
+    "Hub: update flywheel/data/products/metro.json to 1.8.0, and mark the signage-type move live (approved_on 2026-11-05).",
+    "Hub: IndexNow submit for https://metro.dravec.org/. The visible text changed only in sizes, so this is optional."
+  ],
+  "screenshots": [
+    "e2e/shots/live-type-390.png",
+    "e2e/shots/type-before-390-detail-dark.png",
+    "e2e/shots/type-after-390-detail-dark.png",
+    "e2e/shots/type-before-390-timeline-dark.png",
+    "e2e/shots/type-after-390-timeline-dark.png",
+    "e2e/shots/type-before-390-detail-light.png",
+    "e2e/shots/type-after-390-detail-light.png",
+    "e2e/shots/type-before-desktop-dark.png",
+    "e2e/shots/type-after-desktop-dark.png"
+  ]
+}
