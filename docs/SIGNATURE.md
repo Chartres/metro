@@ -87,18 +87,20 @@ a commercial family (https://www.stormtype.com/families/metron).
   because the OFL reserves the name "Encode Sans" for unmodified copies. It is self-hosted as one
   28 KB variable woff2 (weights 400–700) with `font-display: swap`, with no font CDN, and the
   licence ships beside it (`public/fonts/OFL.txt`). `scripts/build-font.py` rebuilds it.
-  - It is the closest free match to Metron. Six OFL/UFL candidates were set beside Metron's
-    specimen: Titillium Web, Barlow, Saira, Exo 2, Fira Sans and Ubuntu, plus Encode Sans and
-    Signika. Encode Sans at 112.5 matches best: squarish rounded bowls, straight-cut terminals,
+  - It is the closest free match to Metron. Eight OFL/UFL faces were set beside Metron's
+    specimen: Encode Sans, Titillium Web, Barlow, Saira, Exo 2, Fira Sans, Ubuntu and Signika.
+    Encode Sans at 112.5 matches best: squarish rounded bowls, straight-cut terminals,
     open apertures, a splayed M and a similar width. The others were too condensed (Titillium,
     Barlow), too technical (Saira, Exo 2) or too calligraphic (Fira, Ubuntu, Signika).
   - Where it appears: map labels, the tooltip and detail headings, the date label, the
-    small-multiple years, event dates, and the dates and station names in the history tables.
-    Prose stays in the system face.
-- **Four type steps everywhere.** Every text size on the page is one of 13 / 17 / 20 px (Display
-  28 isn't used), and nothing is under 13 px. A test checks this at 390 px and on desktop.
-- **The dark ground stays.** The colour-scheme preference does not change the page: white on dark
-  is the signage. A test holds this.
+    small-multiple years, event dates, and in the history tables the dates, the sections'
+    station names, the station list's names and its names until 1990. Prose stays in the system face.
+- **Four type steps everywhere outside the map.** Every HTML text size is one of 13 / 17 / 20 px
+  (Display 28 isn't used), and nothing is under 13 px. A test checks this at 390 px and on desktop.
+  The map's own station labels are SVG text that scales with the map (about 8 px tall at 1280 px
+  wide). They are hidden at 820 px and below, where the tooltip and detail carry the names.
+- **The dark ground stays.** The page has no light theme: white on dark is the signage. A test
+  loads it under both colour-scheme preferences and checks the ground and the 390 px width.
 
 ## Founder lens
 
@@ -220,10 +222,10 @@ The visual-signature proposal of the 4 Nov hand-back is built (1.8.0). See "Visu
 for the font choice, its licence and where it appears. The calls taken with it:
 - **The type steps cover the whole page, not only the sidebar.** The header, controls, legend,
   tooltip and phone legend had 10.5–19 px sizes too. The speed select is 17 px so iOS does not
-  zoom on focus.
+  zoom on focus, and it is now a 44 px touch target.
 - **Secondary event text is 13/18 in sentence case.** The Label step is 13/18 and uppercase, but
   a sentence in capitals reads worse.
-- **The date label has a fixed width (172 px) to fit "September 2026".** The wider face made the
+- **The date label has a minimum width of 172 px, enough for "September 2026".** The wider face made the
   label change width between months, which moved the slider during Play. A test caught it.
 - **No light theme.** "Light and dark" was checked as the colour-scheme preference. The page
   stays dark in both (the signage is white on dark), and a test holds that.

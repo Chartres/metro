@@ -34,21 +34,32 @@ test('the font is ours: same origin, OFL text shipped, inside the 60 KB budget, 
 test('every Czech letter in a station name is drawn by the font, not a fallback', async ({ page }) => {
   await page.goto('/')
   await page.evaluate((f) => document.fonts.load(`600 17px "${f}"`, 'ůřěščžťďňÚŘŠČŽáíéýó'), FAMILY)
-  // a glyph the font lacks falls through to the fallback, so its width changes with the fallback
+  // a glyph the font lacks falls through to the fallback: then it measures exactly as the fallback
+  // alone does, under both fallbacks. (Comparing serif with monospace instead can pass falsely
+  // when both resolve to the same system font.)
   const missing = await page.evaluate((f) => {
     // S is a top-level const in the page's classic script, so read it by name, not off window
     const names: string[] = (0, eval)('Object.values(S).map((s) => s.name + (s.former || ""))')
     const all = [...new Set(names.join('').replace(/\s/g, '') + '0123456789')]
     const c = document.createElement('canvas').getContext('2d')!
     const w = (font: string, ch: string) => ((c.font = font), c.measureText(ch).width)
-    return all.filter((ch) => w(`600 40px "${f}", serif`, ch) !== w(`600 40px "${f}", monospace`, ch))
+    const falls = (ch: string, fb: string) => w(`600 40px "${f}", ${fb}`, ch) === w(`600 40px ${fb}`, ch)
+    return all.filter((ch) => falls(ch, 'serif') && falls(ch, 'monospace'))
   }, FAMILY)
   expect(missing).toEqual([])
+  // and the probe does catch a glyph the font lacks (CJK is not in the subset)
+  const probe = await page.evaluate((f) => {
+    const c = document.createElement('canvas').getContext('2d')!
+    const w = (font: string) => ((c.font = font), c.measureText('漢').width)
+    return w(`600 40px "${f}", serif`) === w('600 40px serif') && w(`600 40px "${f}", monospace`) === w('600 40px monospace')
+  }, FAMILY)
+  expect(probe).toBe(true)
 })
 
 test('station names and the date use the signage face; prose does not', async ({ page }) => {
   await page.goto('/?date=1988-10-26&station=dejvicka')
-  for (const sel of ['#dateLabel', '#detailPanel h3', '.station text', '.myear', '#stations tbody th', '#stations .d']) {
+  for (const sel of ['#dateLabel', '#detailPanel h3', '.station text', '.myear', '#stations tbody th', '#stations .d',
+    '#openings td:nth-child(3)', '#stations td:nth-child(4)']) {
     expect(await familyOf(page, sel), sel).toMatch(SIGN)
   }
   for (const sel of ['#history p', '#detailPanel .kv']) {
@@ -56,6 +67,7 @@ test('station names and the date use the signage face; prose does not', async ({
   }
   await page.locator('.station[data-id="muzeum"]').dispatchEvent('mouseenter')
   expect(await familyOf(page, '#tooltip b')).toMatch(SIGN)
+  expect(await page.locator('#tooltip b').evaluate((el) => getComputedStyle(el).fontSize)).toBe('17px')
 })
 
 for (const vp of [
@@ -83,6 +95,13 @@ for (const vp of [
     })
     const off = Object.entries(sizes).filter(([px]) => !STEPS.includes(Number(px)))
     expect(off, `sizes off the four steps: ${JSON.stringify(off)}`).toEqual([])
+    // the elements empty at load, and the select, which the walk above can't see
+    for (const sel of ['#eventBanner', '#tooltip', '#speed']) {
+      const px = await page.locator(sel).evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
+      expect(STEPS, sel).toContain(px)
+    }
+    // the speed select is a 44 px touch target
+    expect((await page.locator('#speed').boundingBox())!.height).toBeGreaterThanOrEqual(44)
   })
 }
 

@@ -10,7 +10,9 @@ renames it "Metro Sign Sans" because the OFL reserves the name "Encode Sans" for
     curl -LO "https://raw.githubusercontent.com/google/fonts/main/ofl/encodesans/EncodeSans%5Bwdth,wght%5D.ttf"
     python3 scripts/build-font.py "EncodeSans[wdth,wght].ttf"
 """
+import hashlib
 import io
+import os
 import sys
 
 from fontTools import subset
@@ -18,10 +20,16 @@ from fontTools.ttLib import TTFont
 from fontTools.varLib import instancer
 
 NAME = 'Metro Sign Sans'
-OUT = 'public/fonts/metro-sign-sans.woff2'
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public', 'fonts', 'metro-sign-sans.woff2')
+# the google/fonts file this was built from on 2026-11-05; a different source gives a different font
+SOURCE_SHA256 = '7735320abb63a1022d086c938872dae32754db733ecd4dcd402f2a445cbeb43f'
 UNICODES = (list(range(0x20, 0x7F)) + list(range(0xA0, 0x180)) + list(range(0x2010, 0x2028))
             + list(range(0x2030, 0x203B)) + [0x2190, 0x2191, 0x2192, 0x2193, 0x2212])
 
+with open(sys.argv[1], 'rb') as fh:
+    digest = hashlib.sha256(fh.read()).hexdigest()
+if digest != SOURCE_SHA256:
+    sys.exit(f'source is not the pinned Encode Sans file: sha256 {digest}')
 font = TTFont(sys.argv[1], lazy=False)
 font = instancer.instantiateVariableFont(font, {'wdth': 112.5, 'wght': (400, 700)})
 buf = io.BytesIO()
@@ -41,7 +49,7 @@ sub.subset(font)
 
 names = font['name']
 for rec in list(names.names):
-    if rec.nameID in (1, 3, 4, 6, 16, 21):
+    if rec.nameID in (1, 3, 4, 6, 16, 17, 21, 22):
         names.removeNames(nameID=rec.nameID)
 for pid, eid, lid in ((3, 1, 0x409), (1, 0, 0)):
     names.setName(NAME, 1, pid, eid, lid)

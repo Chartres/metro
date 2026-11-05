@@ -129,9 +129,11 @@ Visual signature, approved by Pavol on 5 November (decision log in `docs/SIGNATU
   Latin + Czech, renamed as the OFL requires, and self-hosted as one 28 KB woff2 with
   `font-display: swap`. The licence is in `public/fonts/OFL.txt`; `scripts/build-font.py`
   rebuilds the file.
-- Every text size is one of taste.md's steps (13 / 17 / 20), and nothing is under 13 px. The
-  sidebar's 10.5–12.8 px sizes, the header, controls, legend and tooltip all moved.
+- Every HTML text size is one of taste.md's steps (13 / 17 / 20), and nothing is under 13 px.
+  The sidebar's 10.5–12.8 px sizes, the header, controls, legend and tooltip all moved. The map's
+  SVG station labels still scale with the map, and they are hidden on phones. The speed select is
+  a 44 px touch target.
 - The date label keeps one width for every month, so Play no longer shifts the slider.
 - Tests: font budget (≤ 60 KB, same origin, no font CDN), Czech glyph coverage, which elements
-  use the face, the four steps at 390 px and on desktop, and that the page looks the same under
-  a light or dark colour-scheme preference. Before/after shots are in `e2e/shots/type-*`.
+  use the face, the four steps at 390 px and on desktop, and that a light or dark colour-scheme
+  preference leaves the ground dark and the page 390 px wide. Before/after shots are in `e2e/shots/type-*`.
