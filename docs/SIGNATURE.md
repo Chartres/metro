@@ -67,18 +67,38 @@ deep round of 27–29 October 2026 (flywheel `docs/program/2026-10-27-deep-round
 | Small multiples | Six small maps at the top of the Timeline panel: opening day (9 May 1974), 31 December of 1980, 1990, 2000 and 2010, and today (the build date), with station counts (9, 22, 38, 47, 54, 58); a tap moves the main map to that date | Tufte 1990 | shipped (1.3.0; dates fixed 1.4.0) | `key_action` with `action: decade_jump`; share of visitors with ≥ 1 jump. Target: ≥ 20 % of visitors over 28 days. At 6 visitors a month the number is anecdotal until traffic grows. |
 | Growth line | The slider track is a step chart of stations open; a marker rides the current date | Minard 1869, Tufte's sparklines | shipped (1.3.0) | No event of its own (it's read, not clicked). Indirect: the Play conversion share (`conversion` / visitors) holds or rises after release. |
 | Date links | `?date=1988-10-26&station=dejvicka` opens the map on that day with that station selected, so a teacher or a forum post can point at one moment; the station detail copies a link to the current day and station | Beck's map as a shared object; *ad fontes* (cite a precise state) | shipped (1.5.0) | `key_action` `link_opened` {date, station, fallback}; `link_copied` {date, station} per copy (1.6.0); links seen in referrers |
+| Signage type | Station names and dates in Metro Sign Sans (Encode Sans 112.5, OFL), the closest free face to Rathouský's Metron; every size on taste.md's four steps | Rathouský, Metron (1970–73) | shipped (1.8.0), approved 2026-11-05 | No event (it is read, not clicked). Indirect: Play conversion share holds; no rise in bounce at 390 px |
 | Correction log | A dated "Corrections" list on the page (and "Opravy" in the Czech section): what we had wrong, what it is now, the source | *ad fontes* | shipped (1.5.0; 17 Oct fixes backfilled, newest first, 1.6.0) | Reader-filed issues per quarter; first external citation |
 
 ## Visual signature
 
 The Prague metro has its own design tradition: Jiří Rathouský's orientation system and the
 metro logo of the early 1970s (https://cs.wikipedia.org/wiki/Ji%C5%99%C3%AD_Rathousk%C3%BD),
-with strong line colours on dark ground and plain grotesque lettering. The app already sits
-close to it (dark panels, DPP colours, tabular numerals). Direction for a later round, not
-done here: keep the dark ground, set station names and the date in a grotesque closer to the
-station signage, and bring the type down to the four steps in `taste.md` (the sidebar still
-uses 10.5–12.8 px sizes inherited from the original file). The new history section and the
-small multiples already use the four steps (13 / 17 / 20).
+with strong line colours on dark ground and plain grotesque lettering. Rathouský's signage face
+is **Metron**, commissioned by DPP in 1970, first shown in the Metroprojekt manual of 1973 and
+used for lines A and C (https://fontsinuse.com/typefaces/38516/metron). It has been fading from
+the stations since the mid-1980s, when Helvetica replaced it. Storm Type digitised it in 2004 as
+a commercial family (https://www.stormtype.com/families/metron).
+
+**Approved by Pavol on 2026-11-05 ("Yes do it"), shipped in 1.8.0.**
+
+- **Station names and dates are set in Metro Sign Sans.** This is Encode Sans (SIL OFL 1.1,
+  The Encode Project Authors) instanced at width 112.5, subset to Latin and Czech, and renamed,
+  because the OFL reserves the name "Encode Sans" for unmodified copies. It is self-hosted as one
+  28 KB variable woff2 (weights 400–700) with `font-display: swap`, with no font CDN, and the
+  licence ships beside it (`public/fonts/OFL.txt`). `scripts/build-font.py` rebuilds it.
+  - It is the closest free match to Metron. Six OFL/UFL candidates were set beside Metron's
+    specimen: Titillium Web, Barlow, Saira, Exo 2, Fira Sans and Ubuntu, plus Encode Sans and
+    Signika. Encode Sans at 112.5 matches best: squarish rounded bowls, straight-cut terminals,
+    open apertures, a splayed M and a similar width. The others were too condensed (Titillium,
+    Barlow), too technical (Saira, Exo 2) or too calligraphic (Fira, Ubuntu, Signika).
+  - Where it appears: map labels, the tooltip and detail headings, the date label, the
+    small-multiple years, event dates, and the dates and station names in the history tables.
+    Prose stays in the system face.
+- **Four type steps everywhere.** Every text size on the page is one of 13 / 17 / 20 px (Display
+  28 isn't used), and nothing is under 13 px. A test checks this at 390 px and on desktop.
+- **The dark ground stays.** The colour-scheme preference does not change the page: white on dark
+  is the signage. A test holds this.
 
 ## Founder lens
 
@@ -193,3 +213,17 @@ a surface that an assistant *cites*, not something that remains once the assista
 What's left is taste and craft: a careful diagram, the small multiples, and the checking (it
 reconciles sources and keeps a public correction log). That matches the 8 Sep lens ("taste, not
 curve").
+
+### 2026-11-05 — Pavol's pick (decision page, card v7.metro.type): "Yes do it"
+
+The visual-signature proposal of the 4 Nov hand-back is built (1.8.0). See "Visual signature" above
+for the font choice, its licence and where it appears. The calls taken with it:
+- **The type steps cover the whole page, not only the sidebar.** The header, controls, legend,
+  tooltip and phone legend had 10.5–19 px sizes too. The speed select is 17 px so iOS does not
+  zoom on focus.
+- **Secondary event text is 13/18 in sentence case.** The Label step is 13/18 and uppercase, but
+  a sentence in capitals reads worse.
+- **The date label has a fixed width (172 px) to fit "September 2026".** The wider face made the
+  label change width between months, which moved the slider during Play. A test caught it.
+- **No light theme.** "Light and dark" was checked as the colour-scheme preference. The page
+  stays dark in both (the signage is white on dark), and a test holds that.

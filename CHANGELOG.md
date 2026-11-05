@@ -121,3 +121,17 @@ Iterate round of 4 November (decision log in `docs/SIGNATURE.md`).
   22 February 1990)" gives the day, where it gave only the month.
 - At 390 px an opening date no longer splits across two lines in the openings table.
 - llms.txt describes the station list and the sources; sitemap lastmod 2026-11-04.
+
+## 1.8.0 — 2026-11-05
+Visual signature, approved by Pavol on 5 November (decision log in `docs/SIGNATURE.md`).
+- Station names and dates are set in Metro Sign Sans, the closest free face to Jiří Rathouský's
+  Metron (the 1970s metro signage). It is Encode Sans (SIL OFL 1.1) at width 112.5, subset to
+  Latin + Czech, renamed as the OFL requires, and self-hosted as one 28 KB woff2 with
+  `font-display: swap`. The licence is in `public/fonts/OFL.txt`; `scripts/build-font.py`
+  rebuilds the file.
+- Every text size is one of taste.md's steps (13 / 17 / 20), and nothing is under 13 px. The
+  sidebar's 10.5–12.8 px sizes, the header, controls, legend and tooltip all moved.
+- The date label keeps one width for every month, so Play no longer shifts the slider.
+- Tests: font budget (≤ 60 KB, same origin, no font CDN), Czech glyph coverage, which elements
+  use the face, the four steps at 390 px and on desktop, and that the page looks the same under
+  a light or dark colour-scheme preference. Before/after shots are in `e2e/shots/type-*`.
