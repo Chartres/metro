@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { buildEventRow, createFlywheelClient, isAutomatedBrowser, resolveIds } from './flywheel-client'
 
 describe('buildEventRow', () => {
@@ -36,30 +36,50 @@ describe('resolveIds', () => {
     expect(a.session_id).toBe(b.session_id)
     expect(a.visitor_id).not.toBe('anon')
   })
+})
 
-  it('returns "anon" for visitor_id when ls-storage throws', () => {
-    const bad = {
-      getItem: () => { throw new Error('no storage') },
-      setItem: () => { throw new Error('no storage') },
-    } as unknown as Storage
-    // bad storage is used as ls (visitor_id); session_id may come from native sessionStorage
-    const ids = resolveIds(bad)
-    expect(ids.visitor_id).toBe('anon')
+// Blocked site data (private mode, a strict browser setting): reading window.localStorage or
+// sessionStorage throws a SecurityError. The client must not throw, and must not fold every such
+// visitor into one 'anon' id: it keeps a random id in memory for the page's lifetime (hub #159).
+describe('resolveIds with blocked storage', () => {
+  const blocked = () => {
+    throw new DOMException('The operation is insecure.', 'SecurityError')
+  }
+  // put back whatever was there (Node 25+ and jsdom have real storage globals), not just delete
+  const saved = (['localStorage', 'sessionStorage'] as const).map(
+    (k) => [k, Object.getOwnPropertyDescriptor(globalThis, k)] as const,
+  )
+  afterEach(() => {
+    for (const [k, d] of saved) {
+      if (d) Object.defineProperty(globalThis, k, d)
+      else delete (globalThis as Record<string, unknown>)[k]
+    }
   })
 
-  it('returns "anon" for both ids when global localStorage/sessionStorage getter throws SecurityError', () => {
-    // Covers browsers that block all site storage at the property-access level
-    const throwSecurity = () => { throw new DOMException('Blocked', 'SecurityError') }
-    Object.defineProperty(globalThis, 'localStorage', { get: throwSecurity, configurable: true })
-    Object.defineProperty(globalThis, 'sessionStorage', { get: throwSecurity, configurable: true })
-    try {
-      const ids = resolveIds()
-      expect(ids.visitor_id).toBe('anon')
-      expect(ids.session_id).toBe('anon')
-    } finally {
-      delete (globalThis as Record<string, unknown>).localStorage
-      delete (globalThis as Record<string, unknown>).sessionStorage
-    }
+  it('reading the storage globals throws: ids still resolve, stable within the page, never "anon"', () => {
+    Object.defineProperty(globalThis, 'localStorage', { get: blocked, configurable: true })
+    Object.defineProperty(globalThis, 'sessionStorage', { get: blocked, configurable: true })
+    const a = resolveIds()
+    const b = resolveIds()
+    expect(a.visitor_id).toMatch(/[0-9a-f-]{36}/)
+    expect(a.session_id).toMatch(/[0-9a-f-]{36}/)
+    expect(b).toEqual(a)
+  })
+
+  it('a storage whose getItem/setItem throw: an in-memory id, not "anon"', () => {
+    const throwing = { getItem: blocked, setItem: blocked } as unknown as Storage
+    const { visitor_id } = resolveIds(throwing)
+    expect(visitor_id).not.toBe('anon')
+    expect(visitor_id).toMatch(/[0-9a-f-]{36}/)
+  })
+
+  it('the client tracks with blocked storage instead of throwing', () => {
+    Object.defineProperty(globalThis, 'localStorage', { get: blocked, configurable: true })
+    Object.defineProperty(globalThis, 'sessionStorage', { get: blocked, configurable: true })
+    const insert = vi.fn(() => ({ then: () => {} }))
+    const c = createFlywheelClient({ app: 'metro', supabase: { from: () => ({ insert }) } as never, isAutomated: () => false })
+    expect(() => c.track('page_view', {})).not.toThrow()
+    expect(insert).toHaveBeenCalledTimes(1)
   })
 })
 
