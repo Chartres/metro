@@ -49,5 +49,14 @@ REST shim). Fires `page_view` on load and `conversion` on the first Play press p
 (watching the network grow is the aha). Env-gated: dark without `VITE_SUPABASE_URL`
 + `VITE_SUPABASE_PUBLISHABLE_KEY` at build time.
 
+Bots out (flywheel `docs/standards/signals-contract.md` §2–3): the client is the hub's
+`app/src/platform/flywheel-client.ts`, so `isAutomatedBrowser` drops events from webdriver and
+from bot or headless user agents (a Cubot phone still counts). Our own Playwright runs send
+nothing. One local hunk sits on top of the hub copy: the storage guard in `resolveIds`, because
+blocked site storage throws a SecurityError there. Keep it when re-vendoring.
+`src/platform/flywheel-events.contract.test.ts` with `flywheel-events.json`, a copy of the hub's
+`data/signals/allowlist.json`, fails CI on an event name the insert policy would reject. Refresh
+the JSON when the hub's allow-list changes. Add no new event names: send `key_action` with props.
+
 ## Done means
 Green CI · live at metro.dravec.org · portfolio record current.
