@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { buildEventRow, createFlywheelClient, resolveIds } from './flywheel-client'
+import { buildEventRow, createFlywheelClient, isAutomatedBrowser, resolveIds } from './flywheel-client'
 
 describe('buildEventRow', () => {
   it('returns the expected shape with all fields', () => {
@@ -113,5 +113,40 @@ describe('createFlywheelClient', () => {
     })
     const client = createFlywheelClient({ app: 'test', supabase: { from } })
     expect(() => client.track('x')).not.toThrow()
+  })
+})
+
+// Bots out (flywheel bot audit, 7 Nov 2026): crawlers that run JavaScript and our own headless
+// runs must not count as Metro visitors.
+describe('isAutomatedBrowser', () => {
+  const CHROME = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'
+  const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1'
+  it.each([
+    ['webdriver (Playwright, CI)', { webdriver: true, userAgent: CHROME }, true],
+    ['headless Chrome', { userAgent: CHROME.replace('Chrome/', 'HeadlessChrome/') }, true],
+    ['Googlebot rendering the page', { userAgent: 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Chrome/130.0.0.0 Safari/537.36' }, true],
+    ['Lighthouse', { userAgent: CHROME + ' Chrome-Lighthouse' }, true],
+    ['a Cubot phone (brand ends in "bot")', { userAgent: 'Mozilla/5.0 (Linux; Android 13; CUBOT KingKong 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36' }, false],
+    ['desktop Chrome', { webdriver: false, userAgent: CHROME }, false],
+    ['iPhone Safari', { userAgent: IPHONE }, false],
+    ['no navigator (SSR, tests)', undefined, false],
+  ] as const)('%s', (_name, nav, want) => {
+    expect(isAutomatedBrowser(nav as { webdriver?: boolean; userAgent?: string } | undefined)).toBe(want)
+  })
+
+  it('an automated browser sends nothing, a person sends as before', () => {
+    const rows = (automated: boolean) => {
+      const insert = vi.fn(() => ({ then: () => {} }))
+      const client = createFlywheelClient({
+        app: 'metro',
+        supabase: { from: () => ({ insert }) } as never,
+        isAutomated: () => automated,
+      })
+      client.track('page_view')
+      client.conversion({ action: 'played_timeline' })
+      return insert.mock.calls.length
+    }
+    expect(rows(true)).toBe(0)
+    expect(rows(false)).toBe(2)
   })
 })

@@ -137,3 +137,12 @@ Visual signature, approved by Pavol on 5 November (decision log in `docs/SIGNATU
 - Tests: font budget (≤ 60 KB, same origin, no font CDN), Czech glyph coverage, which elements
   use the face, the four steps at 390 px and on desktop, and that a light or dark colour-scheme
   preference leaves the ground dark and the page 390 px wide. Before/after shots are in `e2e/shots/type-*`.
+
+## 1.8.1 — 2026-11-07
+Bots out of the numbers (flywheel bot audit of 7 November).
+- The analytics client is now the hub's current `flywheel-client.ts`. It sends nothing from
+  automated browsers: webdriver, and bot, crawler or headless user agents, except Cubot phones.
+  Crawlers that run JavaScript no longer count as Metro visitors. Metro keeps its own storage
+  guard on top of the hub copy, because blocked site storage made the getters throw.
+- The signals contract test and a copy of the shared allow-list (`flywheel-events.json`) are
+  vendored. CI now fails on an event name the insert policy would reject. No new event names.

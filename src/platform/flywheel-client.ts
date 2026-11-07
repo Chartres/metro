@@ -4,8 +4,10 @@
 // all writing to the shared flywheel-core Supabase project. Framework-free; the
 // React UI kit (FeedbackWidget, AuthPanel) lives alongside but imports this.
 //
-// Privacy: cookieless, first-party. visitor_id is an anon localStorage UUID;
-// flywheel_uid is the cross-product identity, set only after sign-in.
+// Privacy: cookieless, first-party. visitor_id is an anonymous localStorage UUID;
+// flywheel_uid is the cross-product identity, set only after sign-in. The Supabase
+// client is created with the *publishable* key (sb_publishable_…, which replaced
+// the legacy anon JWT key); it still resolves to the `anon` Postgres role for RLS.
 
 export const TAXONOMY = [
   'page_view',
@@ -38,6 +40,8 @@ export interface FlywheelClientConfig {
   storage?: Storage
   /** Injectable clock for tests. */
   now?: () => string
+  /** True for automated browsers (CI, audits, Playwright, crawlers). Default: isAutomatedBrowser(navigator). Their events are dropped. */
+  isAutomated?: () => boolean
 }
 
 export interface EventRow {
@@ -77,6 +81,9 @@ function readId(storage: Storage | undefined, key: string): string {
 }
 
 export function resolveIds(storage?: Storage): { visitor_id: string; session_id: string } {
+  // Metro keeps this guard on top of the hub copy: with site storage blocked (Safari private mode,
+  // 'block all cookies') merely reading the localStorage/sessionStorage getters throws a
+  // SecurityError; the hub copy would throw out of track() here. Proposed upstream 7 Nov 2026.
   let ls: Storage | undefined = storage
   if (!ls) {
     try { ls = typeof localStorage !== 'undefined' ? localStorage : undefined } catch { /* blocked */ }
@@ -115,13 +122,29 @@ export interface FlywheelClient {
   signOut(): Promise<void>
 }
 
+// Headless browsers and crawlers that run JS (Googlebot renders every page with
+// fresh storage, so each render looked like a new visitor).
+const BOT_UA = /bot\b|crawl|spider|slurp|headless|lighthouse|prerender|pagespeed|googleother|bingpreview|facebookexternalhit|embedly|preview/i
+
+// Real phones whose brand ends in "bot" (Cubot), which BOT_UA would otherwise catch.
+const PHONE_UA = /\bcubot\b/i
+
+/** True for browsers that are not a person: webdriver (Playwright, CI) or a bot/headless user agent. */
+export function isAutomatedBrowser(nav?: { webdriver?: boolean; userAgent?: string }): boolean {
+  if (!nav) return false
+  const ua = nav.userAgent ?? ''
+  return nav.webdriver === true || (BOT_UA.test(ua) && !PHONE_UA.test(ua))
+}
+
 export function createFlywheelClient(config: FlywheelClientConfig): FlywheelClient {
   const { app, supabase = null, storage } = config
   const now = config.now ?? (() => new Date().toISOString())
+  const automated = (config.isAutomated ?? (() => isAutomatedBrowser(typeof navigator !== 'undefined' ? navigator : undefined)))()
   let flywheelUid: string | null = null
 
   const insert = (table: string, row: unknown) => {
     if (!supabase) return // no-op when unconfigured — never breaks the app
+    if (automated) return // our own CI/audit browsers are not visitors (KPIs stay honest)
     try {
       const res = supabase.from(table).insert(row)
       // supabase-js returns a thenable; swallow both outcomes (fire-and-forget)
