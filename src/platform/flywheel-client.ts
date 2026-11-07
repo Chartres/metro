@@ -66,9 +66,32 @@ export interface FeedbackRow {
   created_at: string
 }
 
+// Blocked site data (private mode, strict settings): reading window.localStorage throws a
+// SecurityError, and getItem/setItem may throw too. Then the ids live in memory for the page's
+// lifetime: stable within the visit, never one shared 'anon' id for every such visitor.
+const memoryIds = new Map<string, string>()
+function memoryId(key: string): string {
+  let v = memoryIds.get(key)
+  if (!v) {
+    v = crypto.randomUUID()
+    memoryIds.set(key, v)
+  }
+  return v
+}
+
+/** window.localStorage / sessionStorage, or undefined where reading them throws or they don't exist. */
+function globalStorage(name: 'localStorage' | 'sessionStorage'): Storage | undefined {
+  try {
+    const s = (globalThis as Record<string, unknown>)[name]
+    return s ? (s as Storage) : undefined
+  } catch {
+    return undefined
+  }
+}
+
 function readId(storage: Storage | undefined, key: string): string {
   try {
-    if (!storage) return 'anon'
+    if (!storage) return memoryId(key)
     let v = storage.getItem(key)
     if (!v) {
       v = crypto.randomUUID()
@@ -76,21 +99,13 @@ function readId(storage: Storage | undefined, key: string): string {
     }
     return v
   } catch {
-    return 'anon'
+    return memoryId(key)
   }
 }
 
 export function resolveIds(storage?: Storage): { visitor_id: string; session_id: string } {
-  // Metro keeps this guard on top of the hub copy: with site storage blocked (Safari private mode,
-  // 'block all cookies') merely reading the localStorage/sessionStorage getters throws a
-  // SecurityError; the hub copy would throw out of track() here. Proposed to the hub in
-  // docs/review/2026-11-07.json.
-  let ls: Storage | undefined = storage
-  if (!ls) {
-    try { ls = typeof localStorage !== 'undefined' ? localStorage : undefined } catch { /* blocked */ }
-  }
-  let ss: Storage | undefined
-  try { ss = typeof sessionStorage !== 'undefined' ? sessionStorage : ls } catch { ss = ls }
+  const ls = storage ?? globalStorage('localStorage')
+  const ss = globalStorage('sessionStorage') ?? ls
   return {
     visitor_id: readId(ls, 'fw:vid'),
     session_id: readId(ss, 'fw:sid'),

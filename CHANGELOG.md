@@ -147,3 +147,9 @@ Bots out of the numbers (flywheel bot audit of 7 November).
   guard on top of the hub copy, because blocked site storage made the getters throw.
 - The signals contract test and a copy of the shared allow-list (`flywheel-events.json`) are
   vendored. CI now fails on an event name the insert policy would reject. No new event names.
+
+## 1.8.2 — 2026-11-07
+- The analytics client is the hub's copy again, byte for byte. Hub #159 fixed blocked site
+  storage upstream, so Metro's local hunk is gone. Behaviour change with blocked storage: ids are
+  kept in memory for the visit instead of one shared "anon", so those visitors are no longer merged
+  into one. The tests follow the hub's.
