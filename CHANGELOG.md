@@ -142,7 +142,8 @@ Visual signature, approved by Pavol on 5 November (decision log in `docs/SIGNATU
 Bots out of the numbers (flywheel bot audit of 7 November).
 - The analytics client is now the hub's current `flywheel-client.ts`. It sends nothing from
   automated browsers: webdriver, and bot, crawler or headless user agents, except Cubot phones.
-  Crawlers that run JavaScript no longer count as Metro visitors. Metro keeps its own storage
+  Crawlers that run JavaScript and name themselves in the user agent no longer count as Metro
+  visitors; a headless browser that hides both signals still would. Metro keeps its own storage
   guard on top of the hub copy, because blocked site storage made the getters throw.
 - The signals contract test and a copy of the shared allow-list (`flywheel-events.json`) are
   vendored. CI now fails on an event name the insert policy would reject. No new event names.

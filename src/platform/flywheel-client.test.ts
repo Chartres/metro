@@ -149,4 +149,17 @@ describe('isAutomatedBrowser', () => {
     expect(rows(true)).toBe(0)
     expect(rows(false)).toBe(2)
   })
+
+  it('by default it reads navigator: a webdriver browser sends nothing, feedback included', () => {
+    const insert = vi.fn(() => ({ then: () => {} }))
+    vi.stubGlobal('navigator', { webdriver: true, userAgent: 'Mozilla/5.0 Chrome/130.0.0.0' })
+    try {
+      const client = createFlywheelClient({ app: 'metro', supabase: { from: () => ({ insert }) } as never })
+      client.track('page_view')
+      client.feedback({ score: 5 })
+      expect(insert).not.toHaveBeenCalled()
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
 })

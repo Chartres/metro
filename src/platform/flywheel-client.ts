@@ -83,7 +83,8 @@ function readId(storage: Storage | undefined, key: string): string {
 export function resolveIds(storage?: Storage): { visitor_id: string; session_id: string } {
   // Metro keeps this guard on top of the hub copy: with site storage blocked (Safari private mode,
   // 'block all cookies') merely reading the localStorage/sessionStorage getters throws a
-  // SecurityError; the hub copy would throw out of track() here. Proposed upstream 7 Nov 2026.
+  // SecurityError; the hub copy would throw out of track() here. Proposed to the hub in
+  // docs/review/2026-11-07.json.
   let ls: Storage | undefined = storage
   if (!ls) {
     try { ls = typeof localStorage !== 'undefined' ? localStorage : undefined } catch { /* blocked */ }
