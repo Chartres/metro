@@ -1,0 +1,43 @@
+{
+  "headline": "Metro 1.8.1 is live (PR #24). The analytics client is the hub's current one: webdriver browsers and user agents that say bot, crawler or headless send nothing. The signals contract test and the allow-list copy are vendored. No new event names. On metro.dravec.org, a headless visit sent 0 requests and a normal visit sent one page_view (201).",
+  "shipped": [
+    {
+      "title": "Metro 1.8.1: drop automated browsers from analytics (hub client + signals contract test)",
+      "pr": "https://github.com/Chartres/metro/pull/24",
+      "merged": "2026-11-07 (squash d874210)",
+      "live_checked": "2026-11-07 on https://metro.dravec.org. Playwright default (webdriver true, HeadlessChrome UA): 0 requests to supabase.co/rest/v1/events. Normal visit (webdriver false, desktop Chrome UA, visitor_id preset to 'flywheel-probe' so every counter drops it): 1 POST page_view, HTTP 201."
+    }
+  ],
+  "decisions": [
+    {
+      "question": "Vendor the hub client verbatim, or keep Metro's blocked-storage guard?",
+      "options": ["Hub copy plus Metro's one resolveIds hunk", "Hub copy verbatim"],
+      "default_taken": "Hub copy plus the hunk. The hub copy fails Metro's existing test: with site storage blocked, reading the localStorage/sessionStorage getters throws a SecurityError out of track(). AGENTS.md says to keep the hunk when re-vendoring. The fleet check still reads Metro as current (it looks for isAutomatedBrowser), and the reviewer ran auditRepo and got findings: [].",
+      "why": "Verbatim would bring back a crash path for people browsing with storage blocked."
+    },
+    {
+      "question": "How do I check 'a normal visit still sends page_view' without adding a visitor?",
+      "options": ["Normal visit with visitor_id 'flywheel-probe' (dropped by every counter)", "An anonymous normal visit"],
+      "default_taken": "flywheel-probe.",
+      "why": "Same row shape as a real visit, and no visitor added to Metro's numbers."
+    },
+    {
+      "question": "Independent review findings",
+      "options": ["Merge as is", "Fix them first"],
+      "default_taken": "A fresh subagent found nothing blocking. Fixed before merge: a test for the default navigator path, with feedback() covered; the CHANGELOG now says only crawlers that name themselves are dropped; the upstream note points here.",
+      "why": "Small, and each is tested: vitest 28/28, typecheck, build, e2e 70/70. CI green on the merged head."
+    }
+  ],
+  "proposals": [
+    {
+      "name": "Hub: harden resolveIds in app/src/platform/flywheel-client.ts against blocked site storage",
+      "options": ["Take Metro's hunk upstream: try/catch around the localStorage and sessionStorage getters", "Leave the hub copy as it is"],
+      "recommendation": "Take it upstream. Every product on the hub copy throws from track() when site storage is blocked (Safari private mode, 'block all cookies'). The hunk and its test are in Chartres/metro: src/platform/flywheel-client.ts:84-92 and flywheel-client.test.ts 'returns \"anon\" for both ids when global localStorage/sessionStorage getter throws SecurityError'."
+    }
+  ],
+  "next": [
+    "Hub: Metro's bot_filter should read 'current' on the next fleet run.",
+    "Hub, noted by the reviewer: Metro's CI has no deploy step (Cloudflare Pages builds from Git), so the fleet's bundle-guard check never applies to it. signals-contract §4 says the live probe covers such products; worth confirming that metro is in data/signals/config.json active and in probe.json."
+  ],
+  "screenshots": []
+}
