@@ -45,9 +45,15 @@ describe('resolveIds with blocked storage', () => {
   const blocked = () => {
     throw new DOMException('The operation is insecure.', 'SecurityError')
   }
+  // put back whatever was there (Node 25+ and jsdom have real storage globals), not just delete
+  const saved = (['localStorage', 'sessionStorage'] as const).map(
+    (k) => [k, Object.getOwnPropertyDescriptor(globalThis, k)] as const,
+  )
   afterEach(() => {
-    delete (globalThis as Record<string, unknown>).localStorage
-    delete (globalThis as Record<string, unknown>).sessionStorage
+    for (const [k, d] of saved) {
+      if (d) Object.defineProperty(globalThis, k, d)
+      else delete (globalThis as Record<string, unknown>)[k]
+    }
   })
 
   it('reading the storage globals throws: ids still resolve, stable within the page, never "anon"', () => {
