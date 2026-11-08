@@ -58,5 +58,32 @@ in-memory ids for the visit, not one shared 'anon'. Re-vendor it as is; don't pa
 `data/signals/allowlist.json`, fails CI on an event name the insert policy would reject. Refresh
 the JSON when the hub's allow-list changes. Add no new event names: send `key_action` with props.
 
+## Working with the orchestrator
+
+Two standing rules from Pavol, picked on the flywheel decision page on 7 Nov 2026:
+
+1. **Follow the orchestrator's packages unless a step is risky.** The orchestrator is the
+   flywheel hub's orchestrating session; its packages arrive as messages from another session.
+   Metro has worked this way since 4 Nov 2026, and every product session since 7 Nov 2026
+   (card v8.flywheel.standing-rule). These steps are risky and always wait for Pavol himself:
+   - anything sent or posted in his name;
+   - money or accounts;
+   - secrets or settings;
+   - deleting data or database writes;
+   - store submissions;
+   - signature moves.
+2. **A one-page context summary in `docs/SESSION.md`, rewritten at every hand-back** (card
+   v8.flywheel.fresh-sessions: "long-lived but summarize context on a rule"). It covers:
+   - what Metro is now;
+   - open threads;
+   - Pavol's rules in force, with dates;
+   - the last three packages and how they ended;
+   - what is next.
+
+   Rewrite it rather than append to it: with each hand-back in `docs/review/`, and before the
+   context runs out. The repo is public, so keep anything private out of it. Start every package
+   by re-reading this file, the living docs (`docs/SIGNATURE.md`, `CHANGELOG.md`) and
+   `docs/SESSION.md`. After a restart or compaction, continue from `docs/SESSION.md`.
+
 ## Done means
 Green CI · live at metro.dravec.org · portfolio record current.
