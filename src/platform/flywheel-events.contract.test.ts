@@ -11,6 +11,8 @@
 // first (the platform applies the policy migration), then refresh the vendored
 // copy here. Prefer the shared taxonomy + props over a new name:
 // track('key_action', { action: 'drill' }) needs no policy change.
+import * as fs from 'node:fs'
+import * as path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import allow from './flywheel-events.json'
 
@@ -49,6 +51,9 @@ describe('signals contract', () => {
     for (const [file, text] of Object.entries(sources)) {
       for (const n of extractEventNames(text)) if (!allowed.has(n)) rejected.push(`${n} (${file})`)
     }
+    // ponytail: also scan the inline <script> in index.html (not covered by import.meta.glob)
+    const html = fs.readFileSync(path.resolve(__dirname, '../../index.html'), 'utf8')
+    for (const n of extractEventNames(html)) if (!allowed.has(n)) rejected.push(`${n} (index.html)`)
     expect(rejected, 'add these to flywheel data/signals/allowlist.json first, or send key_action + props').toEqual([])
   })
 
