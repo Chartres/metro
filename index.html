@@ -1000,7 +1000,7 @@ const futureSegments = D_SECTIONS.flatMap(sec=>{
 // A Line D station appears when the first section through it starts (Pankrác is line C's)
 const D_STATION_START = {};
 futureSegments.forEach(seg=>[seg.a,seg.b].forEach(id=>{
-  if(S[id].lines[0]==='D' && !(D_STATION_START[id] <= seg.started)) D_STATION_START[id]=seg.started;
+  if(isLineD(S[id]) && !(D_STATION_START[id] <= seg.started)) D_STATION_START[id]=seg.started;
 }));
 const sectionName = sec => `${S[sec.from].name} – ${S[sec.to].name}`;
 
