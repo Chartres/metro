@@ -1093,10 +1093,9 @@ function fmtDay(dateStr){
 // Tick marks for major events
 const ticksEl = document.getElementById('ticks');
 EVENTS.forEach(ev=>{
-  const pct = sliderFromDate(ev.date)/1000*100;
   const t = document.createElement('div');
   t.className='tick major';
-  t.style.left = pct+'%';
+  t.style.left = sliderFromDate(ev.date)/10+'%';
   t.title = ev.title+' — '+ev.date;
   ticksEl.appendChild(t);
 });
