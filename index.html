@@ -1248,8 +1248,7 @@ EVENTS.forEach((ev,idx)=>{
 });
 const eventsListItems = Array.from(eventsListEl.querySelectorAll('.ev')); // cached; list is static after this
 function updateEventListActive(dateStr){
-  let activeIdx=-1;
-  EVENTS.forEach((ev,idx)=>{ if(dateStr>=ev.date) activeIdx=idx; });
+  const activeIdx = EVENTS.findLastIndex(ev=>dateStr>=ev.date);
   eventsListItems.forEach((c,idx)=>c.classList.toggle('active', idx===activeIdx));
 }
 
