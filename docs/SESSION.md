@@ -1,7 +1,7 @@
 # Session summary — Metro
 
 One page, rewritten at every hand-back (AGENTS.md, "Working with the orchestrator").
-Last rewritten 2026-11-08.
+Last rewritten 2026-11-11.
 
 ## What Metro is now (1.8.2)
 - A map of the Prague Metro from 9 May 1974 to today. You can scrub it with the slider or press
@@ -20,11 +20,8 @@ Last rewritten 2026-11-08.
   112.5, the closest free face to Rathouský's Metron, self-hosted, 28 KB. Every HTML size is
   on taste.md's steps (13/17/20).
 - Analytics: the hub's client, byte for byte. Automated browsers send nothing, and the signals
-  contract test runs in CI. Events:
-  - `page_view`;
-  - `conversion` (first Play);
-  - `key_action` with an action: decade_jump, line_d_detail, czech_section_view, link_opened,
-    link_copied.
+  contract test runs in CI. Events: `page_view`, `conversion` (first Play), `key_action` with
+  an action: decade_jump, line_d_detail, czech_section_view, link_opened, link_copied.
 - §6c remains: none. Taste and craft, confirmed 4 Nov.
 - Deploy: push to main, Cloudflare Pages builds it, live at metro.dravec.org. Pet track, kill
   clock 2027-01-31.
@@ -38,20 +35,25 @@ Last rewritten 2026-11-08.
   without him.
 
 ## Last three packages
-1. **8 Nov: session rules.** Added the two standing rules to AGENTS.md, and this file. Pavol
-   asked for it directly after the session's permission check had held the AGENTS.md write
-   on 7 Nov.
-2. **7 Nov: re-vendored the hub client after hub #159.** Metro's local storage hunk is gone, and
+1. **11 Nov: sweep/2026-11-11.** 5 cycles, max reached. 5 fixes + 1 chore + 15 refactors.
+   Key fixes: VERSION stale (1.5.0→1.8.2), narodni_trida/mustek swapped in 1985 event,
+   dead exports in analytics.ts, new backward-scrub e2e test, Object.values hot path.
+   PR #28 is DRAFT (needs-human-review; sweep guard flagged pre-existing main history — false positive).
+   Open for Pavol: font probe test (high), Czech genitive "od Florence" (medium), FOUNDER-CASES rows.
+2. **8 Nov: session rules.** Added the two standing rules to AGENTS.md, and this file. Pavol
+   asked for it directly after the session's permission check had held the AGENTS.md write on 7 Nov.
+3. **7 Nov: re-vendored the hub client after hub #159.** Metro's local storage hunk is gone, and
    with blocked storage the ids now stay in memory for the visit. 1.8.2, PR #26.
-3. **7 Nov: bots out.** The hub client with isAutomatedBrowser, plus the contract test. 1.8.1, PR #24.
-   Live check: a headless visit sent 0 requests, a normal visit sent page_view (201).
-   Hand-back PR #25.
 
 ## Open threads
-- Hub: portfolio record to 1.8.x, the signage-type move marked live, `remains` confirmed none.
-- Hub: confirm that the live probe covers Metro. Metro's CI has no deploy step, so the bundle
-  guard never runs.
-- Watch link_opened and link_copied over 28 days. At current traffic the numbers are anecdotal.
+- **PR #28** (sweep/2026-11-11): review and merge when ready. No sweep-guard concerns from new
+  commits; the flags are for old main history. Previous sweep PR #19 also still open draft.
+- **Font probe test** (e2e/type-2026-11-05.spec.ts:56): `expect(probe).toBe(true)` fails. Canvas
+  measureText CJK probe returns false in Chromium; unknown if font issue or browser behavior.
+- **Czech genitive** (index.html:712): "od Florence" → may be "od Florencu" (station name genitive).
+- **FOUNDER-CASES.md rows 2+6**: stale (described planned legs removed in v1.4.0; "new" stations
+  wording for row 6). Pavol-only changes.
+- Hub: portfolio record `last_swept` updated to 2026-11-11.
 
 ## Next
 Nothing queued. Waiting for the orchestrator's next package.
