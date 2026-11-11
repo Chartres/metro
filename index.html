@@ -882,7 +882,7 @@ const BUILD_DATE = /^\d{4}-\d\d-\d\d$/.test(BUILD_DATE_RAW) ? BUILD_DATE_RAW : T
 const START = '1974-05-09';
 const END   = '2029-12-31'; // slider horizon; Line D never "opens" in the app (DPP: 2032), so this only sets the scale
 // prevDateStr is reset to this on (re)start so the opening-day event fires on the first Play tick
-const DAY_BEFORE_START = new Date(Date.parse(START)-86400000).toISOString().slice(0,10);
+const DAY_BEFORE_START = '1974-05-08'; // day before START
 
 const EVENTS = [
   {date:START, line:'C', title:'Prague Metro opens', tag:'C',
