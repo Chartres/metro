@@ -1156,7 +1156,6 @@ function render(dateStr){
   dateLabel.textContent = fmtDate(dateStr);
   slider.setAttribute('aria-valuetext', dateStr);
 
-  let openCount=0;
   Object.values(S).forEach(s=>{
     const g = stationEls[s.id];
     if(!g) return;
@@ -1168,7 +1167,6 @@ function render(dateStr){
     g.setAttribute('tabindex', shown?'0':'-1');
     g.setAttribute('aria-hidden', shown?'false':'true');
     if(!shown || isFuture) return;
-    openCount++;
     const textEl = g._t;
     const label = displayName(s, dateStr);
     const usingFormer = label !== s.name;
@@ -1185,6 +1183,7 @@ function render(dateStr){
         g._dot.setAttribute('stroke',LINE_COLOR_HEX[activeLinesHere[0]]);
     }
   });
+  const openCount = stationsOpenOn(dateStr);
   statStationsEl.textContent = openCount;
 
   // "Lines running" counts lines with at least one open SEGMENT — an open
