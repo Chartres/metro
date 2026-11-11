@@ -34,8 +34,8 @@ const fw = createFlywheelClient({
   supabase: url && key ? restShim(url, key) : null,
 })
 
-export const track = fw.track
-export const conversion = fw.conversion
+const track = fw.track
+const conversion = fw.conversion
 
 // Boot: page_view on load; the aha moment is pressing Play (watching the
 // network grow) — fire `conversion` once per session on the first press.
