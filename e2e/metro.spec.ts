@@ -429,3 +429,14 @@ test('discoverability kit: robots, sitemap, llms.txt, security.txt, 1200×630 sh
   expect(ld['@type']).toBe('WebApplication')
   expect(ld.url).toBe('https://metro.dravec.org/')
 })
+
+test('backward scrub past a known event flashes the event banner', async ({ page }) => {
+  await page.goto('/')
+  // Start after the 1978-08-12 Line A opening, then scrub back before it.
+  const after = await page.evaluate('sliderFromDate("1978-09-01")')
+  const before = await page.evaluate('sliderFromDate("1978-07-01")')
+  await scrubTo(page, after as number)
+  await scrubTo(page, before as number)
+  await expect(page.locator('#eventBanner')).toHaveClass(/show/)
+  await expect(page.locator('#eventBanner')).toContainText('Line A opens')
+})
