@@ -1092,6 +1092,7 @@ function fmtDate(dateStr){
 function fmtDay(dateStr){
   return new Date(dateStr+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 }
+const RENAME_DAY_FMT = fmtDay(RENAME_DATE); // "22 February 1990" — constant, computed once
 
 // Tick marks for major events
 const ticksEl = document.getElementById('ticks');
@@ -1302,9 +1303,9 @@ function renderDetailPanel(dateStr){
     });
     // before the rename the heading shows the old name: say what it became instead of repeating it
     if(s.former && dateStr < RENAME_DATE){
-      html += `<div><b>Renamed</b> ${s.name} on ${fmtDay(RENAME_DATE)}</div>`;
+      html += `<div><b>Renamed</b> ${s.name} on ${RENAME_DAY_FMT}</div>`;
     } else if(s.former){
-      html += `<div><b>Former name:</b> <span class="former">${s.former}</span> (until ${fmtDay(RENAME_DATE)})</div>`;
+      html += `<div><b>Former name:</b> <span class="former">${s.former}</span> (until ${RENAME_DAY_FMT})</div>`;
     }
   }
   html += `</div><div class="share"><button type="button" class="copylink">Copy link to this day</button>`
