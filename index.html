@@ -1077,7 +1077,8 @@ const slider = document.getElementById('slider');
 const dateLabel = document.getElementById('dateLabel');
 const statStationsEl = document.getElementById('statStations');
 // Open (non-D) stations on a date — the one count behind the stats, the growth line and the multiples
-const OPEN_STATIONS = Object.values(S).filter(s=>!isLineD(s));
+const ALL_STATIONS = Object.values(S);
+const OPEN_STATIONS = ALL_STATIONS.filter(s=>!isLineD(s));
 document.getElementById('statTotal').textContent = OPEN_STATIONS.length;
 const statLinesEl = document.getElementById('statLines');
 
@@ -1156,7 +1157,7 @@ function render(dateStr){
   dateLabel.textContent = fmtDate(dateStr);
   slider.setAttribute('aria-valuetext', dateStr);
 
-  Object.values(S).forEach(s=>{
+  ALL_STATIONS.forEach(s=>{
     const g = stationEls[s.id];
     if(!g) return;
     // future (Line D) station: shown only as hollow marker once its section has started, never "opens"
