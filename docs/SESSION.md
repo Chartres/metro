@@ -38,19 +38,22 @@ Last rewritten 2026-11-11.
 1. **11 Nov: sweep/2026-11-11.** 5 cycles, max reached. 5 fixes + 1 chore + 15 refactors.
    Key fixes: VERSION stale (1.5.0→1.8.2), narodni_trida/mustek swapped in 1985 event,
    dead exports in analytics.ts, new backward-scrub e2e test, Object.values hot path.
-   PR #28 is DRAFT (needs-human-review; sweep guard flagged pre-existing main history — false positive).
-   Open for Pavol: font probe test (high), Czech genitive "od Florence" (medium), FOUNDER-CASES rows.
+   Reviewed and merged as PR #28 on 18 Nov (sweep guard clean against main; CI green after #29
+   pinned the runner to ubuntu-24.04).
 2. **8 Nov: session rules.** Added the two standing rules to AGENTS.md, and this file. Pavol
    asked for it directly after the session's permission check had held the AGENTS.md write on 7 Nov.
 3. **7 Nov: re-vendored the hub client after hub #159.** Metro's local storage hunk is gone, and
    with blocked storage the ids now stay in memory for the visit. 1.8.2, PR #26.
 
 ## Open threads
-- **PR #28** (sweep/2026-11-11): review and merge when ready. No sweep-guard concerns from new
-  commits; the flags are for old main history. Previous sweep PR #19 also still open draft.
-- **Font probe test** (e2e/type-2026-11-05.spec.ts:56): `expect(probe).toBe(true)` fails. Canvas
-  measureText CJK probe returns false in Chromium; unknown if font issue or browser behavior.
-- **Czech genitive** (index.html:712): "od Florence" → may be "od Florencu" (station name genitive).
+- **PR #19** (sweep/2026-11-02): draft; overlaps #28. See the review comment there.
+- **Font probe test** (e2e/type-2026-11-05.spec.ts:56): `expect(probe).toBe(true)` fails on macOS
+  Chromium, on main as well; it passes in CI on Linux. The CJK probe depends on the system fallback font.
+- "od Florence" (index.html:712) is the correct Czech genitive of Florenc; no change needed.
+- Hub: portfolio record to 1.8.x, the signage-type move marked live, `remains` confirmed none.
+- Hub: confirm that the live probe covers Metro. Metro's CI has no deploy step, so the bundle
+  guard never runs.
+- Watch link_opened and link_copied over 28 days. At current traffic the numbers are anecdotal.
 - **FOUNDER-CASES.md rows 2+6**: stale (described planned legs removed in v1.4.0; "new" stations
   wording for row 6). Pavol-only changes.
 - Hub: portfolio record `last_swept` updated to 2026-11-11.
