@@ -71,6 +71,7 @@ test('copy link follows the map: after moving to another day it links that day',
 })
 
 test('without a clipboard the link is shown to copy by hand', async ({ page }) => {
+  await actionsFromBoot(page)
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true })
   })
@@ -78,6 +79,7 @@ test('without a clipboard the link is shown to copy by hand', async ({ page }) =
   await page.getByRole('button', { name: 'Copy link to this day' }).click()
   const out = page.locator('#detailPanel .linkout')
   await expect(out).toHaveValue(/\?date=2015-04-06&station=nemocnice_motol$/)
+  await expect.poll(() => seen(page)).toContainEqual({ action: 'link_copied', date: '2015-04-06', station: 'nemocnice_motol' })
   // tapping again reuses the box instead of stacking another
   await page.getByRole('button', { name: 'Copy link to this day' }).click()
   await page.getByRole('button', { name: 'Copy link to this day' }).click()

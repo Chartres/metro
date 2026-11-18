@@ -826,7 +826,8 @@ const LINE_ORDER = {
     const dxs=xs.slice(1).map((x,i)=>x-xs[i]);
     const allUp=dxs.every(d=>d>=0), allDown=dxs.every(d=>d<=0);
     if(!allUp&&!allDown){
-      const bad=order.filter((_,i)=>i>0&&(allUp?dxs[i-1]<0:dxs[i-1]>0));
+      const goesUp=xs[xs.length-1]>=xs[0];
+      const bad=order.filter((_,i)=>i>0&&(goesUp?dxs[i-1]<0:dxs[i-1]>0));
       console.error('Line '+line+' x not monotone near: '+bad.join(', '));
     }
   });
@@ -1158,7 +1159,7 @@ let currentDate = START; // last rendered date — tooltip picks former vs curre
 function displayName(s, dateStr){ return s.former && dateStr < RENAME_DATE ? s.former : s.name; }
 function render(dateStr){
   dateLabel.textContent = fmtDate(dateStr);
-  slider.setAttribute('aria-valuetext', dateStr);
+  slider.setAttribute('aria-valuetext', fmtDay(dateStr));
 
   ALL_STATIONS.forEach(s=>{
     const g = stationEls[s.id];
@@ -1240,7 +1241,6 @@ const eventsListEl = document.getElementById('eventsList');
 EVENTS.forEach((ev,idx)=>{
   const div = document.createElement('div');
   div.className = 'ev'+(ev.isFuture?' future':'');
-  div.dataset.idx = idx;
   div.setAttribute('role','button');
   div.setAttribute('tabindex','0');
   const tagLabel = ev.tag==='rename' ? 'RENAME' : ev.tag==='flood' ? 'FLOOD' : 'LINE '+ev.line;
